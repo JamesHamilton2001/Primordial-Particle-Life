@@ -8,9 +8,10 @@
 
 class ParticleLife
 {
+
  public:
 
-    void init(int particleTypes, int particleCount, int gridSize);
+    void init(int particleTypes, int particleCount, float particleInnerRadius, int gridSize);
     void update();
     void draw();
 
@@ -19,6 +20,7 @@ class ParticleLife
     float step;
     float resistance;
     float bounds;
+    float innerRadius;
     int count;
     
     std::vector<Color> colours;

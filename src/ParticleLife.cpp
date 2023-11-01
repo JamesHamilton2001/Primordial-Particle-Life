@@ -8,20 +8,21 @@
 #include <iostream>
 
 
-void ParticleLife::init(int particleTypes, int particleCount, int gridSize)
+void ParticleLife::init(int particleTypes, int particleCount, float particleInnerRadius, int gridSize)
 {
     // simulation settings
-    step = 0.00005f;
-    resistance = 0.001f;
+    step = 0.000025f;
+    resistance = 0.0025f;
     count = particleCount;
+    innerRadius = particleInnerRadius;
     bounds = 2.0f * gridSize;
 
     // randomise attraction values
     attractions.resize(particleTypes, std::vector<float>(particleTypes, 0.0f));
     for (int i = 0; i < particleTypes; i ++)
         for (int j = 0; j < particleTypes; j ++)
-            attractions[i][j] = 0.05f + GetRandomValue(0, 10) / 100.0f;
-    
+            attractions[i][j] = GetRandomValue(-250, 250) / 100.0f;
+
     // assign colours
     colours.resize(particleTypes, WHITE);
     Color defaultColours[9] = { RED, BLUE, YELLOW, PURPLE, GREEN, ORANGE, PINK, RAYWHITE, LIGHTGRAY };
@@ -29,12 +30,11 @@ void ParticleLife::init(int particleTypes, int particleCount, int gridSize)
         colours[i] = defaultColours[i];
 
     // initalise random particle values
-    for (int i = 0; i < count; i++) {
-        velocities.push_back({ 0, 0 });
-        types.push_back(i % particleTypes);
+    for (int i = 0; i < count; i++)
+        velocities.push_back({ 0, 0 }),
+        types.push_back(i % particleTypes),
         positions.push_back({ GetRandomValue(0, 100*bounds) / 100.0f,
                               GetRandomValue(0, 100*bounds) / 100.0f });
-    }
 
     // initialise particle texture
     Image temp = GenImageColor(64, 64, BLANK);
@@ -54,6 +54,7 @@ void ParticleLife::update()
         const float yPos = positions[i].y;
         float xVelInc = 0.0f;
         float yVelInc = 0.0f;
+        std::vector<float>& attractionArray = attractions[type];
 
         // for each other particle
         for (int j = 0; j < count; j++) {
@@ -63,30 +64,26 @@ void ParticleLife::update()
             float xDist = positions[j].x - xPos;
             float yDist = positions[j].y - yPos;
             float sqDist = xDist*xDist + yDist*yDist;
-            std::vector<float>& attractionArray = attractions[type];
 
             // if other particle within acting range
             if (sqDist <= 4.0f) {
                 float distance = sqrtf(sqDist);
 
                 // repulse if in inner radius, otherwise attract
-                float reactionCoef = (distance <= 0.5f)
-                    ? 1.0f - 0.5f / distance
-                    :  attractionArray[types[j]] * (distance - 0.5f);
-                
-                // apply normalised force to other particle
-                float xForce = reactionCoef * xDist / distance;
-                float yForce = reactionCoef * yDist / distance;
-                xVelInc += xForce;
-                yVelInc += yForce;
-                velocities[j].x -= xForce;
-                velocities[j].y -= yForce;
+                float coef = (distance <= innerRadius)
+                    ? 1.0f - innerRadius / distance
+                    : attractionArray[types[j]] * (distance - innerRadius);
+
+                // increment normalised force to particle
+                xVelInc += coef * (xDist / distance);
+                yVelInc += coef * (yDist / distance);
             }
         }
 
         // apply accumulative force to original particle
         velocities[i].x += xVelInc;
         velocities[i].y += yVelInc;
+
     }
 
     // for each particle
@@ -114,8 +111,8 @@ void ParticleLife::update()
         // apply calculated velocity
         velocities[i].x = xVelocity;
         velocities[i].y = yVelocity;
-    }
 
+    }
 }
 
 void ParticleLife::draw()
