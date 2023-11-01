@@ -8,14 +8,14 @@
 #include <iostream>
 
 
-void ParticleLife::init(int particleTypes, int particleCount, float particleInnerRadius, int gridSize)
+void ParticleLife::init(int particleTypes, int particleCount, float particleInnerRadius, float resistance, float step, int gridSize)
 {
     // simulation settings
-    step = 0.000025f;
-    resistance = 0.0025f;
-    count = particleCount;
-    innerRadius = particleInnerRadius;
-    bounds = 2.0f * gridSize;
+    this->count = particleCount;
+    this->innerRadius = particleInnerRadius;
+    this->resistance = resistance;
+    this->step = step;
+    this->bounds = 2.0f * gridSize;
 
     // randomise attraction values
     attractions.resize(particleTypes, std::vector<float>(particleTypes, 0.0f));

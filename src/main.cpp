@@ -11,7 +11,7 @@ int windowHeight;
 int fpsTarget;
 
 int particleTypes;
-int initialParticles;
+int initialCount;
 float innerRadius;
 float resistance;
 float step;
@@ -25,7 +25,7 @@ Camera2D camera;
 int main()
 {
     particleTypes = 5;
-    initialParticles = 512;
+    initialCount = 512;
     innerRadius = 0.25f;
     resistance = 0.0025f;
     step = 0.000025f;
@@ -38,7 +38,7 @@ int main()
     InitWindow(windowWidth, windowHeight, "Primordial Particle Life");
     SetTargetFPS(fpsTarget);
 
-    particleLife.init(particleTypes, initialParticles, innerRadius, gridSize);
+    particleLife.init(particleTypes, initialCount, innerRadius, resistance, step, gridSize);
 
     camera.offset = { windowWidth/2.0f, windowHeight/2.0f };
     camera.target = { (float)(gridSize), (float)(gridSize) };

@@ -11,7 +11,7 @@ class ParticleLife
 
  public:
 
-    void init(int particleTypes, int particleCount, float particleInnerRadius, int gridSize);
+    void init(int particleTypes, int particleCount, float particleInnerRadius, float resistance, float step, int gridSize);
     void update();
     void draw();
 
