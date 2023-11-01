@@ -25,15 +25,15 @@ Camera2D camera;
 int main()
 {
     particleTypes = 5;
-    initialCount = 512;
+    initialCount = 1024;
     innerRadius = 0.25f;
     resistance = 0.0025f;
     step = 0.000025f;
-    gridSize = 16;
+    gridSize = 24;
 
     windowWidth = 1600;
     windowHeight = 800;
-    fpsTarget = 165;
+    fpsTarget = 0;
 
     InitWindow(windowWidth, windowHeight, "Primordial Particle Life");
     SetTargetFPS(fpsTarget);
@@ -44,9 +44,6 @@ int main()
     camera.target = { (float)(gridSize), (float)(gridSize) };
     camera.rotation = 0.0f;
     camera.zoom = 25.0f;
-
-    std::cout << std::endl << "Output:" << std::endl << std::endl;
-
 
     while (!WindowShouldClose())
     {

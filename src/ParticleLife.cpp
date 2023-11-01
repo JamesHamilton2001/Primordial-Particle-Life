@@ -91,27 +91,27 @@ void ParticleLife::update()
     for (int i = 0; i < count; i++) {
 
         // cache variables
-        float xVelocity = velocities[i].x;
-        float yVelocity = velocities[i].y;
+        float xVel = velocities[i].x;
+        float yVel = velocities[i].y;
+        float xPos = positions[i].x;
+        float yPos = positions[i].y;
 
-        // apply friction
-        xVelocity *= invResistance;
-        yVelocity *= invResistance;
+        // apply resistance
+        xVel *= invResistance;
+        yVel *= invResistance;
 
-        // apply movement
-        positions[i].x += step * xVelocity;
-        positions[i].y += step * yVelocity;
+        // loop boundaries
+        if (xPos < 0.0f) xPos = bounds;
+        if (xPos > bounds) xPos = 0.0f;
+        if (yPos < 0.0f) yPos = bounds;
+        if (yPos > bounds) yPos = 0.0f;
 
-        // bounce if bounds reached
-        if (positions[i].x < 0 || positions[i].x > bounds)
-            xVelocity *= -1.0f;
-        if (positions[i].y < 0 || positions[i].y > bounds)
-            yVelocity *= -1.0f;
-
-        // apply calculated velocity
-        velocities[i].x = xVelocity;
-        velocities[i].y = yVelocity;
-
+        // apply new position and velocity
+        xPos += step * xVel;
+        yPos += step * yVel;
+        positions[i] = { xPos, yPos };
+        velocities[i] = { xVel, yVel };
+        
     }
 }
 
@@ -128,16 +128,16 @@ void ParticleLife::draw()
             rlColor4ub(colour.r, colour.g, colour.b, 255);
             rlNormal3f(0.0f, 0.0f, 1.0f);
 
-            rlTexCoord2f(0.0f, 0.0f);       // top left
+            rlTexCoord2f(0.0f, 0.0f);               // top left
             rlVertex2f(pos.x-0.05f, pos.y-0.05f);
 
-            rlTexCoord2f(0, 1.0f);          // bottom left
+            rlTexCoord2f(0, 1.0f);                  // bottom left
             rlVertex2f(pos.x-0.05f, pos.y+0.05f);
 
-            rlTexCoord2f(1.0f, 1.0f);       // bottom right
+            rlTexCoord2f(1.0f, 1.0f);               // bottom right
             rlVertex2f(pos.x+0.05f, pos.y+0.05f);
 
-            rlTexCoord2f(1.0f, 0.0f);       // top right
+            rlTexCoord2f(1.0f, 0.0f);               // top right
             rlVertex2f(pos.x+0.05f, pos.y-0.05f);
 
         }
