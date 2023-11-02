@@ -10,7 +10,6 @@
 
 void ParticleLife::init(int typeCount, int particleCount, float particleInnerRadius, float resistance, float step, int gridSize)
 {
-    // simulation settings
     this->typeCount = typeCount;
     this->count = particleCount;
     this->innerRadius = particleInnerRadius;
@@ -18,24 +17,35 @@ void ParticleLife::init(int typeCount, int particleCount, float particleInnerRad
     this->step = step;
     this->bounds = 2.0f * gridSize;
 
-    // assign colours
-    colours.resize(typeCount, WHITE);
-    Color defaultColours[9] = { RED, BLUE, YELLOW, PURPLE, GREEN, ORANGE, PINK, RAYWHITE, LIGHTGRAY };
-    for (int i = 0; i < typeCount; i++)
-        colours[i] = defaultColours[i];
+    initColours();
+    initTexture();
 
-    // allocate vectors and randomise attractions and positions
     attractions.resize(typeCount, std::vector<float>(typeCount, 0.0f));
     types.resize(count, 0);
     velocities.resize(count, { 0.0f, 0.0f });
     positions.resize(count, { 0.0f, 0.0f });
-    randomise();
+    randomiseAll();
 
-    // initialise particle texture
-    Image temp = GenImageColor(64, 64, BLANK);
-    ImageDrawCircle(&temp, 32, 32, 32, WHITE);
-    particleTexture = LoadTextureFromImage(temp);
-    UnloadImage(temp);
+}
+
+void ParticleLife::init(Settings settings)
+{
+    this->typeCount = settings.typeCount;
+    this->count = settings.count;
+    this->innerRadius = settings.innerRadius;
+    this->resistance = settings.resistance;
+    this->step = settings.step;
+    this->bounds = 2.0f * settings.gridSize;
+    this->attractions = settings.attractions;
+    
+    initColours();
+    initTexture();
+
+    types.resize(count, 0);
+    velocities.resize(count, { 0.0f, 0.0f });
+    positions.resize(count, { 0.0f, 0.0f });
+    randomisePositions();
+
 }
 
 void ParticleLife::update()
@@ -97,12 +107,12 @@ void ParticleLife::update()
         xVel *= invResistance;
         yVel *= invResistance;
 
-        // loop boundaries
-        if (xPos < 0.0f) xPos = bounds;
-        if (xPos > bounds) xPos = 0.0f;
-        if (yPos < 0.0f) yPos = bounds;
-        if (yPos > bounds) yPos = 0.0f;
-
+        // bounce on boundaries
+        if (xPos < 0.0f)   xPos = 0.0f,   xVel *= -1.0f;
+        if (xPos > bounds) xPos = bounds, xVel *= -1.0f;
+        if (yPos < 0.0f)   yPos = 0.0f,   yVel *= -1.0f;
+        if (yPos > bounds) yPos = bounds, yVel *= -1.0f;
+ 
         // apply new position and velocity
         xPos += step * xVel;
         yPos += step * yVel;
@@ -125,15 +135,13 @@ void ParticleLife::draw()
             rlColor4ub(colour.r, colour.g, colour.b, 255);
             rlNormal3f(0.0f, 0.0f, 1.0f);
 
+            // assign tex coords to vertexes
             rlTexCoord2f(0.0f, 0.0f);               // top left
             rlVertex2f(pos.x-0.05f, pos.y-0.05f);
-
             rlTexCoord2f(0, 1.0f);                  // bottom left
             rlVertex2f(pos.x-0.05f, pos.y+0.05f);
-
             rlTexCoord2f(1.0f, 1.0f);               // bottom right
             rlVertex2f(pos.x+0.05f, pos.y+0.05f);
-
             rlTexCoord2f(1.0f, 0.0f);               // top right
             rlVertex2f(pos.x+0.05f, pos.y-0.05f);
 
@@ -143,18 +151,65 @@ void ParticleLife::draw()
     rlEnd();
 }
 
-void ParticleLife::randomise()
-{
-    // randomise attraction values
-    for (int i = 0; i < typeCount; i ++)
-        for (int j = 0; j < typeCount; j ++)
-            attractions[i][j] = GetRandomValue(-250, 250) / 100.0f;
 
-    // randomise positions and reset velocity
-    for (int i = 0; i < count; i++) {
-        types[i] = (i % typeCount);
-        velocities[i] = { 0.0f, 0.0f };
+
+int ParticleLife::getTypeCount() const { return typeCount; }
+
+int ParticleLife::getCount() const { return count; }
+
+float ParticleLife::getResistance() const { return resistance; }
+
+float ParticleLife::getInnerRadius() const { return innerRadius; }
+
+float ParticleLife::getStep() const { return step; }
+
+int ParticleLife::getGridSize() const { return bounds/2.0f; }
+
+
+
+void ParticleLife::randomisePositions()
+{
+    for (int i = 0; i < count; i++) 
+        types[i] = (i % typeCount),
+        velocities[i] = { 0.0f, 0.0f },
         positions[i] = { GetRandomValue(0, 100*bounds) / 100.0f,
                          GetRandomValue(0, 100*bounds) / 100.0f };
+    std::cout << "Randomise Positions" << std::endl << std::endl;
+}
+
+void ParticleLife::randomiseAttractions()
+{
+    for (int i = 0; i < typeCount; i ++)
+        for (int j = 0; j < typeCount; j ++)
+            attractions[i][j] = GetRandomValue(-10, 10) / 10.0f;
+
+    std::cout << "Randomise Attractions" << std::endl;
+    for (std::vector<float>& set : attractions) {
+        for (float val : set)
+            std::cout << val << ", ";
+        std::cout << std::endl;
     }
+    std::cout << std::endl;
+}
+
+void ParticleLife::randomiseAll()
+{
+    randomisePositions();
+    randomiseAttractions();
+}
+
+void ParticleLife::initColours()
+{
+    Color defaultColours[9] = { RED, BLUE, YELLOW, PURPLE, GREEN, ORANGE, PINK, RAYWHITE, LIGHTGRAY };
+    colours.resize(typeCount, WHITE);
+    for (int i = 0; i < typeCount; i++)
+        colours[i] = defaultColours[i];
+}
+
+void ParticleLife::initTexture()
+{
+    Image temp = GenImageColor(64, 64, BLANK);
+    ImageDrawCircle(&temp, 32, 32, 32, WHITE);
+    particleTexture = LoadTextureFromImage(temp);
+    UnloadImage(temp);
 }

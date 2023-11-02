@@ -11,22 +11,22 @@ int windowWidth;
 int windowHeight;
 int fpsTarget;
 
-int particleTypes;
-int initialCount;
-float innerRadius;
-float resistance;
-float step;
-int gridSize;
-
 bool drawGrid;
 
 ParticleLife particleLife;
 Camera2D camera;
 
+ParticleLife::Settings redDeathSmall;
+ParticleLife::Settings redDeathLarge;
+ParticleLife::Settings stinkyRed;
+
 
 void init();
 void update();
 void render();
+
+void initPreSettings();
+
 
 
 
@@ -45,12 +45,6 @@ int main()
 
 void init()
 {
-    particleTypes = 4;
-    initialCount = 3000;
-    innerRadius = 0.25f;
-    resistance = 0.0025f;
-    step = 0.00005f;
-    gridSize = 32;
 
     windowWidth = 1600;
     windowHeight = 800;
@@ -59,21 +53,24 @@ void init()
     InitWindow(windowWidth, windowHeight, "Primordial Particle Life");
     SetTargetFPS(fpsTarget);
 
-    particleLife.init(particleTypes, initialCount, innerRadius, resistance, step, gridSize);
+    initPreSettings();
+
+    particleLife.init(stinkyRed);
 
     camera.offset = { windowWidth/2.0f, windowHeight/2.0f };
-    camera.target = { (float)(gridSize), (float)(gridSize) };
+    camera.target = { (float)(particleLife.getGridSize()), (float)(particleLife.getGridSize()) };
     camera.rotation = 0.0f;
-    camera.zoom = 25.0f;    
+    camera.zoom = 25.0f;
+
 }
 
 void update()
 {
-    // camera pan
+    // camera pan RIGHT CLICK DRAG
     if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT))
         camera.target = Vector2Add(camera.target, Vector2Scale(GetMouseDelta(), -1.0f / camera.zoom));
     
-    // camera zoom
+    // camera zoom on SCROLL
     float wheel = GetMouseWheelMove();
     if (wheel != 0) {
         camera.target = GetScreenToWorld2D(camera.offset, camera);
@@ -84,8 +81,9 @@ void update()
 
     // randomise on press R
     if (IsKeyPressed(KEY_R))
-        particleLife.randomise();
+        particleLife.randomiseAll();
 
+    // turn grid on/off on press G
     if (IsKeyPressed(KEY_G))
         drawGrid = !drawGrid;
     
@@ -103,11 +101,14 @@ void render()
             particleLife.draw();
 
             if (drawGrid) {
+                int gridSize = particleLife.getGridSize();
+
                 rlBegin(RL_LINES);
                     rlColor4ub(80, 80, 80, 255);
                     for (int i = 0; i <= gridSize; i++)
                         rlVertex2i(0, i*2), rlVertex2i(gridSize*2, i*2),
                         rlVertex2i(i*2, 0), rlVertex2i(i*2, gridSize*2);
+                rlEnd();
             }
 
         EndMode2D();
@@ -115,4 +116,48 @@ void render()
         DrawFPS(windowWidth - 80, 5);
         
     EndDrawing();
+}
+
+
+void initPreSettings()
+{
+    redDeathLarge.typeCount   = 5;
+    redDeathLarge.count       = 1500;
+    redDeathLarge.innerRadius = 0.5f;
+    redDeathLarge.resistance  = 0.0025f;
+    redDeathLarge.step        = 0.0002f;
+    redDeathLarge.gridSize    = 32;
+    redDeathLarge.attractions.resize(redDeathLarge.typeCount, std::vector<float>(redDeathLarge.typeCount, 0.0f));
+    redDeathLarge.attractions[0][0] = 0.8f;
+    for (int i = 1; i < redDeathLarge.typeCount; i++)
+        redDeathLarge.attractions[0][i] = 0.6f;
+    for (int i = 1; i < redDeathLarge.typeCount; i++)
+        redDeathLarge.attractions[i][0] = -0.6f;
+    for (int i = 1; i < redDeathLarge.typeCount; i++)
+        for (int j = 0; j < redDeathLarge.typeCount; j++)
+            redDeathLarge.attractions[i][j] = -0.05f + (i+j)%4 * 0.05f;
+
+
+    redDeathSmall = redDeathLarge;
+    redDeathSmall.count = 512;
+    redDeathSmall.gridSize = 16;
+
+
+    stinkyRed.typeCount   = 3;
+    stinkyRed.count       = 2000;
+    stinkyRed.innerRadius = 0.5f;
+    stinkyRed.resistance  = 0.0025f;
+    stinkyRed.step        = 0.0002f;
+    stinkyRed.gridSize    = 20;
+    stinkyRed.attractions.resize(stinkyRed.typeCount, std::vector<float>(stinkyRed.typeCount, 0.0f));
+    stinkyRed.attractions[0][0] =  0.005f;
+    stinkyRed.attractions[0][1] =  0.100f;
+    stinkyRed.attractions[0][2] =  0.100f;
+    stinkyRed.attractions[1][0] = -0.100f;
+    stinkyRed.attractions[1][1] =  0.025f;
+    stinkyRed.attractions[1][2] =  0.025f;
+    stinkyRed.attractions[2][0] = -0.100f;
+    stinkyRed.attractions[2][1] =  0.033f;
+    stinkyRed.attractions[2][2] =  0.033f;
+
 }
