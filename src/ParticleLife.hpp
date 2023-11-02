@@ -15,12 +15,15 @@ class ParticleLife
     void update();
     void draw();
 
+    void randomise();
+
  private:
 
     float step;
     float resistance;
     float bounds;
     float innerRadius;
+    int typeCount;
     int count;
     
     std::vector<Color> colours;

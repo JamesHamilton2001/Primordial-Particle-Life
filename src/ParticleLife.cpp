@@ -8,33 +8,28 @@
 #include <iostream>
 
 
-void ParticleLife::init(int particleTypes, int particleCount, float particleInnerRadius, float resistance, float step, int gridSize)
+void ParticleLife::init(int typeCount, int particleCount, float particleInnerRadius, float resistance, float step, int gridSize)
 {
     // simulation settings
+    this->typeCount = typeCount;
     this->count = particleCount;
     this->innerRadius = particleInnerRadius;
     this->resistance = resistance;
     this->step = step;
     this->bounds = 2.0f * gridSize;
 
-    // randomise attraction values
-    attractions.resize(particleTypes, std::vector<float>(particleTypes, 0.0f));
-    for (int i = 0; i < particleTypes; i ++)
-        for (int j = 0; j < particleTypes; j ++)
-            attractions[i][j] = GetRandomValue(-250, 250) / 100.0f;
-
     // assign colours
-    colours.resize(particleTypes, WHITE);
+    colours.resize(typeCount, WHITE);
     Color defaultColours[9] = { RED, BLUE, YELLOW, PURPLE, GREEN, ORANGE, PINK, RAYWHITE, LIGHTGRAY };
-    for (int i = 0; i < particleTypes; i++)
+    for (int i = 0; i < typeCount; i++)
         colours[i] = defaultColours[i];
 
-    // initalise random particle values
-    for (int i = 0; i < count; i++)
-        velocities.push_back({ 0, 0 }),
-        types.push_back(i % particleTypes),
-        positions.push_back({ GetRandomValue(0, 100*bounds) / 100.0f,
-                              GetRandomValue(0, 100*bounds) / 100.0f });
+    // allocate vectors and randomise attractions and positions
+    attractions.resize(typeCount, std::vector<float>(typeCount, 0.0f));
+    types.resize(count, 0);
+    velocities.resize(count, { 0.0f, 0.0f });
+    positions.resize(count, { 0.0f, 0.0f });
+    randomise();
 
     // initialise particle texture
     Image temp = GenImageColor(64, 64, BLANK);
@@ -45,6 +40,7 @@ void ParticleLife::init(int particleTypes, int particleCount, float particleInne
 
 void ParticleLife::update()
 {
+    // ========================================= PARTICLE INTERACTION
     // for each particle
     for (int i = 0; i < count; i++) {
 
@@ -69,7 +65,7 @@ void ParticleLife::update()
             if (sqDist <= 4.0f) {
                 float distance = sqrtf(sqDist);
 
-                // repulse if in inner radius, otherwise attract
+                // repulse if in inner radius, otherwise apply attraction
                 float coef = (distance <= innerRadius)
                     ? 1.0f - innerRadius / distance
                     : attractionArray[types[j]] * (distance - innerRadius);
@@ -85,7 +81,8 @@ void ParticleLife::update()
         velocities[i].y += yVelInc;
 
     }
-
+    
+    // ===================================== OTHER FORCES AND BOUDNS
     // for each particle
     const float invResistance = 1.0f - resistance;
     for (int i = 0; i < count; i++) {
@@ -144,4 +141,20 @@ void ParticleLife::draw()
 
     rlSetTexture(0);
     rlEnd();
+}
+
+void ParticleLife::randomise()
+{
+    // randomise attraction values
+    for (int i = 0; i < typeCount; i ++)
+        for (int j = 0; j < typeCount; j ++)
+            attractions[i][j] = GetRandomValue(-250, 250) / 100.0f;
+
+    // randomise positions and reset velocity
+    for (int i = 0; i < count; i++) {
+        types[i] = (i % typeCount);
+        velocities[i] = { 0.0f, 0.0f };
+        positions[i] = { GetRandomValue(0, 100*bounds) / 100.0f,
+                         GetRandomValue(0, 100*bounds) / 100.0f };
+    }
 }
