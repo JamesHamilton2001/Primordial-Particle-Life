@@ -244,28 +244,21 @@ void ParticleLife::initTexture()
 
 inline int ParticleLife::gridHash(float coord)
 {
-    return (int) (coord/2.0f) % gridSize;
+    return abs((int) (coord/2.0f) % gridSize);
 }
 
 void ParticleLife::mapGrid()
 {
-    // reset
-    for (int r = 0; r < gridSize; r++) {
-        for (int c = 0; c < gridSize; c++) {
-            for (int i = 0; i < gridCounts[r][c]; i++)
-                gridIds[r][c][i] = -1;
+    for (int r = 0; r < gridSize; r++)
+        for (int c = 0; c < gridSize; c++)
             gridCounts[r][c] = 0;
-        }
-    }
-
-    // recalculate
+    
     for (int i = 0; i < count; i++) {
         int r = gridHash(positions[i].y);
         int c = gridHash(positions[i].x);
 
-        if (gridCounts[r][c] >= gridIds[r][c].capacity())
-            gridIds[r][c].resize((int)(1.5*gridCounts[r][c]), -1);
-        
-        gridIds[r][c][gridCounts[r][c]++] = i;
+         if (gridCounts[r][c] == gridIds[r][c].capacity())
+            gridIds[r][c].push_back(i);
+        else gridIds[r][c][gridCounts[r][c]++] = i;
     }
 }
