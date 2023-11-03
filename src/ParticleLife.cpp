@@ -184,12 +184,30 @@ void ParticleLife::randomiseAll()
     randomiseAttractions();
 }
 
+void ParticleLife::printCell(int r, int c)
+{
+    std::cout << "Cell[" << r << "][" << c << "]" << std::endl;
+    for (int i = 0; i < gridCounts[r][c]; i++)
+        std::cout << types[gridIds[r][c][i]] << ", " << positions[i].x << ", " << positions[i].y << std::endl;
+    std::cout << std::endl;
+}
 
 
 
 void ParticleLife::initGrid()
 {
+    gridCounts = new int*[gridSize];
+    gridIds = new std::vector<int>*[gridSize];
 
+    for (int i = 0; i < gridSize; i++) {
+        gridCounts[i] = new int[gridSize];
+        gridIds[i] = new std::vector<int>[gridSize];
+
+        for (int j = 0; j < gridSize; j++) {
+            gridCounts[i][j] = 0;
+            gridIds[i][j].resize(3 * count/gridSize, -1);
+        }
+    }
 }
 
 void ParticleLife::initColours()
@@ -210,5 +228,19 @@ void ParticleLife::initTexture()
 
 void ParticleLife::mapGrid()
 {
+    // reset
+    for (int r = 0; r < gridSize; r++) {
+        for (int c = 0; c < gridSize; c++) {
+            for (int i = 0; i < gridCounts[r][c]; i++)
+                gridIds[r][c][i] = -1;
+            gridCounts[r][c] = 0;
+        }
+    }
 
+    // recalculate
+    for (int i = 0; i < count; i++) {
+        int r = (int)(positions[i].y/2.0f) % gridSize;
+        int c = (int)(positions[i].x/2.0f) % gridSize;
+        gridIds[r][c][gridCounts[r][c]++] = i;
+    }
 }

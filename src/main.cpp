@@ -20,6 +20,7 @@ Camera2D camera;
 ParticleLife::Settings redDeathSmall;
 ParticleLife::Settings redDeathLarge;
 ParticleLife::Settings stinkyRed;
+ParticleLife::Settings debugga;
 
 
 void init();
@@ -47,8 +48,8 @@ int main()
 void init()
 {
 
-    windowWidth = 1600;
-    windowHeight = 800;
+    windowWidth = 600;
+    windowHeight = 600;
     fpsTarget = 0;
 
     paused = false;
@@ -59,7 +60,7 @@ void init()
 
     initPreSettings();
 
-    particleLife.init(stinkyRed);
+    particleLife.init(debugga);
 
     camera.offset = { windowWidth/2.0f, windowHeight/2.0f };
     camera.target = { (float)(particleLife.getGridSize()), (float)(particleLife.getGridSize()) };
@@ -84,8 +85,13 @@ void update()
     }
 
     // toggle pause on press SPACE
-    if (IsKeyPressed(KEY_SPACE))
+    if (IsKeyPressed(KEY_SPACE)) {
+        if (!paused)
+            for (int r = 0; r < particleLife.getGridSize(); r++)
+                for (int c = 0; c < particleLife.getGridSize(); c++)
+                    particleLife.printCell(r, c);
         paused = !paused;
+    }
 
     // toggle drawn grid on press G
     if (IsKeyPressed(KEY_G))
@@ -170,5 +176,22 @@ void initPreSettings()
     stinkyRed.attractions[2][0] = -0.100f;
     stinkyRed.attractions[2][1] =  0.033f;
     stinkyRed.attractions[2][2] =  0.033f;
+
+    debugga.typeCount   = 3;
+    debugga.count       = 16;
+    debugga.innerRadius = 0.5f;
+    debugga.resistance  = 0.0025f;
+    debugga.step        = 0.0002f;
+    debugga.gridSize    = 3;
+    debugga.attractions.resize(debugga.typeCount, std::vector<float>(debugga.typeCount, 0.0f));
+    debugga.attractions[0][0] =  0.005f;
+    debugga.attractions[0][1] =  0.100f;
+    debugga.attractions[0][2] =  0.100f;
+    debugga.attractions[1][0] = -0.100f;
+    debugga.attractions[1][1] =  0.025f;
+    debugga.attractions[1][2] =  0.025f;
+    debugga.attractions[2][0] = -0.100f;
+    debugga.attractions[2][1] =  0.033f;
+    debugga.attractions[2][2] =  0.033f;
 
 }

@@ -37,6 +37,8 @@ class ParticleLife
     void randomiseAttractions();
     void randomiseAll();
 
+    void printCell(int r, int c);
+
  private:
 
     int typeCount;
