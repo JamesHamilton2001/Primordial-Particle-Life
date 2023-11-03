@@ -57,7 +57,6 @@ void ParticleLife::update()
 
                 // get ids from neighbor cell
                 int cellCount = gridCounts[r][c];
-                int capacity = gridIds[r][c].capacity();
                 for (int l = 0; l < cellCount; l++) {
                     int id = gridIds[r][c][l];
 
@@ -247,18 +246,24 @@ inline int ParticleLife::gridHash(float coord)
     return abs((int) (coord/2.0f) % gridSize);
 }
 
+// !! idk why but it only works if increment in the else statement
 void ParticleLife::mapGrid()
 {
+    // reset counts
     for (int r = 0; r < gridSize; r++)
         for (int c = 0; c < gridSize; c++)
             gridCounts[r][c] = 0;
     
+    // remap ids and recaculate counts
     for (int i = 0; i < count; i++) {
         int r = gridHash(positions[i].y);
         int c = gridHash(positions[i].x);
 
-         if (gridCounts[r][c] == gridIds[r][c].capacity())
+        // if capacity reached, resize and add id
+        if (gridCounts[r][c] >= gridIds[r][c].capacity())
             gridIds[r][c].push_back(i);
+        
+        // otherwise just map id
         else gridIds[r][c][gridCounts[r][c]++] = i;
     }
 }
