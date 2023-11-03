@@ -45,11 +45,11 @@ void ParticleLife::update()
         float yVelInc = 0.0f;
         std::vector<float>& attractionArray = attractions[type];
 
-
+        // get particle row col in grid
         int row = gridHash(positions[i].y);
         int col = gridHash(positions[i].x);
 
-        // get neighboring row and collumn
+        // iterate over neighboring row and collumn
         for (int j = -1; j <= 1; j++) {
             int r = (row + j + gridSize) % gridSize;
             for (int k = -1; k <= 1; k++) {
@@ -220,7 +220,7 @@ void ParticleLife::initGrid()
 
         for (int j = 0; j < gridSize; j++) {
             gridCounts[i][j] = 0;
-            gridIds[i][j].resize((1 * count/gridSize)/2, -1);
+            gridIds[i][j].resize((3 * count/gridSize)/2, -1);
         }
     }
 }
