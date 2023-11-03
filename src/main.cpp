@@ -107,11 +107,13 @@ void render()
         ClearBackground(BLACK);
 
         BeginMode2D(camera);
+
+            // draw simulation
             particleLife.draw();
 
+            // draw grid lines if toggled on
             if (drawGrid) {
                 int gridSize = particleLife.getGridSize();
-
                 rlBegin(RL_LINES);
                     rlColor4ub(80, 80, 80, 255);
                     for (int i = 0; i <= gridSize; i++)

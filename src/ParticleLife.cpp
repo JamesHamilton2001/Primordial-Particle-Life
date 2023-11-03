@@ -8,43 +8,26 @@
 #include <iostream>
 
 
-void ParticleLife::init(int typeCount, int particleCount, float particleInnerRadius, float resistance, float step, int gridSize)
-{
-    this->typeCount = typeCount;
-    this->count = particleCount;
-    this->innerRadius = particleInnerRadius;
-    this->resistance = resistance;
-    this->step = step;
-    this->bounds = 2.0f * gridSize;
-
-    initColours();
-    initTexture();
-
-    attractions.resize(typeCount, std::vector<float>(typeCount, 0.0f));
-    types.resize(count, 0);
-    velocities.resize(count, { 0.0f, 0.0f });
-    positions.resize(count, { 0.0f, 0.0f });
-    randomiseAll();
-
-}
 
 void ParticleLife::init(Settings settings)
 {
-    this->typeCount = settings.typeCount;
-    this->count = settings.count;
+    this->typeCount   = settings.typeCount;
+    this->count       = settings.count;
     this->innerRadius = settings.innerRadius;
-    this->resistance = settings.resistance;
-    this->step = settings.step;
-    this->bounds = 2.0f * settings.gridSize;
+    this->resistance  = settings.resistance;
+    this->step        = settings.step;
+    this->bounds      = 2.0f * settings.gridSize;
+    this->gridSize    = settings.gridSize;
     this->attractions = settings.attractions;
-    
-    initColours();
-    initTexture();
 
     types.resize(count, 0);
     velocities.resize(count, { 0.0f, 0.0f });
     positions.resize(count, { 0.0f, 0.0f });
     randomisePositions();
+    
+    initColours();
+    initTexture();
+    initGrid();
 
 }
 
@@ -120,6 +103,9 @@ void ParticleLife::update()
         velocities[i] = { xVel, yVel };
         
     }
+
+    mapGrid();
+
 }
 
 void ParticleLife::draw()
@@ -198,6 +184,14 @@ void ParticleLife::randomiseAll()
     randomiseAttractions();
 }
 
+
+
+
+void ParticleLife::initGrid()
+{
+
+}
+
 void ParticleLife::initColours()
 {
     Color defaultColours[9] = { RED, BLUE, YELLOW, PURPLE, GREEN, ORANGE, PINK, RAYWHITE, LIGHTGRAY };
@@ -212,4 +206,9 @@ void ParticleLife::initTexture()
     ImageDrawCircle(&temp, 32, 32, 32, WHITE);
     particleTexture = LoadTextureFromImage(temp);
     UnloadImage(temp);
+}
+
+void ParticleLife::mapGrid()
+{
+
 }

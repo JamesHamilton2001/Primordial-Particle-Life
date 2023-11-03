@@ -22,7 +22,6 @@ class ParticleLife
         std::vector<std::vector<float>> attractions;
     };
 
-    void init(int particleTypes, int particleCount, float particleInnerRadius, float resistance, float step, int gridSize);
     void init(Settings settings);
     void update();
     void draw();
@@ -46,6 +45,7 @@ class ParticleLife
     float innerRadius;
     float step;
     float bounds;
+    int gridSize;
     
     std::vector<Color> colours;
     std::vector<std::vector<float>> attractions;
@@ -56,7 +56,14 @@ class ParticleLife
     
     Texture2D particleTexture;
 
+    int** gridCounts;
+    std::vector<int>** gridIds;
+
+
+    void initGrid();
     void initColours();
     void initTexture();
+
+    void mapGrid();
 
 };
