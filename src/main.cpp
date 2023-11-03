@@ -85,13 +85,8 @@ void update()
     }
 
     // toggle pause on press SPACE
-    if (IsKeyPressed(KEY_SPACE)) {
-        if (!paused)
-            for (int r = 0; r < particleLife.getGridSize(); r++)
-                for (int c = 0; c < particleLife.getGridSize(); c++)
-                    particleLife.printCell(r, c);
+    if (IsKeyPressed(KEY_SPACE))
         paused = !paused;
-    }
 
     // toggle drawn grid on press G
     if (IsKeyPressed(KEY_G))
@@ -139,11 +134,11 @@ void render()
 void initPreSettings()
 {
     redDeathLarge.typeCount   = 5;
-    redDeathLarge.count       = 1500;
+    redDeathLarge.count       = 4000;
     redDeathLarge.innerRadius = 0.5f;
     redDeathLarge.resistance  = 0.0025f;
     redDeathLarge.step        = 0.0002f;
-    redDeathLarge.gridSize    = 32;
+    redDeathLarge.gridSize    = 48;
     redDeathLarge.attractions.resize(redDeathLarge.typeCount, std::vector<float>(redDeathLarge.typeCount, 0.0f));
     redDeathLarge.attractions[0][0] = 0.8f;
     for (int i = 1; i < redDeathLarge.typeCount; i++)
