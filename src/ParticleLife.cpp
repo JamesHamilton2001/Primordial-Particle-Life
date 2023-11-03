@@ -45,31 +45,47 @@ void ParticleLife::update()
         float yVelInc = 0.0f;
         std::vector<float>& attractionArray = attractions[type];
 
-        // for each other particle
-        for (int j = 0; j < count; j++) {
-            if (i == j) continue;
 
-            // get distance from other particle
-            float xDist = positions[j].x - xPos;
-            float yDist = positions[j].y - yPos;
-            float sqDist = xDist*xDist + yDist*yDist;
+        int row = gridHash(positions[i].y);
+        int col = gridHash(positions[i].x);
 
-            // if other particle within acting range
-            if (sqDist <= 4.0f) {
-                float distance = sqrtf(sqDist);
+        // get neighboring row and collumn
+        for (int j = -1; j <= 1; j++) {
+            int r = (row + j + gridSize) % gridSize;
+            for (int k = -1; k <= 1; k++) {
+                int c = (col + k + gridSize) % gridSize;
 
-                // repulse if in inner radius, otherwise apply attraction
-                float coef = (distance <= innerRadius)
-                    ? 1.0f - innerRadius / distance
-                    : attractionArray[types[j]] * (distance - innerRadius);
+                // get ids from neighbor cell
+                int cellCount = gridCounts[r][c];
+                int capacity = gridIds[r][c].capacity();
+                for (int l = 0; l < cellCount; l++) {
+                    int id = gridIds[r][c][l];
 
-                // increment normalised force to particle
-                xVelInc += coef * (xDist / distance);
-                yVelInc += coef * (yDist / distance);
+                    if (j == 0 && k == 0 && i == id) continue;
+
+                    // get distance from other particle
+                    float xDist = positions[id].x - xPos;
+                    float yDist = positions[id].y - yPos;
+                    float sqDist = xDist*xDist + yDist*yDist;
+
+                    // if  witin acting range
+                    if (sqDist <= 4.0f) {
+                        float distance = sqrtf(sqDist);
+
+                        // repulse if within inner radius, otherwise apply attraction
+                        float coef = (distance <= innerRadius)
+                            ? 1.0f - innerRadius / distance
+                            : attractionArray[types[id]] * (distance - innerRadius);
+
+                        // increment normalised force
+                        xVelInc += coef * (xDist / distance);
+                        yVelInc += coef * (yDist / distance);
+                    }
+                }
             }
         }
 
-        // apply accumulative force to original particle
+        // apply accumulated force to original particle
         velocities[i].x += xVelInc;
         velocities[i].y += yVelInc;
 
@@ -205,7 +221,7 @@ void ParticleLife::initGrid()
 
         for (int j = 0; j < gridSize; j++) {
             gridCounts[i][j] = 0;
-            gridIds[i][j].resize(3 * count/gridSize, -1);
+            gridIds[i][j].resize((1 * count/gridSize)/2, -1);
         }
     }
 }
@@ -226,6 +242,11 @@ void ParticleLife::initTexture()
     UnloadImage(temp);
 }
 
+inline int ParticleLife::gridHash(float coord)
+{
+    return (int) (coord/2.0f) % gridSize;
+}
+
 void ParticleLife::mapGrid()
 {
     // reset
@@ -239,8 +260,12 @@ void ParticleLife::mapGrid()
 
     // recalculate
     for (int i = 0; i < count; i++) {
-        int r = (int)(positions[i].y/2.0f) % gridSize;
-        int c = (int)(positions[i].x/2.0f) % gridSize;
+        int r = gridHash(positions[i].y);
+        int c = gridHash(positions[i].x);
+
+        if (gridCounts[r][c] >= gridIds[r][c].capacity())
+            gridIds[r][c].resize((int)(1.5*gridCounts[r][c]), -1);
+        
         gridIds[r][c][gridCounts[r][c]++] = i;
     }
 }

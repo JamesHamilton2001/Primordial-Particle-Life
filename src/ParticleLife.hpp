@@ -66,6 +66,8 @@ class ParticleLife
     void initColours();
     void initTexture();
 
+    inline int gridHash(float coord);
+
     void mapGrid();
 
 };

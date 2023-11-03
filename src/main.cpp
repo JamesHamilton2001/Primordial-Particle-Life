@@ -60,7 +60,7 @@ void init()
 
     initPreSettings();
 
-    particleLife.init(debugga);
+    particleLife.init(redDeathLarge);
 
     camera.offset = { windowWidth/2.0f, windowHeight/2.0f };
     camera.target = { (float)(particleLife.getGridSize()), (float)(particleLife.getGridSize()) };
