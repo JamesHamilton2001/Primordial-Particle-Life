@@ -11,6 +11,7 @@ int windowWidth;
 int windowHeight;
 int fpsTarget;
 
+bool paused;
 bool drawGrid;
 
 ParticleLife particleLife;
@@ -50,6 +51,9 @@ void init()
     windowHeight = 800;
     fpsTarget = 0;
 
+    paused = false;
+    drawGrid = false;
+
     InitWindow(windowWidth, windowHeight, "Primordial Particle Life");
     SetTargetFPS(fpsTarget);
 
@@ -79,16 +83,21 @@ void update()
             camera.zoom = 2.0f;
     }
 
+    // toggle pause on press SPACE
+    if (IsKeyPressed(KEY_SPACE))
+        paused = !paused;
+
+    // toggle drawn grid on press G
+    if (IsKeyPressed(KEY_G))
+        drawGrid = !drawGrid;
+
     // randomise on press R
     if (IsKeyPressed(KEY_R))
         particleLife.randomiseAll();
-
-    // turn grid on/off on press G
-    if (IsKeyPressed(KEY_G))
-        drawGrid = !drawGrid;
     
     // update simulation
-    particleLife.update();
+    if (!paused)
+        particleLife.update();
 
 }
 
