@@ -260,8 +260,10 @@ void ParticleLife::mapGrid()
         int c = gridHash(positions[i].x);
 
         // if capacity reached, resize and add id
-        if (gridCounts[r][c] >= gridIds[r][c].capacity())
+        if (gridCounts[r][c] >= gridIds[r][c].capacity()) {
+            gridCounts[r][c]++;
             gridIds[r][c].push_back(i);
+        }
         
         // otherwise just map id
         else gridIds[r][c][gridCounts[r][c]++] = i;
