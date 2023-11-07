@@ -66,7 +66,7 @@ void ParticleLife::update()
                     const float yDist = positions[id].y - yPos;
                     const float sqDist = xDist*xDist + yDist*yDist;
 
-                    // if  witin acting range
+                    // if  within acting range
                     if (sqDist <= 4.0f) {
                         const float distance = sqrtf(sqDist);
 
@@ -131,19 +131,13 @@ void ParticleLife::draw()
             Vector2 pos = positions[i];
             Color colour = colours[types[i]];
 
-            // set colour of particle and set normal towards viewer
             rlColor4ub(colour.r, colour.g, colour.b, 255);
             rlNormal3f(0.0f, 0.0f, 1.0f);
 
-            // assign tex coords to vertexes
-            rlTexCoord2f(0.0f, 0.0f);               // top left
-            rlVertex2f(pos.x-0.05f, pos.y-0.05f);
-            rlTexCoord2f(0, 1.0f);                  // bottom left
-            rlVertex2f(pos.x-0.05f, pos.y+0.05f);
-            rlTexCoord2f(1.0f, 1.0f);               // bottom right
-            rlVertex2f(pos.x+0.05f, pos.y+0.05f);
-            rlTexCoord2f(1.0f, 0.0f);               // top right
-            rlVertex2f(pos.x+0.05f, pos.y-0.05f);
+            rlTexCoord2f(0.0f, 0.0f); rlVertex2f(pos.x-0.05f, pos.y-0.05f);
+            rlTexCoord2f(0.0f, 1.0f); rlVertex2f(pos.x-0.05f, pos.y+0.05f);
+            rlTexCoord2f(1.0f, 1.0f); rlVertex2f(pos.x+0.05f, pos.y+0.05f);
+            rlTexCoord2f(1.0f, 0.0f); rlVertex2f(pos.x+0.05f, pos.y-0.05f);
 
         }
 
@@ -200,7 +194,7 @@ void ParticleLife::randomiseAll()
 
 void ParticleLife::printCell(int r, int c)
 {
-    std::cout << "Cell[" << r << "][" << c << "]" << std::endl;
+    std::cout << "Cell["<< r <<"]["<< c <<"]"<< std::endl;
     for (int i = 0; i < gridCounts[r][c]; i++)
         std::cout << types[gridIds[r][c][i]] << ", " << positions[i].x << ", " << positions[i].y << std::endl;
     std::cout << std::endl;
@@ -219,7 +213,7 @@ void ParticleLife::initGrid()
 
         for (int j = 0; j < gridSize; j++) {
             gridCounts[i][j] = 0;
-            gridIds[i][j].resize(3 * count/gridSize, -1);
+            gridIds[i][j].resize((int)(1.5f * count/gridSize));
         }
     }
 }

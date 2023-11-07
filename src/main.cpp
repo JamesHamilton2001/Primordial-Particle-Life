@@ -47,7 +47,6 @@ int main()
 
 void init()
 {
-
     windowWidth = 600;
     windowHeight = 600;
     fpsTarget = 0;
@@ -66,37 +65,26 @@ void init()
     camera.target = { (float)(particleLife.getGridSize()), (float)(particleLife.getGridSize()) };
     camera.rotation = 0.0f;
     camera.zoom = 25.0f;
-
 }
 
 void update()
 {
-    // camera pan RIGHT CLICK DRAG
-    if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT))
-        camera.target = Vector2Add(camera.target, Vector2Scale(GetMouseDelta(), -1.0f / camera.zoom));
-    
-    // camera zoom on SCROLL
+    // camera zoom and pan
     float wheel = GetMouseWheelMove();
     if (wheel != 0) {
         camera.target = GetScreenToWorld2D(camera.offset, camera);
         camera.zoom += (wheel * 2.0f);
         if (camera.zoom < 2.0f)
             camera.zoom = 2.0f;
-    }
+    } if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT))
+        camera.target = Vector2Add(camera.target, Vector2Scale(GetMouseDelta(), -1.0f / camera.zoom));
 
-    // toggle pause on press SPACE
-    if (IsKeyPressed(KEY_SPACE))
-        paused = !paused;
+    // key binds
+    if (IsKeyPressed(KEY_SPACE)) paused = !paused;
+    if (IsKeyPressed(KEY_G))     drawGrid = !drawGrid;
+    if (IsKeyPressed(KEY_R))     particleLife.randomiseAll();
 
-    // toggle drawn grid on press G
-    if (IsKeyPressed(KEY_G))
-        drawGrid = !drawGrid;
-
-    // randomise on press R
-    if (IsKeyPressed(KEY_R))
-        particleLife.randomiseAll();
-    
-    // update simulation
+    // update simulation if not paused
     if (!paused)
         particleLife.update();
 
@@ -114,12 +102,11 @@ void render()
 
             // draw grid lines if toggled on
             if (drawGrid) {
-                int gridSize = particleLife.getGridSize();
                 rlBegin(RL_LINES);
                     rlColor4ub(80, 80, 80, 255);
-                    for (int i = 0; i <= gridSize; i++)
-                        rlVertex2i(0, i*2), rlVertex2i(gridSize*2, i*2),
-                        rlVertex2i(i*2, 0), rlVertex2i(i*2, gridSize*2);
+                    for (int i = 0; i <= particleLife.getGridSize(); i++)
+                        rlVertex2i(0, i*2), rlVertex2i(particleLife.getGridSize()*2, i*2),
+                        rlVertex2i(i*2, 0), rlVertex2i(i*2, particleLife.getGridSize()*2);
                 rlEnd();
             }
 
@@ -149,11 +136,9 @@ void initPreSettings()
         for (int j = 0; j < redDeathLarge.typeCount; j++)
             redDeathLarge.attractions[i][j] = -0.05f + (i+j)%4 * 0.05f;
 
-
     redDeathSmall = redDeathLarge;
     redDeathSmall.count = 512;
     redDeathSmall.gridSize = 16;
-
 
     stinkyRed.typeCount   = 3;
     stinkyRed.count       = 2000;
@@ -188,5 +173,4 @@ void initPreSettings()
     debugga.attractions[2][0] = -0.100f;
     debugga.attractions[2][1] =  0.033f;
     debugga.attractions[2][2] =  0.033f;
-
 }
