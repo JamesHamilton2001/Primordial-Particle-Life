@@ -220,7 +220,7 @@ void ParticleLife::initGrid()
 
         for (int j = 0; j < gridSize; j++) {
             gridCounts[i][j] = 0;
-            gridIds[i][j].resize((3 * count/gridSize)/2, -1);
+            gridIds[i][j].resize(3 * count/gridSize, -1);
         }
     }
 }
@@ -246,7 +246,6 @@ inline int ParticleLife::gridHash(float coord)
     return abs((int) (coord/2.0f) % gridSize);
 }
 
-// !! idk why but it only works if increment in the else statement
 void ParticleLife::mapGrid()
 {
     // reset counts
@@ -259,11 +258,11 @@ void ParticleLife::mapGrid()
         int r = gridHash(positions[i].y);
         int c = gridHash(positions[i].x);
 
-        // if capacity reached, resize and add id
-        if (gridCounts[r][c] >= gridIds[r][c].capacity())
-            gridIds[r][c].push_back(i);
-        
-        // otherwise just map id
-        else gridIds[r][c][gridCounts[r][c]++] = i;
+        // if capacity reached, resize gridId vector
+        if (gridCounts[r][c] >= (int)(gridIds[r][c].capacity()))
+             gridIds[r][c].resize((int)(1.5 * gridIds[r][c].capacity()));
+
+        // add map id and increment counter
+        gridIds[r][c][gridCounts[r][c]++] = i;
     }
 }
