@@ -41,40 +41,39 @@ void ParticleLife::update()
         const int type = types[i];
         const float xPos = positions[i].x;
         const float yPos = positions[i].y;
+        const std::vector<float>& attractionArray = attractions[type];
+        const int row = gridHash(positions[i].y);
+        const int col = gridHash(positions[i].x);
+
+        // accumulative increment to particle velocity
         float xVelInc = 0.0f;
         float yVelInc = 0.0f;
-        std::vector<float>& attractionArray = attractions[type];
-
-        // get particle row col in grid
-        int row = gridHash(positions[i].y);
-        int col = gridHash(positions[i].x);
 
         // iterate over neighboring row and collumn
         for (int j = -1; j <= 1; j++) {
-            int r = (row + j + gridSize) % gridSize;
+            const int r = (row + j + gridSize) % gridSize;
             for (int k = -1; k <= 1; k++) {
-                int c = (col + k + gridSize) % gridSize;
+                const int c = (col + k + gridSize) % gridSize;
 
                 // get ids from neighbor cell
-                int cellCount = gridCounts[r][c];
-                for (int l = 0; l < cellCount; l++) {
-                    int id = gridIds[r][c][l];
+                for (int l = 0; l < gridCounts[r][c]; l++) {
+                    const int id = gridIds[r][c][l];
 
                     if (j == 0 && k == 0 && i == id) continue;
 
                     // get distance from other particle
-                    float xDist = positions[id].x - xPos;
-                    float yDist = positions[id].y - yPos;
-                    float sqDist = xDist*xDist + yDist*yDist;
+                    const float xDist = positions[id].x - xPos;
+                    const float yDist = positions[id].y - yPos;
+                    const float sqDist = xDist*xDist + yDist*yDist;
 
                     // if  witin acting range
                     if (sqDist <= 4.0f) {
-                        float distance = sqrtf(sqDist);
+                        const float distance = sqrtf(sqDist);
 
                         // repulse if within inner radius, otherwise apply attraction
-                        float coef = (distance <= innerRadius)
+                        const float coef = (distance <= innerRadius)
                             ? 1.0f - innerRadius / distance
-                            : attractionArray[types[id]] * (distance - innerRadius);
+                            : attractionArray[types[id]] * (distance - innerRadius) / 2.0f;
 
                         // increment normalised force
                         xVelInc += coef * (xDist / distance);
