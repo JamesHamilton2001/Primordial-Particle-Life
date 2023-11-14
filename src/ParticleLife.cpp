@@ -1,4 +1,5 @@
 #include "ParticleLife.hpp"
+#include "ThreapPool.hpp"
 
 #include <raylib.h>
 #include <raymath.h>
@@ -133,9 +134,8 @@ void ParticleLife::update()
     mapGrid();
 
     
-    // sectionInteraction(0, count);
-    threadPool.addTask(&sectionInteraction, this, 0, count);
-
+    sectionInteraction(0, count);
+    // threadPool.addTask(&sectionInteraction, this, 0, count);
     
     sectionApplyForce(0, count);
 }
@@ -276,63 +276,5 @@ void ParticleLife::mapGrid()
         // add map id and increment counter
         gridIds[r][c][gridCounts[r][c]++] = i;
     }
-}
-
-
-void ParticleLife::ThreadPool::init(int particleCount)
-{
-    stop = false;
-    threadCount = std::thread::hardware_concurrency();
-    particlesPerThread = particleCount / threadCount;
-    particlesPerFinalThread = particleCount - (threadCount-1) * particlesPerThread;
-    for (size_t i = 0; i < threadCount; ++i)
-        workers.emplace_back(std::bind(&ThreadPool::workerFunction, this));
-}
-
-template<class F, class ...Args>
-void ParticleLife::ThreadPool::addTask(F && f, Args && ...args)
-{
-    auto task = std::make_shared<std::packaged_task<void()>>(
-                    std::bind(std::forward<F>(f), std::forward<Args>(args)...)
-                );
-    {
-        std::unique_lock<std::mutex> lock(queueMutex);
-        tasks.emplace([task] { (*task)(); });
-    }
-    condition.notify_one();
-}
-
-void ParticleLife::ThreadPool::waitAll()
-{
-    std::unique_lock<std::mutex> lock(queueMutex);
-    condition.wait(lock, [this]() { return tasks.empty(); });
-}
-
-void ParticleLife::ThreadPool::workerFunction()
-{
-    while (true) {
-        std::function<void()> task;
-        {
-            std::unique_lock<std::mutex> lock(queueMutex);
-            condition.wait(lock, [this]() { return stop || !tasks.empty(); });
-
-            if (stop && tasks.empty()) return;
-
-            task = std::move(tasks.front());
-            tasks.pop();
-        }
-        task();
-    }
-}
-
-ParticleLife::ThreadPool::~ThreadPool()
-{
-    {
-        std::unique_lock<std::mutex> lock(queueMutex);
-        stop = true;
-    }
-    condition.notify_all();
-    for (std::thread& worker : workers)
-        worker.join();
 }
 
