@@ -5,6 +5,7 @@
 #include <rlgl.h>
 
 #include <vector>
+#include <thread>
 #include <iostream>
 
 
@@ -20,6 +21,10 @@ void ParticleLife::init(Settings settings)
     this->gridSize    = settings.gridSize;
     this->attractions = settings.attractions;
 
+    this->threadCount = std::thread::hardware_concurrency();
+    this->particlesPerThread = count / threadCount;
+    this->particlesPerFinalThread = count - (threadCount-1) * particlesPerThread;
+
     types.resize(count, 0);
     velocities.resize(count, { 0.0f, 0.0f });
     positions.resize(count, { 0.0f, 0.0f });
@@ -28,14 +33,13 @@ void ParticleLife::init(Settings settings)
     initColours();
     initTexture();
     initGrid();
-
+    
 }
 
-void ParticleLife::update()
+void ParticleLife::sectionInteraction(int start, int end)
 {
-    // ========================================= PARTICLE INTERACTION
     // for each particle
-    for (int i = 0; i < count; i++) {
+    for (int i = start; i < end; i++) {
 
         // cache particle variables
         const int type = types[i];
@@ -88,11 +92,13 @@ void ParticleLife::update()
         velocities[i].y += yVelInc;
 
     }
-    
-    // ===================================== OTHER FORCES AND BOUDNS
+}
+
+void ParticleLife::sectionApplyForce(int start, int end)
+{
     // for each particle
     const float invResistance = 1.0f - resistance;
-    for (int i = 0; i < count; i++) {
+    for (int i = start; i < end; i++) {
 
         // cache variables
         float xVel = velocities[i].x;
@@ -117,9 +123,13 @@ void ParticleLife::update()
         velocities[i] = { xVel, yVel };
         
     }
+}
 
+void ParticleLife::update()
+{
     mapGrid();
-
+    sectionInteraction(0, count);
+    sectionApplyForce(0, count);
 }
 
 void ParticleLife::draw()

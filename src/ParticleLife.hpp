@@ -61,10 +61,17 @@ class ParticleLife
     int** gridCounts;
     std::vector<int>** gridIds;
 
+    int threadCount;
+    int particlesPerThread;
+    int particlesPerFinalThread;
+
 
     void initGrid();
     void initColours();
     void initTexture();
+
+    void sectionInteraction(int start, int end);
+    void sectionApplyForce(int start, int end);
 
     inline int gridHash(float coord);
 
