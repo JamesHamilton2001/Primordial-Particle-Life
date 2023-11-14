@@ -75,8 +75,7 @@ class ParticleLife
         void init(int particleCount);
         
         template<class F, class... Args> void addTask(F&& f, Args&&... args);
-
-
+        void waitAll();
     
      private:
 
