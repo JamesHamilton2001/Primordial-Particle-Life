@@ -4,9 +4,11 @@
 #include <raymath.h>
 #include <rlgl.h>
 
+
 #include <vector>
 #include <iostream>
 
+#include <cmath>
 
 
 void ParticleLife::init(Settings settings)
@@ -16,9 +18,10 @@ void ParticleLife::init(Settings settings)
     this->innerRadius = settings.innerRadius;
     this->resistance  = settings.resistance;
     this->step        = settings.step;
-    this->bounds      = 2.0f * settings.gridSize;
     this->gridSize    = settings.gridSize;
     this->attractions = settings.attractions;
+
+    this->bounds = nextafterf(2 * settings.gridSize, 0.0f);
 
     types.resize(count, 0);
     velocities.resize(count, { 0.0f, 0.0f });
@@ -89,12 +92,11 @@ void ParticleLife::update()
 
     }
     
-    // ===================================== OTHER FORCES AND BOUDNS
-    // for each particle
+    // for each particle again
     const float invResistance = 1.0f - resistance;
     for (int i = 0; i < count; i++) {
 
-        // cache variables
+        // cache velocity and position
         float xVel = velocities[i].x;
         float yVel = velocities[i].y;
         float xPos = positions[i].x;
@@ -103,21 +105,23 @@ void ParticleLife::update()
         // apply resistance
         xVel *= invResistance;
         yVel *= invResistance;
+ 
+        // apply step and velocity
+        xPos += step * xVel;
+        yPos += step * yVel;
 
         // bounce on boundaries
         if (xPos < 0.0f)   xPos = 0.0f,   xVel *= -1.0f;
         if (xPos > bounds) xPos = bounds, xVel *= -1.0f;
         if (yPos < 0.0f)   yPos = 0.0f,   yVel *= -1.0f;
         if (yPos > bounds) yPos = bounds, yVel *= -1.0f;
- 
-        // apply new position and velocity
-        xPos += step * xVel;
-        yPos += step * yVel;
+        
+        // update particle
         positions[i] = { xPos, yPos };
         velocities[i] = { xVel, yVel };
-        
     }
 
+    // map spatial hash
     mapGrid();
 
 }
@@ -159,6 +163,33 @@ float ParticleLife::getStep() const { return step; }
 
 int ParticleLife::getGridSize() const { return bounds/2.0f; }
 
+
+
+inline int ParticleLife::gridHash(float coord)
+{
+    return coord / 2.0f;
+}
+
+void ParticleLife::mapGrid()
+{
+    // reset counts
+    for (int r = 0; r < gridSize; r++)
+        for (int c = 0; c < gridSize; c++)
+            gridCounts[r][c] = 0;
+
+    // remap ids and recaculate counts
+    for (int i = 0; i < count; i++) {
+        const int r = gridHash(positions[i].y);
+        const int c = gridHash(positions[i].x);
+
+        // if capacity reached, resize gridId vector
+        if (gridCounts[r][c] >= (int)(gridIds[r][c].capacity()))
+             gridIds[r][c].resize((int)(1.5 * gridIds[r][c].capacity()));
+
+        // add map id and increment counter
+        gridIds[r][c][gridCounts[r][c]++] = i;
+    }
+}
 
 
 void ParticleLife::randomisePositions()
@@ -232,30 +263,4 @@ void ParticleLife::initTexture()
     ImageDrawCircle(&temp, 32, 32, 32, WHITE);
     particleTexture = LoadTextureFromImage(temp);
     UnloadImage(temp);
-}
-
-inline int ParticleLife::gridHash(float coord)
-{
-    return abs((int) (coord/2.0f) % gridSize);
-}
-
-void ParticleLife::mapGrid()
-{
-    // reset counts
-    for (int r = 0; r < gridSize; r++)
-        for (int c = 0; c < gridSize; c++)
-            gridCounts[r][c] = 0;
-    
-    // remap ids and recaculate counts
-    for (int i = 0; i < count; i++) {
-        int r = gridHash(positions[i].y);
-        int c = gridHash(positions[i].x);
-
-        // if capacity reached, resize gridId vector
-        if (gridCounts[r][c] >= (int)(gridIds[r][c].capacity()))
-             gridIds[r][c].resize((int)(1.5 * gridIds[r][c].capacity()));
-
-        // add map id and increment counter
-        gridIds[r][c][gridCounts[r][c]++] = i;
-    }
 }
