@@ -1,266 +1,73 @@
 #include "ParticleLife.hpp"
 
 #include <raylib.h>
-#include <raymath.h>
-#include <rlgl.h>
-
-
 #include <vector>
-#include <iostream>
-
 #include <cmath>
 
 
-void ParticleLife::init(Settings settings)
+ParticleLife::ParticleLife(int types, int size, int count, float resistance, float innerRadius, float step, std::vector<std::vector<float>> attractions, int seed) :
+    types       (types),
+    size        (size),
+    bounds      (nextafterf(2 * size, 0.0f)),
+    count       (count),
+    resistance  (resistance),
+    innerRadius (innerRadius),
+    step        (step),
+    attractions (attractions)
 {
-    this->typeCount   = settings.typeCount;
-    this->count       = settings.count;
-    this->innerRadius = settings.innerRadius;
-    this->resistance  = settings.resistance;
-    this->step        = settings.step;
-    this->gridSize    = settings.gridSize;
-    this->attractions = settings.attractions;
+    particles.resize(count);
 
-    this->bounds = nextafterf(2 * settings.gridSize, 0.0f);
+    SetRandomSeed(seed);
 
-    types.resize(count, 0);
-    velocities.resize(count, { 0.0f, 0.0f });
-    positions.resize(count, { 0.0f, 0.0f });
-    randomisePositions();
-    
-    initColours();
-    initTexture();
-    initGrid();
-
+    for (Particle& p : particles) {
+        p.type = GetRandomValue(0, types-1);
+        p.pos = Vector2 { GetRandomValue(0, 100*bounds) / 100.0f, GetRandomValue(0, 100*bounds) / 100.0f };
+        p.vel = Vector2 { 0, 0 };
+    }
 }
 
 void ParticleLife::update()
 {
-    // ========================================= PARTICLE INTERACTION
-    // for each particle
     for (int i = 0; i < count; i++) {
+        Particle& p1 = particles[i];
 
-        // cache particle variables
-        const int type = types[i];
-        const float xPos = positions[i].x;
-        const float yPos = positions[i].y;
-        const std::vector<float>& attractionArray = attractions[type];
-        const int row = gridHash(positions[i].y);
-        const int col = gridHash(positions[i].x);
+        for (int j = 0; j < count; j++) {
+            if (i == j) continue;
 
-        // accumulative increment to particle velocity
-        float xVelInc = 0.0f;
-        float yVelInc = 0.0f;
+            Particle& p2 = particles[j];
 
-        // iterate over neighboring row and collumn
-        for (int j = -1; j <= 1; j++) {
-            const int r = (row + j + gridSize) % gridSize;
-            for (int k = -1; k <= 1; k++) {
-                const int c = (col + k + gridSize) % gridSize;
+            const float dx = p2.pos.x - p1.pos.x;
+            const float dy = p2.pos.y - p1.pos.y;
+            const float sqDist = dx*dx + dy*dy;
 
-                // get ids from neighbor cell
-                for (int l = 0; l < gridCounts[r][c]; l++) {
-                    const int id = gridIds[r][c][l];
+            if (sqDist <= 4.0f) {
+                float dist = sqrt(sqDist);
 
-                    if (j == 0 && k == 0 && i == id) continue;
+                const float coef = (dist <= innerRadius)
+                    ? 1.0f - innerRadius / dist
+                    : attractions[p1.type][p2.type] * (dist - innerRadius) / 2.0f;
 
-                    // get distance from other particle
-                    const float xDist = positions[id].x - xPos;
-                    const float yDist = positions[id].y - yPos;
-                    const float sqDist = xDist*xDist + yDist*yDist;
+                p1.vel.x += coef * (dx / dist);
+                p1.vel.y += coef * (dy / dist);
 
-                    // if  within acting range
-                    if (sqDist <= 4.0f) {
-                        const float distance = sqrtf(sqDist);
-
-                        // repulse if within inner radius, otherwise apply attraction
-                        const float coef = (distance <= innerRadius)
-                            ? 1.0f - innerRadius / distance
-                            : attractionArray[types[id]] * (distance - innerRadius) / 2.0f;
-
-                        // increment normalised force
-                        xVelInc += coef * (xDist / distance);
-                        yVelInc += coef * (yDist / distance);
-                    }
-                }
             }
         }
-
-        // apply accumulated force to original particle
-        velocities[i].x += xVelInc;
-        velocities[i].y += yVelInc;
-
     }
-    
-    // for each particle again
+
     const float invResistance = 1.0f - resistance;
-    for (int i = 0; i < count; i++) {
 
-        // cache velocity and position
-        float xVel = velocities[i].x;
-        float yVel = velocities[i].y;
-        float xPos = positions[i].x;
-        float yPos = positions[i].y;
+    for (Particle& p : particles) {
 
-        // apply resistance
-        xVel *= invResistance;
-        yVel *= invResistance;
- 
-        // apply step and velocity
-        xPos += step * xVel;
-        yPos += step * yVel;
+        p.vel.x *= invResistance;
+        p.vel.y *= invResistance;
 
-        // bounce on boundaries
-        if (xPos < 0.0f)   xPos = 0.0f,   xVel *= -1.0f;
-        if (xPos > bounds) xPos = bounds, xVel *= -1.0f;
-        if (yPos < 0.0f)   yPos = 0.0f,   yVel *= -1.0f;
-        if (yPos > bounds) yPos = bounds, yVel *= -1.0f;
-        
-        // update particle
-        positions[i] = { xPos, yPos };
-        velocities[i] = { xVel, yVel };
+        p.pos.x += step * p.vel.x;
+        p.pos.y += step * p.vel.y;
+
+        if (p.pos.x < 0.0f)   p.pos.x = 0.0f,   p.vel.x *= -1.0f;
+        if (p.pos.x > bounds) p.pos.x = bounds, p.vel.x *= -1.0f;
+        if (p.pos.y < 0.0f)   p.pos.y = 0.0f,   p.vel.y *= -1.0f;
+        if (p.pos.y > bounds) p.pos.y = bounds, p.vel.y *= -1.0f;
+
     }
-
-    // map spatial hash
-    mapGrid();
-
-}
-
-void ParticleLife::draw()
-{
-    rlSetTexture(particleTexture.id);
-    rlBegin(RL_QUADS);
-
-        for (int i = 0; i < count; i++) {
-            Vector2 pos = positions[i];
-            Color colour = colours[types[i]];
-
-            rlColor4ub(colour.r, colour.g, colour.b, 255);
-            rlNormal3f(0.0f, 0.0f, 1.0f);
-
-            rlTexCoord2f(0.0f, 0.0f); rlVertex2f(pos.x-0.05f, pos.y-0.05f);
-            rlTexCoord2f(0.0f, 1.0f); rlVertex2f(pos.x-0.05f, pos.y+0.05f);
-            rlTexCoord2f(1.0f, 1.0f); rlVertex2f(pos.x+0.05f, pos.y+0.05f);
-            rlTexCoord2f(1.0f, 0.0f); rlVertex2f(pos.x+0.05f, pos.y-0.05f);
-
-        }
-
-    rlSetTexture(0);
-    rlEnd();
-}
-
-
-
-int ParticleLife::getTypeCount() const { return typeCount; }
-
-int ParticleLife::getCount() const { return count; }
-
-float ParticleLife::getResistance() const { return resistance; }
-
-float ParticleLife::getInnerRadius() const { return innerRadius; }
-
-float ParticleLife::getStep() const { return step; }
-
-int ParticleLife::getGridSize() const { return bounds/2.0f; }
-
-
-
-inline int ParticleLife::gridHash(float coord)
-{
-    return coord / 2.0f;
-}
-
-void ParticleLife::mapGrid()
-{
-    // reset counts
-    for (int r = 0; r < gridSize; r++)
-        for (int c = 0; c < gridSize; c++)
-            gridCounts[r][c] = 0;
-
-    // remap ids and recaculate counts
-    for (int i = 0; i < count; i++) {
-        const int r = gridHash(positions[i].y);
-        const int c = gridHash(positions[i].x);
-
-        // if capacity reached, resize gridId vector
-        if (gridCounts[r][c] >= (int)(gridIds[r][c].capacity()))
-             gridIds[r][c].resize((int)(1.5 * gridIds[r][c].capacity()));
-
-        // add map id and increment counter
-        gridIds[r][c][gridCounts[r][c]++] = i;
-    }
-}
-
-
-void ParticleLife::randomisePositions()
-{
-    for (int i = 0; i < count; i++) 
-        types[i] = (i % typeCount),
-        velocities[i] = { 0.0f, 0.0f },
-        positions[i] = { GetRandomValue(0, 100*bounds) / 100.0f,
-                         GetRandomValue(0, 100*bounds) / 100.0f };
-    std::cout << "Randomise Positions" << std::endl << std::endl;
-}
-
-void ParticleLife::randomiseAttractions()
-{
-    for (int i = 0; i < typeCount; i ++)
-        for (int j = 0; j < typeCount; j ++)
-            attractions[i][j] = GetRandomValue(-10, 10) / 10.0f;
-
-    std::cout << "Randomise Attractions" << std::endl;
-    for (std::vector<float>& set : attractions) {
-        for (float val : set)
-            std::cout << val << ", ";
-        std::cout << std::endl;
-    }
-    std::cout << std::endl;
-}
-
-void ParticleLife::randomiseAll()
-{
-    randomisePositions();
-    randomiseAttractions();
-}
-
-void ParticleLife::printCell(int r, int c)
-{
-    std::cout << "Cell["<< r <<"]["<< c <<"]"<< std::endl;
-    for (int i = 0; i < gridCounts[r][c]; i++)
-        std::cout << types[gridIds[r][c][i]] << ", " << positions[i].x << ", " << positions[i].y << std::endl;
-    std::cout << std::endl;
-}
-
-
-
-void ParticleLife::initGrid()
-{
-    gridCounts = new int*[gridSize];
-    gridIds = new std::vector<int>*[gridSize];
-
-    for (int i = 0; i < gridSize; i++) {
-        gridCounts[i] = new int[gridSize];
-        gridIds[i] = new std::vector<int>[gridSize];
-
-        for (int j = 0; j < gridSize; j++) {
-            gridCounts[i][j] = 0;
-            gridIds[i][j].resize((int)(1.5f * count/gridSize));
-        }
-    }
-}
-
-void ParticleLife::initColours()
-{
-    Color defaultColours[9] = { RED, BLUE, YELLOW, PURPLE, GREEN, ORANGE, PINK, RAYWHITE, LIGHTGRAY };
-    colours.resize(typeCount, WHITE);
-    for (int i = 0; i < typeCount; i++)
-        colours[i] = defaultColours[i];
-}
-
-void ParticleLife::initTexture()
-{
-    Image temp = GenImageColor(64, 64, BLANK);
-    ImageDrawCircle(&temp, 32, 32, 32, WHITE);
-    particleTexture = LoadTextureFromImage(temp);
-    UnloadImage(temp);
 }
