@@ -57,9 +57,11 @@ void init()
     InitWindow(windowWidth, windowHeight, "Primordial Particle Life");
     SetTargetFPS(fpsTarget);
 
+    SetRandomSeed(1234);
+
     initPreSettings();
 
-    particleLife.init(redDeathLarge);
+    particleLife.init(debugga);
 
     camera.offset = { windowWidth/2.0f, windowHeight/2.0f };
     camera.target = { (float)(particleLife.getGridSize()), (float)(particleLife.getGridSize()) };
