@@ -47,9 +47,14 @@ void App::update(ParticleLife& particleLife)
     if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT))
         camera.target = Vector2Add(camera.target, Vector2Scale(GetMouseDelta(), -1.0f / camera.zoom));
     
-    if (IsKeyPressed(KEY_SPACE))    paused = !paused;
-    if (IsKeyPressed(KEY_G))        drawGrid = !drawGrid;
-
+    if (IsKeyPressed(KEY_SPACE)) {
+        paused = !paused;
+        if (paused)
+            std::cout << particleLife.spatialHash << std::endl;
+    }
+    if (IsKeyPressed(KEY_G))
+        drawGrid = !drawGrid;
+    
     if (!paused)
         particleLife.update();
 }

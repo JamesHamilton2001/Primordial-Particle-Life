@@ -2,6 +2,7 @@
 #define PARTICLELIFE_HPP
 
 #include "Particle.hpp"
+#include "SpatialHash.hpp"
 
 #include <raylib.h>
 #include <vector>
@@ -24,6 +25,8 @@ class ParticleLife
     std::vector<std::vector<float>> attractions;
 
     std::vector<Particle> particles;
+
+    SpatialHash spatialHash;
 
     void update();
 

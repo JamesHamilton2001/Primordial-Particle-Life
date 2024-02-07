@@ -14,7 +14,8 @@ ParticleLife::ParticleLife(int types, int size, int count, float resistance, flo
     resistance  (resistance),
     innerRadius (innerRadius),
     step        (step),
-    attractions (attractions)
+    attractions (attractions),
+    spatialHash (size, types)
 {
     particles.resize(count);
 
@@ -43,7 +44,7 @@ void ParticleLife::update()
             const float sqDist = dx*dx + dy*dy;
 
             if (sqDist <= 4.0f) {
-                float dist = sqrt(sqDist);
+                const float dist = sqrt(sqDist);
 
                 const float coef = (dist <= innerRadius)
                     ? 1.0f - innerRadius / dist
@@ -72,5 +73,7 @@ void ParticleLife::update()
         if (p.pos.y > bounds) p.pos.y = bounds, p.vel.y *= -1.0f;
 
     }
+
+    spatialHash.map(particles);
 }
 

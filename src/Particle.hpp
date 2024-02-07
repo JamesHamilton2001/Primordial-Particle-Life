@@ -18,9 +18,10 @@ class Particle
 
  private:
     
-    std::string fmtVecStr(Vector2 vec2, int iDigs, int fDigs) const;
+    std::string fmtVecStr(Vector2 vec, int iDigs, int fDigs) const;
     std::string fmtFloatStr(float val, int iDigs, int fDigs) const;
 
 };
+
 
 #endif

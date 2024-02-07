@@ -13,10 +13,12 @@ std::ostream& operator<<(std::ostream& os, const Particle& p)
     return os;
 }
 
-std::string Particle::fmtVecStr(Vector2 vec2, int iDigs, int fDigs) const
+
+std::string Particle::fmtVecStr(Vector2 vec, int iDigs, int fDigs) const
 {
-    return fmtFloatStr(vec2.x, iDigs, fDigs) + ", " + fmtFloatStr(vec2.y, iDigs, fDigs);
+    return fmtFloatStr(vec.x, iDigs, fDigs) + ", " + fmtFloatStr(vec.y, iDigs, fDigs);
 }
+
 
 std::string Particle::fmtFloatStr(float val, int iDigs, int fDigs) const
 {
