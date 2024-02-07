@@ -3,6 +3,7 @@
 #include <raylib.h>
 #include <vector>
 #include <cmath>
+#include <iostream>
 
 
 ParticleLife::ParticleLife(int types, int size, int count, float resistance, float innerRadius, float step, std::vector<std::vector<float>> attractions, int seed) :
@@ -25,6 +26,7 @@ ParticleLife::ParticleLife(int types, int size, int count, float resistance, flo
         p.vel = Vector2 { 0, 0 };
     }
 }
+
 
 void ParticleLife::update()
 {
@@ -71,3 +73,4 @@ void ParticleLife::update()
 
     }
 }
+

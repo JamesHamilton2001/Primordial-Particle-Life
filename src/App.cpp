@@ -1,5 +1,7 @@
 #include "App.hpp"
 
+#include "Particle.hpp"
+
 #include <raylib.h>
 #include <rlgl.h>
 #include <raymath.h>
@@ -66,7 +68,7 @@ void App::draw(ParticleLife& particleLife)
             rlSetTexture(particleTexture.id);
             rlBegin(RL_QUADS);
 
-                for (ParticleLife::Particle const& p : particleLife.particles) {
+                for (Particle const& p : particleLife.particles) {
                     Color colour = particleColors[p.type];
                     rlColor4ub(colour.r, colour.g, colour.b, colour.a);
                     rlNormal3f(0.0f, 0.0f, 1.0f);
