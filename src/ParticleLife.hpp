@@ -13,10 +13,16 @@ class ParticleLife
  public:
 
     ParticleLife(int types, int size, int count, float resistance, float innerRadius, float step, std::vector<std::vector<float>> attractions, int seed);
+    ~ParticleLife();
 
     const int types;
     const int size;
     const float bounds;
+
+    void update();
+    void draw() const;
+
+ private:
 
     int count;
     float resistance;
@@ -28,7 +34,10 @@ class ParticleLife
 
     SpatialHash spatialHash;
 
-    void update();
+    Texture2D particleTexture;
+    std::vector<Color> particleColors = { RED, BLUE, YELLOW, PURPLE, GREEN, ORANGE, PINK, RAYWHITE, LIGHTGRAY };
+
+    void particleInteraction(Particle& p1, Particle& p2);
 
 };
 

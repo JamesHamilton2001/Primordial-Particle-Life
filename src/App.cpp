@@ -21,22 +21,17 @@ App::App(int width, int height, int fpsTarget) :
     camera.rotation = 0.0f;
     camera.zoom = 25.0f;
 
-    Image temp = GenImageColor(64, 64, BLANK);
-    ImageDrawCircle(&temp, 32, 32, 32, Color { 255, 255, 255, 255 });
-    particleTexture = LoadTextureFromImage(temp);
-    UnloadImage(temp);
-
 }
 
 App::~App()
 {
-    UnloadTexture(particleTexture);
+    // UnloadTexture(particleTexture);
 }
 
 
 void App::update(ParticleLife& particleLife)
 {
-    // camera zoom and pan
+    // camera zoom
     float wheel = GetMouseWheelMove();
     if (wheel != 0) {
         camera.target = GetScreenToWorld2D(camera.offset, camera);
@@ -44,14 +39,17 @@ void App::update(ParticleLife& particleLife)
         if (camera.zoom < 2.0f)
             camera.zoom = 2.0f;
     }
+    // camera pan
     if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT))
         camera.target = Vector2Add(camera.target, Vector2Scale(GetMouseDelta(), -1.0f / camera.zoom));
     
+    // pause on SPACE
     if (IsKeyPressed(KEY_SPACE)) {
         paused = !paused;
-        if (paused)
-            std::cout << particleLife.spatialHash << std::endl;
+        // if (paused)
+            // std::cout << particleLife.spatialHash << std::endl;
     }
+    // toggle grid on G
     if (IsKeyPressed(KEY_G))
         drawGrid = !drawGrid;
     
@@ -60,7 +58,7 @@ void App::update(ParticleLife& particleLife)
 }
 
 
-void App::draw(ParticleLife& particleLife)
+void App::draw(ParticleLife& particleLife) const
 {
     BeginDrawing();
 
@@ -69,23 +67,7 @@ void App::draw(ParticleLife& particleLife)
         // draw simulation scene
         BeginMode2D(camera);
 
-            // draw particles
-            rlSetTexture(particleTexture.id);
-            rlBegin(RL_QUADS);
-
-                for (Particle const& p : particleLife.particles) {
-                    Color colour = particleColors[p.type];
-                    rlColor4ub(colour.r, colour.g, colour.b, colour.a);
-                    rlNormal3f(0.0f, 0.0f, 1.0f);
-
-                    rlTexCoord2f(0.0f, 0.0f); rlVertex2f(p.pos.x-0.05f, p.pos.y-0.05f);
-                    rlTexCoord2f(0.0f, 1.0f); rlVertex2f(p.pos.x-0.05f, p.pos.y+0.05f);
-                    rlTexCoord2f(1.0f, 1.0f); rlVertex2f(p.pos.x+0.05f, p.pos.y+0.05f);
-                    rlTexCoord2f(1.0f, 0.0f); rlVertex2f(p.pos.x+0.05f, p.pos.y-0.05f);
-                }
-
-            rlSetTexture(0);
-            rlEnd();
+            particleLife.draw();
 
             // draw grid lines if on
             if (drawGrid) {

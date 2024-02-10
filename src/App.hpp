@@ -15,11 +15,7 @@ class App
     ~App();
 
     void update(ParticleLife& particleLife);
-    void draw(ParticleLife& particleLife);
-
-    int getWidth() const { return width; }
-    int getHeight() const { return height; }
-    int getFpsTarget() const { return fpsTarget; }
+    void draw(ParticleLife& particleLife) const;
     
  private:
 
@@ -32,9 +28,10 @@ class App
 
     Camera2D camera;
 
-    Texture2D particleTexture;
-    std::vector<Color> particleColors = { RED, BLUE, YELLOW, PURPLE, GREEN, ORANGE, PINK, RAYWHITE, LIGHTGRAY };
+    // Texture2D particleTexture;
+    // std::vector<Color> particleColors = { RED, BLUE, YELLOW, PURPLE, GREEN, ORANGE, PINK, RAYWHITE, LIGHTGRAY };
 
 };
+
 
 #endif
