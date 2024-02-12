@@ -46,8 +46,8 @@ void App::update(ParticleLife& particleLife)
     // pause on SPACE
     if (IsKeyPressed(KEY_SPACE)) {
         paused = !paused;
-        // if (paused)
-            // std::cout << particleLife.spatialHash << std::endl;
+        if (paused)
+            std::cout << particleLife << std::endl;
     }
     // toggle grid on G
     if (IsKeyPressed(KEY_G))
@@ -80,6 +80,8 @@ void App::draw(ParticleLife& particleLife) const
             }
 
         EndMode2D();
+
+        DrawFPS(10, 10);
 
     EndDrawing();
 }

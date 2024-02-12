@@ -14,7 +14,7 @@ int main()
     ParticleLife particleLife(
         3,                              // types
         16,                             // size
-        512,                            // count
+        2024,                            // count
         0.0025f,                        // resistance
         0.5f,                           // innerRadius
         0.0002f,                        // step

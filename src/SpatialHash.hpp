@@ -19,7 +19,7 @@ class SpatialHash
     std::vector<int> countTypesInCell(int row, int col) const;
 
 
-    std::vector<std::vector<Particle*>>& operator[](int index);
+    std::vector<std::vector<Particle*>>& operator [] (int index);
 
     friend std::ostream& operator << (std::ostream& os, const SpatialHash& spatHash);
 

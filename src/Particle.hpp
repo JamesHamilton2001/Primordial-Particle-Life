@@ -14,7 +14,7 @@ class Particle
     Vector2 pos;
     Vector2 vel;
 
-    friend std::ostream& operator<<(std::ostream& os, const Particle& p);
+    friend std::ostream& operator <<(std::ostream& os, const Particle& p);
 
  private:
     

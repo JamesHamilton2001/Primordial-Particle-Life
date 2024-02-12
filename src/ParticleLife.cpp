@@ -66,11 +66,10 @@ void ParticleLife::update()
         p.pos.x += step * p.vel.x;
         p.pos.y += step * p.vel.y;
 
-        if (p.pos.x < 0.0f)   p.pos.x = 0.0f,   p.vel.x *= -1.0f;
-        if (p.pos.x > bounds) p.pos.x = bounds, p.vel.x *= -1.0f;
-        if (p.pos.y < 0.0f)   p.pos.y = 0.0f,   p.vel.y *= -1.0f;
-        if (p.pos.y > bounds) p.pos.y = bounds, p.vel.y *= -1.0f;
-
+        if (p.pos.x < 0.0f)         p.pos.x = 0.0f,   p.vel.x *= -1.0f;
+        else if (p.pos.x > bounds)  p.pos.x = bounds, p.vel.x *= -1.0f;
+        if (p.pos.y < 0.0f)         p.pos.y = 0.0f,   p.vel.y *= -1.0f;
+        else if (p.pos.y > bounds)  p.pos.y = bounds, p.vel.y *= -1.0f;
     }
 }
 
@@ -95,6 +94,11 @@ void ParticleLife::draw() const
     rlEnd();
 }
 
+
+std::ostream& operator << (std::ostream& os, const ParticleLife& particleLife)
+{
+    return os << "| Particle Life | " << "\n" << particleLife.spatialHash << "\n\n\n";
+}
 
 
 void ParticleLife::particleInteraction(Particle& p1, Particle& p2)

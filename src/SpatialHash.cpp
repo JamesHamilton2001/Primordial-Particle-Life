@@ -58,9 +58,7 @@ std::ostream& operator<<(std::ostream& os, const SpatialHash& spatHash)
             for (int i = 1; i < static_cast<int>(counts.size()); i++)
                 os << " : " << counts[i];
             os <<") |" << std::endl;
-
-            for (Particle* p : cell)
-                os << "  " << *p << std::endl;
+            
         }
     }
     return os;

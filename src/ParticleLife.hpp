@@ -22,6 +22,8 @@ class ParticleLife
     void update();
     void draw() const;
 
+    friend std::ostream& operator << (std::ostream& os, const ParticleLife& particleLife);
+
  private:
 
     int count;
