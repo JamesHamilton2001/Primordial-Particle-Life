@@ -7,18 +7,18 @@
 #include <iostream>
 
 
-ParticleLife::ParticleLife(int types, int size, int count, float resistance, float innerRadius, float step, std::vector<std::vector<float>> attractions, int seed) :
-    types       (types),
-    size        (size),
-    bounds      (nextafterf(2 * size, 0.0f)),
-    count       (count),
-    resistance  (resistance),
-    innerRadius (innerRadius),
-    step        (step),
-    attractions (attractions),
-    spatialHash (size, types)
+ParticleLife::ParticleLife(Settings settings) :
+    types       (settings.types),
+    size        (settings.size),
+    bounds      (nextafterf(2 * settings.size, 0.0f)),
+    count       (settings.count),
+    resistance  (settings.resistance),
+    innerRadius (settings.innerRadius),
+    step        (settings.step),
+    attractions (settings.attractions),
+    spatialHash (settings.size, settings.types)
 {
-    SetRandomSeed(seed);
+    SetRandomSeed(settings.seed);
 
     particles.resize(count);
     for (Particle& p : particles) {

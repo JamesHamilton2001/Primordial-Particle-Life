@@ -1,34 +1,30 @@
 #include "App.hpp"
 
 
-void redDeathSmall(int& types, int& size, int& count, float& resistance, float& innerRadius, float& step, std::vector<std::vector<float>>& attractions, int& seed);
+void initSettings();
+
+ParticleLife::Settings redDeathSmall;
 
 
 int main()
 {
-    int width = 800;
-    int height = 800;
-    int fpsTarget = 0;
-
-    int option;
-
-    int types;
-    int size;
-    int count;
-    float resistance;
-    float innerRadius;
-    float step;
-    std::vector<std::vector<float>> attractions;
-    int seed;
+    initSettings();
 
     while (true)
     {
+        int width = 800;
+        int height = 800;
+        int fpsTarget = 0;
+        
+        ParticleLife::Settings settings;
+
+        int option;
         std::cin >> option;
 
         switch(option)
         {
             case 1:
-                redDeathSmall(types, size, count, resistance, innerRadius, step, attractions, seed);
+                settings = redDeathSmall;
                 break;
             default:
                 continue;
@@ -40,16 +36,7 @@ int main()
 
         App app(width, height, fpsTarget);
 
-        ParticleLife particleLife(
-            types,                             
-            size,                             
-            count,                            
-            resistance,                       
-            innerRadius,                      
-            step,                             
-            attractions,                      
-            seed                              
-        );
+        ParticleLife particleLife(settings);
 
         while (!WindowShouldClose())
         {
@@ -65,26 +52,25 @@ int main()
 
 }
 
-void redDeathSmall(int& types, int& size, int& count, float& resistance, float& innerRadius, float& step, std::vector<std::vector<float>>& attractions, int& seed)
+void initSettings()
 {
-    types       = 5;
-    size        = 16;
-    count       = 512;
-    resistance  = 0.0025f;
-    innerRadius = 0.5f;
-    step        = 0.0025f;
+    redDeathSmall.types = 5;
+    redDeathSmall.size = 16;
+    redDeathSmall.count = 512;
+    redDeathSmall.resistance = 0.0025f;
+    redDeathSmall.innerRadius = 0.5f;
+    redDeathSmall.step = 0.0025f;
 
-    attractions.resize(types, std::vector<float>(types, 0.0f));
+    redDeathSmall.attractions.resize(redDeathSmall.types, std::vector<float>(redDeathSmall.types, 0.0f));
 
-    attractions[0][0] = 0.06f;
-    for (int i = 1; i < types; i++)
-        attractions[0][i] = 0.04f;
-    for (int i = 1; i < types; i++)
-        attractions[i][0] = -0.04f;
-    for (int i = 1; i < types; i++)
-        for (int j = 0; j < types; j++)
-            attractions[i][j] = -0.01f + (i+j) % 4 * 0.01f;
+    redDeathSmall.attractions[0][0] = 0.06f;
+    for (int i = 1; i < redDeathSmall.types; i++)
+        redDeathSmall.attractions[0][i] = 0.04f;
+    for (int i = 1; i < redDeathSmall.types; i++)
+        redDeathSmall.attractions[i][0] = -0.04f;
+    for (int i = 1; i < redDeathSmall.types; i++)
+        for (int j = 0; j < redDeathSmall.types; j++)
+            redDeathSmall.attractions[i][j] = -0.01f + (i+j) % 4 * 0.01f;
 
-    seed = 1234;
-    
+    redDeathSmall.seed = 1234;
 }

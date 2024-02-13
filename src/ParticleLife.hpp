@@ -12,7 +12,19 @@ class ParticleLife
 {
  public:
 
-    ParticleLife(int types, int size, int count, float resistance, float innerRadius, float step, std::vector<std::vector<float>> attractions, int seed);
+    struct Settings
+    {
+        int types;
+        int size;
+        int count;
+        float resistance;
+        float innerRadius;
+        float step;
+        std::vector<std::vector<float>> attractions;
+        int seed;
+    };
+
+    ParticleLife(Settings settings);
     ~ParticleLife();
 
     const int types;
