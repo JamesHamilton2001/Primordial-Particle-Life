@@ -55,22 +55,22 @@ int main()
 void initSettings()
 {
     redDeathSmall.types = 5;
-    redDeathSmall.size = 16;
+    redDeathSmall.size = 12;
     redDeathSmall.count = 512;
-    redDeathSmall.resistance = 0.0025f;
-    redDeathSmall.innerRadius = 0.5f;
-    redDeathSmall.step = 0.0025f;
+    redDeathSmall.resistance = 0.00125f;
+    redDeathSmall.innerRadius = 0.3f;
+    redDeathSmall.step = 0.0005f;
 
     redDeathSmall.attractions.resize(redDeathSmall.types, std::vector<float>(redDeathSmall.types, 0.0f));
 
-    redDeathSmall.attractions[0][0] = 0.06f;
+    redDeathSmall.attractions[0][0] = 0.04f;
     for (int i = 1; i < redDeathSmall.types; i++)
-        redDeathSmall.attractions[0][i] = 0.04f;
+        redDeathSmall.attractions[0][i] = 0.03f;
     for (int i = 1; i < redDeathSmall.types; i++)
-        redDeathSmall.attractions[i][0] = -0.04f;
+        redDeathSmall.attractions[i][0] = -0.02f;
     for (int i = 1; i < redDeathSmall.types; i++)
         for (int j = 0; j < redDeathSmall.types; j++)
-            redDeathSmall.attractions[i][j] = -0.01f + (i+j) % 4 * 0.01f;
+            redDeathSmall.attractions[i][j] = -0.01f + (i+j) % 4 * 0.005f;
 
     redDeathSmall.seed = 1234;
 }

@@ -41,7 +41,7 @@ ParticleLife::~ParticleLife()
 
 void ParticleLife::update()
 {
-    spatialHash.map(particles);
+    // spatialHash.map(particles);
     
     for (int i = 0; i < count; i++) {
         Particle& p1 = particles[i];

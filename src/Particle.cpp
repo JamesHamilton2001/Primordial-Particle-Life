@@ -5,6 +5,13 @@
 #include <iomanip>
 
 
+Particle::Particle() :
+    type(0),
+    pos(Vector2 { 0, 0 }),
+    vel(Vector2 { 0, 0 })
+{}
+
+
 std::ostream& operator<<(std::ostream& os, const Particle& p)
 {
     os << "| Type: " << p.type <<

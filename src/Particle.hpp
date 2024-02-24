@@ -10,6 +10,8 @@ class Particle
 {
  public:
 
+    Particle();
+
     int type;
     Vector2 pos;
     Vector2 vel;

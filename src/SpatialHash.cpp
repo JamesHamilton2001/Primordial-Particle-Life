@@ -8,9 +8,7 @@
 SpatialHash::SpatialHash(int size, int types) :
     types(types)
 {
-    grid.resize(size);
-    for (int i = 0; i < size; i++)
-        grid[i].resize(size);
+    grid.resize(size, std::vector<std::vector<Particle*>>(size));
 }
 
 
