@@ -28,9 +28,6 @@ class App
 
     Camera2D camera;
 
-    // Texture2D particleTexture;
-    // std::vector<Color> particleColors = { RED, BLUE, YELLOW, PURPLE, GREEN, ORANGE, PINK, RAYWHITE, LIGHTGRAY };
-
 };
 
 
