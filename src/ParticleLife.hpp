@@ -34,6 +34,9 @@ class ParticleLife
     void update();
     void draw() const;
 
+    void printCell(int row, int col);
+    void printCellAtPos(Vector2 pos);
+
     friend std::ostream& operator << (std::ostream& os, const ParticleLife& particleLife);
 
  private:

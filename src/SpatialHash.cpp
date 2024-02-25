@@ -8,9 +8,14 @@
 SpatialHash::SpatialHash(int size, int types) :
     types(types)
 {
-    grid.resize(size, std::vector<std::vector<Particle*>>(size));
+    grid.resize(size+2, std::vector<std::vector<Particle*>>(size+2));
 }
 
+
+int SpatialHash::hash(float coord) const
+{
+    return coord/2 + 1;
+}
 
 void SpatialHash::map(std::vector<Particle>& particles)
 {
@@ -19,7 +24,12 @@ void SpatialHash::map(std::vector<Particle>& particles)
             cell.clear();
 
     for (Particle& p : particles)
-        grid[hash(p.pos.x)][hash(p.pos.y)].push_back(&p);
+        grid[hash(p.pos.y)][hash(p.pos.x)].push_back(&p);
+}
+
+std::vector<Particle*> SpatialHash::cellAtPos(Vector2 pos)
+{
+    return grid[hash(pos.y)][hash(pos.x)];
 }
 
 std::vector<int> SpatialHash::countTypesInCell(int row, int col) const
@@ -32,39 +42,8 @@ std::vector<int> SpatialHash::countTypesInCell(int row, int col) const
     return counts;
 }
 
-
 std::vector<std::vector<Particle*>>& SpatialHash::operator[](int index)
 {
     return grid[index];
-}
-
-
-std::ostream& operator<<(std::ostream& os, const SpatialHash& spatHash)
-{
-    for (int r = 0; r < static_cast<int>(spatHash.grid.size()); r++) {
-        const std::vector<std::vector<Particle*>>& row = spatHash.grid[r];
-
-        for (int c = 0; c < static_cast<int>(row.size()); c++) {
-            const std::vector<Particle*>& cell = row[c];
-
-            std::vector<int> counts = spatHash.countTypesInCell(r, c);
-
-            os <<  "| [" << r <<"][" << c <<
-                 "] | (" << cell.size() << "/" << cell.capacity() <<
-                 ") | ( ";
-            os << counts[0];
-            for (int i = 1; i < static_cast<int>(counts.size()); i++)
-                os << " : " << counts[i];
-            os <<") |" << std::endl;
-            
-        }
-    }
-    return os;
-}
-
-
-int SpatialHash::hash(float coord)
-{
-    return coord / 2;
 }
 

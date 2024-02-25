@@ -3,6 +3,7 @@
 
 void initSettings();
 
+ParticleLife::Settings dbg;
 ParticleLife::Settings redDeathSmall;
 ParticleLife::Settings soup;
 
@@ -25,15 +26,10 @@ int main()
 
         switch(option)
         {
-            case 1:
-                settings = redDeathSmall;
-                break;
-            case 2:
-                settings = soup;
-                break;
-            default:
-                continue;
-                break;
+            case 1:     settings = dbg;             break;
+            case 2:     settings = redDeathSmall;   break;
+            case 3:     settings = soup;            break;
+            default:    continue;                   break;
         }
 
         InitWindow(width, height, "Particle Life");
@@ -59,6 +55,21 @@ int main()
 
 void initSettings()
 {
+    dbg.types = 3;
+    dbg.size = 3;
+    dbg.count = 15;
+    dbg.resistance = 0.001f;
+    dbg.innerRadius = 0.5f;
+    dbg.step = 0.001f;
+
+    dbg.attractions =
+    {
+        {  0.005,  0.002,  -0.002 },
+        { -0.002,  0.005,   0.002 },
+        {  0.002, -0.002,   0.005 }
+    };
+
+
     redDeathSmall.types = 5;
     redDeathSmall.size = 16;
     redDeathSmall.count = 1024;
@@ -84,8 +95,6 @@ void initSettings()
     soup.resistance = 0.00125f;
     soup.innerRadius = 0.5f;
     soup.step = 0.002f;
-
-    // soup.attractions.resize(soup.types, std::vector<float>(soup.types, 0.0f));
 
     soup.attractions =
     {

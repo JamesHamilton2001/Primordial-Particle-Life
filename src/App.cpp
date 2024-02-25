@@ -31,7 +31,7 @@ App::~App()
 
 void App::update(ParticleLife& particleLife)
 {
-    // camera zoom
+    // camera zoom on MOUSE_WHEEL
     float wheel = GetMouseWheelMove();
     if (wheel != 0) {
         camera.target = GetScreenToWorld2D(camera.offset, camera);
@@ -39,20 +39,28 @@ void App::update(ParticleLife& particleLife)
         if (camera.zoom < 2.0f)
             camera.zoom = 2.0f;
     }
-    // camera pan
+    // camera pan on HOLD_RIGHT_CLICK + DRAG
     if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT))
         camera.target = Vector2Add(camera.target, Vector2Scale(GetMouseDelta(), -1.0f / camera.zoom));
     
-    // pause on SPACE
+    // print cell contents on PRESS_LEFT_CLICK
+    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+        Vector2 mouseWorldPos = GetScreenToWorld2D(GetMousePosition(), camera);
+        particleLife.printCellAtPos(mouseWorldPos);
+    }
+
+    // pause on PRESS_SPACE
     if (IsKeyPressed(KEY_SPACE)) {
         paused = !paused;
         if (paused) {}
             // std::cout << particleLife << std::endl;
     }
-    // toggle grid on G
+
+    // toggle grid on PRESS_G
     if (IsKeyPressed(KEY_G))
         drawGrid = !drawGrid;
     
+    // update simulation if not paused
     if (!paused)
         particleLife.update();
 }

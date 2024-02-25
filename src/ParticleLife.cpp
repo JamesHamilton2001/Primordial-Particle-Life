@@ -41,7 +41,7 @@ ParticleLife::~ParticleLife()
 
 void ParticleLife::update()
 {
-    // spatialHash.map(particles);
+    spatialHash.map(particles);
     
     for (int i = 0; i < count; i++) {
         Particle& p1 = particles[i];
@@ -94,10 +94,32 @@ void ParticleLife::draw() const
     rlEnd();
 }
 
+void ParticleLife::printCell(int row, int col)
+{
+    // get the cell and the type counts
+    std::vector<Particle*>& cell = spatialHash[row][col];
+    std::vector<int> typeCounts = spatialHash.countTypesInCell(row, col);
+
+    // print cell index, type count ratio, count and capacity
+    std::cout << "Cell["<< row <<"]["<< col <<"] " << typeCounts[0];
+    for (int i = 1; i < types; i++)
+        std::cout << ":" << typeCounts[i];
+    std::cout <<" "<< cell.size() <<"/"<< cell.capacity() << std::endl; 
+
+    // print the particles in the cell
+    for (Particle* pPtr : cell)
+        std::cout << *pPtr << std::endl;
+    std::cout << std::endl;
+}
+
+void ParticleLife::printCellAtPos(Vector2 pos)
+{
+    printCell(spatialHash.hash(pos.y), spatialHash.hash(pos.x));
+}
 
 std::ostream& operator << (std::ostream& os, const ParticleLife& particleLife)
 {
-    return os << "| Particle Life | " << "\n" << particleLife.spatialHash << "\n\n\n";
+    return os << "| Particle Life | " << std::endl;
 }
 
 
