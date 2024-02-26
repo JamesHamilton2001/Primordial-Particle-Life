@@ -9,13 +9,11 @@
 SpatialHash::SpatialHash(int size, int types) :
     types(types),
     size(size),
-    bounds(nextafterf(2 * size, 0.0f)),
+    bounds(2.0f * size),
     grid(size+2, std::vector<std::vector<Particle*>>(size+2, std::vector<Particle*>())),
     cornerWraps(4, std::vector<Particle>()),
-    edgeWraps(4, std::vector<Particle>())
-{
-
-}
+    edgeWraps(4, std::vector<std::vector<Particle>>(size))
+{}
 
 
 int SpatialHash::hash(float coord) const
@@ -27,43 +25,78 @@ void SpatialHash::map(std::vector<Particle>& particles)
 {
     // clear cells in grid, cornerWraps, and edgeWraps
     for (auto& row : grid) for (auto& cell : row) cell.clear();
-    for (auto& cell : cornerWraps) cell.clear();
-    for (auto& cell : edgeWraps) cell.clear();
+    for (auto& corner : cornerWraps) corner.clear();
+    for (auto& edge : edgeWraps) for (auto& cell : edge) cell.clear();
 
     // map normal particles to grid
     for (Particle& p : particles)
         grid[hash(p.pos.y)][hash(p.pos.x)].emplace_back(&p);
 
     // BR wraps to TL
-    for (Particle* ptr : grid[size][size]) {    // TL <- BR : ↖  DUN
+    for (Particle* ptr : grid[size][size]) {    // TL <- BR : ↖ 
         Particle p = *ptr; 
         p.pos.x -= bounds;
         p.pos.y -= bounds;
         cornerWraps[0].emplace_back(p);
     } for (Particle& p : cornerWraps[0]) grid[0][0].emplace_back(&p);
     // BL wraps to TR
-    for (Particle* ptr : grid[size][1]) {       // TR <- BL : ↗  DUN
+    for (Particle* ptr : grid[size][1]) {       // TR <- BL : ↗ 
         Particle p = *ptr;
         p.pos.x += bounds;
         p.pos.y -= bounds;
         cornerWraps[1].emplace_back(p);
     } for (Particle& p : cornerWraps[1]) grid[0][size+1].emplace_back(&p);
     // TL wraps to BR
-    for (Particle* ptr : grid[1][1]) {          // BR <- TL : ↘  DUN
+    for (Particle* ptr : grid[1][1]) {          // BR <- TL : ↘ 
         Particle p = *ptr;
         p.pos.x += bounds;
         p.pos.y += bounds;
         cornerWraps[2].emplace_back(p);
     } for (Particle& p : cornerWraps[2]) grid[size+1][size+1].emplace_back(&p);
     // TR wraps to BL
-    for (Particle* ptr : grid[1][size]) {       // BL <- TR : ↙  DUN
+    for (Particle* ptr : grid[1][size]) {       // BL <- TR : ↙ 
         Particle p = *ptr;
         p.pos.x -= bounds;
         p.pos.y += bounds;
         cornerWraps[3].emplace_back(p);
     } for (Particle& p : cornerWraps[3]) grid[size+1][0].emplace_back(&p);
 
-
+    // B wraps to T
+    for (int c = 1; c <= size; c++) {
+        for (Particle* ptr : grid[size][c]) {   // T <- B : ↑
+            Particle p = *ptr;
+            p.pos.y -= bounds;
+            edgeWraps[0][c-1].emplace_back(p);
+        }
+    } for (int c = 1; c <= size; c++)
+        for (Particle& p : edgeWraps[0][c-1]) grid[0][c].emplace_back(&p);
+    // L wraps to R
+    for (int r = 1; r <= size; r++) {
+        for (Particle* ptr : grid[r][1]) {      // R <- L : →
+            Particle p = *ptr;
+            p.pos.x += bounds;
+            edgeWraps[1][r-1].emplace_back(p);
+        }
+    } for (int r = 1; r <= size; r++)
+        for (Particle& p : edgeWraps[1][r-1]) grid[r][size+1].emplace_back(&p);
+    // T wraps to B
+    for (int c = 1; c <= size; c++) {
+        for (Particle* ptr : grid[1][c]) {      // B <- T : ↓
+            Particle p = *ptr;
+            p.pos.y += bounds;
+            edgeWraps[2][c-1].emplace_back(p);
+        }
+    } for (int c = 1; c <= size; c++)
+        for (Particle& p : edgeWraps[2][c-1]) grid[size+1][c].emplace_back(&p);
+    // R wraps to L
+    for (int r = 1; r <= size; r++) {
+        for (Particle* ptr : grid[r][size]) {   // L <- R : ←
+            Particle p = *ptr;
+            p.pos.x -= bounds;
+            edgeWraps[3][r-1].emplace_back(p);
+        }
+    } for (int r = 1; r <= size; r++)
+        for (Particle& p : edgeWraps[3][r-1]) grid[r][0].emplace_back(&p);
 }
 
 std::vector<Particle*>& SpatialHash::getCell(int row, int col)

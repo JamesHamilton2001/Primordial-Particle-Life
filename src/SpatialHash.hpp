@@ -25,13 +25,15 @@ class SpatialHash
 
  private:
 
-    const int types;
-    const int size;
-    const float bounds;
+    const int types;    // number of particle types
+    const int size;     // number of cells in one dimension
+    const float bounds; // in world grid bounds
 
-    std::vector<std::vector<std::vector<Particle*>>> grid;
-    std::vector<std::vector<Particle>> cornerWraps;
-    std::vector<std::vector<Particle>> edgeWraps;
+    std::vector<std::vector<std::vector<Particle*>>> grid; // [size+2][size+2], corner and edge wraps
+    
+    std::vector<std::vector<Particle>> cornerWraps; // TL, TR, BR, BL
+
+    std::vector<std::vector<std::vector<Particle>>> edgeWraps;   // T[size],  R[size],  B[size],  L[size]
     
 };
 
