@@ -46,16 +46,18 @@ void ParticleLife::update()
 
     // TODO: spatial hash does not yet produce correct results
     spatialHash.map(particles);
+    debugGrid();
 
-    // for each cell and its neighbours (including itself), interact particles within neighbourhood
+    // for each cell and its neighbours (including itself)
     for (int row = 1; row <= size; row++) {
         for (int col = 1; col <= size; col++) {
             auto& cell = spatialHash.getCell(row, col);
-            
+
             for (int r = row-1; r <= row+1; r++) {
                 for (int c = col-1; c <= col+1; c++) {
                     auto& neighbour = spatialHash.getCell(r, c);
-
+                    
+                    // interact particles within neighbourhood
                     for (Particle* p1 : cell)
                         for (Particle* p2 : neighbour)
                             if (p1 != p2)
@@ -158,4 +160,52 @@ void ParticleLife::particleInteraction(Particle& p1, Particle& p2)
         p1.vel.x += coef * (dx / dist);
         p1.vel.y += coef * (dy / dist);
     }
+}
+
+void ParticleLife::debugGrid()
+{
+    // // corner cells
+    // if (spatialHash.getCell(1,1).size() != spatialHash.getCell(size+1, size+1).size())
+    //     std::cout << "Corner[0] wrap count mismatch" << std::endl;
+    // if (spatialHash.getCell(1,size).size() != spatialHash.getCell(size+1, 0).size())
+    //     std::cout << "Corner[1] wrap count mismatch" << std::endl;
+    // if (spatialHash.getCell(size,1).size() != spatialHash.getCell(0, size+1).size())
+    //     std::cout << "Corner[2] wrap count mismatch" << std::endl;
+    // if (spatialHash.getCell(size,size).size() != spatialHash.getCell(0, 0).size())
+    //     std::cout << "Corner[3] wrap count mismatch" << std::endl;
+    // std::vector<std::vector<int>> normCornerTypes {
+    //     spatialHash.countTypesInCell(1, 1),
+    //     spatialHash.countTypesInCell(1, size),
+    //     spatialHash.countTypesInCell(size, 1),
+    //     spatialHash.countTypesInCell(size, size)
+    // }; std::vector<std::vector<int>> wrapCornerTypes {
+    //     spatialHash.countTypesInCell(size+1, size+1),
+    //     spatialHash.countTypesInCell(size+1, 0),
+    //     spatialHash.countTypesInCell(0, size+1),
+    //     spatialHash.countTypesInCell(0, 0)
+    // }; for (int i = 0; i < 4; i++)
+    //     for (int j = 0; j < types; j++)
+    //         if (normCornerTypes[i][j] != wrapCornerTypes[i][j])
+    //             std::cout << "Corner["<<i<<"] wrap type count mismatch" << std::endl;
+    // std::vector<Particle*>& norm = spatialHash.getCell(1, 1);
+    // std::vector<Particle*>& wrap = spatialHash.getCell(size+1, size+1);
+    // for (int i = 0; i < static_cast<int>(norm.size()); i++)
+    //     if (wrap[i]->pos.x != norm[i]->pos.x + bounds || wrap[i]->pos.y != norm[i]->pos.y + bounds)
+    //         std::cout << "Corner[0] wrap particle mismatch" << std::endl;
+    // norm = spatialHash.getCell(1, size);
+    // wrap = spatialHash.getCell(size+1, 0);
+    // for (int i = 0; i < static_cast<int>(norm.size()); i++)
+    //     if (wrap[i]->pos.x != norm[i]->pos.x - bounds || wrap[i]->pos.y != norm[i]->pos.y + bounds)
+    //         std::cout << "Corner[1] wrap particle mismatch" << std::endl;
+    // norm = spatialHash.getCell(size, 1);
+    // wrap = spatialHash.getCell(0, size+1);
+    // for (int i = 0; i < static_cast<int>(norm.size()); i++)
+    //     if (wrap[i]->pos.x != norm[i]->pos.x + bounds || wrap[i]->pos.y != norm[i]->pos.y - bounds)
+    //         std::cout << "Corner[2] wrap particle mismatch" << std::endl;
+    // norm = spatialHash.getCell(size, size);
+    // wrap = spatialHash.getCell(0, 0);
+    // for (int i = 0; i < static_cast<int>(norm.size()); i++)
+    //     if (wrap[i]->pos.x != norm[i]->pos.x - bounds || wrap[i]->pos.y != norm[i]->pos.y - bounds)
+    //         std::cout << "Corner[3] wrap particle mismatch" << std::endl;
+
 }

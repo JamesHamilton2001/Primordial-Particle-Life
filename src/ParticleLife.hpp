@@ -62,6 +62,8 @@ class ParticleLife
 
     void particleInteraction(Particle& p1, Particle& p2);
 
+    void debugGrid();
+
 };
 
 

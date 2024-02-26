@@ -18,6 +18,8 @@ class SpatialHash
     void map(std::vector<Particle>& particles);
 
     std::vector<Particle*>& getCell(int row, int col);
+    std::vector<Particle>& getCornerWrap(int corner);
+    std::vector<Particle>& getEdgeWrap(int edge);
 
     std::vector<int> countTypesInCell(int row, int col) const;
 
@@ -28,6 +30,8 @@ class SpatialHash
     const float bounds;
 
     std::vector<std::vector<std::vector<Particle*>>> grid;
+    std::vector<std::vector<Particle>> cornerWraps;
+    std::vector<std::vector<Particle>> edgeWraps;
     
 };
 
