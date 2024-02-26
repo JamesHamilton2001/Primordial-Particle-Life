@@ -56,7 +56,7 @@ int main()
 void initSettings()
 {
     dbg.types = 3;
-    dbg.size = 3;
+    dbg.size = 4;
     dbg.count = 15;
     dbg.resistance = 0.001f;
     dbg.innerRadius = 0.5f;
@@ -71,11 +71,11 @@ void initSettings()
 
 
     redDeathSmall.types = 5;
-    redDeathSmall.size = 16;
+    redDeathSmall.size = 12;
     redDeathSmall.count = 1024;
     redDeathSmall.resistance = 0.0025f;
-    redDeathSmall.innerRadius = 0.5f;
-    redDeathSmall.step = 0.0003f;
+    redDeathSmall.innerRadius = 0.4f;
+    redDeathSmall.step = 0.0001f;
 
     redDeathSmall.attractions.resize(redDeathSmall.types, std::vector<float>(redDeathSmall.types, 0.0f));
 

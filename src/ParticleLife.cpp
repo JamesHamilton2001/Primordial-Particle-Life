@@ -19,8 +19,8 @@ ParticleLife::ParticleLife(Settings settings) :
     attractions (settings.attractions),
     spatialHash (settings.size, settings.types)
 {
-    gen.seed(settings.seed);
     posDistr = std::uniform_real_distribution<float>(0.0f, bounds);
+    gen.seed(settings.seed);
 
     particles.resize(count);
     randomisePositions();
@@ -49,11 +49,12 @@ void ParticleLife::update()
 
     for (int row = 1; row <= size; row++) {
         for (int col = 1; col <= size; col++) {
-            std::vector<Particle*>& cell = spatialHash[row][col];
+            std::vector<Particle*>& cell = spatialHash.getCell(row, col);
 
             for (int r = row-1; r <= row+1; r++) {
                 for (int c = col-1; c <= col+1; c++) {
-                    std::vector<Particle*>& neighbour = spatialHash[r][c];
+                    std::vector<Particle*>& neighbour = spatialHash.getCell(r, c);
+                    // std::cout <<"[" << row <<"]["<< col <<"] : ["<< r <<"]["<< c <<"]" << std::endl;
 
                     for (Particle* p1 : cell) {
                         for (Particle* p2 : neighbour) {
@@ -65,7 +66,7 @@ void ParticleLife::update()
                 }
             }
         }
-    }            
+    }
 
     const float invResistance = 1.0f - resistance;
 
@@ -77,10 +78,14 @@ void ParticleLife::update()
         p.pos.x += step * p.vel.x;
         p.pos.y += step * p.vel.y;
 
-        if (p.pos.x < 0.0f)         p.pos.x = 0.0f,   p.vel.x *= -1.0f;
-        else if (p.pos.x > bounds)  p.pos.x = bounds, p.vel.x *= -1.0f;
-        if (p.pos.y < 0.0f)         p.pos.y = 0.0f,   p.vel.y *= -1.0f;
-        else if (p.pos.y > bounds)  p.pos.y = bounds, p.vel.y *= -1.0f;
+        // if (p.pos.x < 0.0f)         p.pos.x = 0.0f,   p.vel.x *= -1.0f;
+        // else if (p.pos.x > bounds)  p.pos.x = bounds, p.vel.x *= -1.0f;
+        // if (p.pos.y < 0.0f)         p.pos.y = 0.0f,   p.vel.y *= -1.0f;
+        // else if (p.pos.y > bounds)  p.pos.y = bounds, p.vel.y *= -1.0f;
+        if (p.pos.x < 0.0f)         p.pos.x += bounds;
+        else if (p.pos.x > bounds)  p.pos.x -= bounds;
+        if (p.pos.y < 0.0f)         p.pos.y += bounds;
+        else if (p.pos.y > bounds)  p.pos.y -= bounds;
     }
 }
 
@@ -118,7 +123,7 @@ void ParticleLife::randomisePositions()
 void ParticleLife::printCell(int row, int col)
 {
     // get the cell and the type counts
-    std::vector<Particle*>& cell = spatialHash[row][col];
+    std::vector<Particle*>& cell = spatialHash.getCell(row, col);
     std::vector<int> typeCounts = spatialHash.countTypesInCell(row, col);
 
     // print cell index, type count ratio, count and capacity

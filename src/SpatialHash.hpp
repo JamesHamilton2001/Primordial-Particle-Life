@@ -17,15 +17,20 @@ class SpatialHash
     int hash(float coord) const;
     void map(std::vector<Particle>& particles);
 
-    std::vector<int> countTypesInCell(int row, int col) const;
+    std::vector<Particle*>& getCell(int row, int col);
 
-    std::vector<std::vector<Particle*>>& operator [] (int index);
+    std::vector<int> countTypesInCell(int row, int col) const;
 
  private:
 
     const int types;
+    const int size;
+    const float bounds;
+
     std::vector<std::vector<std::vector<Particle*>>> grid;
-    
+
+    std::vector<Particle> wrappedParticles;
+
 };
 
 
