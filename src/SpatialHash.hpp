@@ -17,8 +17,6 @@ class SpatialHash
     int hash(float coord) const;
     void map(std::vector<Particle>& particles);
 
-    std::vector<Particle*> cellAtPos(Vector2 pos);
-
     std::vector<int> countTypesInCell(int row, int col) const;
 
     std::vector<std::vector<Particle*>>& operator [] (int index);

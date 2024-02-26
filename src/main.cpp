@@ -22,7 +22,7 @@ int main()
 
         int option;
         // std::cin >> option;
-        option = 1;
+        option = 2;
 
         switch(option)
         {
@@ -73,8 +73,8 @@ void initSettings()
     redDeathSmall.types = 5;
     redDeathSmall.size = 16;
     redDeathSmall.count = 1024;
-    redDeathSmall.resistance = 0.0015f;
-    redDeathSmall.innerRadius = 0.6f;
+    redDeathSmall.resistance = 0.0025f;
+    redDeathSmall.innerRadius = 0.5f;
     redDeathSmall.step = 0.0003f;
 
     redDeathSmall.attractions.resize(redDeathSmall.types, std::vector<float>(redDeathSmall.types, 0.0f));

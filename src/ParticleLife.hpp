@@ -6,6 +6,7 @@
 
 #include <raylib.h>
 #include <vector>
+#include <random>
 
 
 class ParticleLife
@@ -34,6 +35,8 @@ class ParticleLife
     void update();
     void draw() const;
 
+    void randomisePositions();
+
     void printCell(int row, int col);
     void printCellAtPos(Vector2 pos);
 
@@ -50,6 +53,9 @@ class ParticleLife
     std::vector<Particle> particles;
 
     SpatialHash spatialHash;
+
+    std::mt19937 gen;
+    std::uniform_real_distribution<float> posDistr;
 
     Texture2D particleTexture;
     std::vector<Color> particleColors = { RED, BLUE, YELLOW, PURPLE, GREEN, ORANGE, PINK, RAYWHITE, LIGHTGRAY };

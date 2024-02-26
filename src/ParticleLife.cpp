@@ -4,6 +4,7 @@
 #include <rlgl.h>
 #include <vector>
 #include <cmath>
+#include <random>
 #include <iostream>
 
 
@@ -18,14 +19,11 @@ ParticleLife::ParticleLife(Settings settings) :
     attractions (settings.attractions),
     spatialHash (settings.size, settings.types)
 {
-    SetRandomSeed(settings.seed);
+    gen.seed(settings.seed);
+    posDistr = std::uniform_real_distribution<float>(0.0f, bounds);
 
     particles.resize(count);
-    for (Particle& p : particles) {
-        p.type = GetRandomValue(0, types-1);
-        p.pos = Vector2 { GetRandomValue(0, 100*bounds) / 100.0f, GetRandomValue(0, 100*bounds) / 100.0f };
-        p.vel = Vector2 { 0, 0 };
-    }
+    randomisePositions();
 
     Image temp = GenImageColor(64, 64, BLANK);
     ImageDrawCircle(&temp, 32, 32, 32, WHITE);
@@ -41,20 +39,33 @@ ParticleLife::~ParticleLife()
 
 void ParticleLife::update()
 {
+    // for (Particle& p1 : particles)
+    //     for (Particle& p2 : particles)
+    //         if (&p1 != &p2)
+    //             particleInteraction(p1, p2);
+
+    // TODO: spatial hash does not yet produce correct results
     spatialHash.map(particles);
-    
-    for (int i = 0; i < count; i++) {
-        Particle& p1 = particles[i];
 
-        for (int j = 0; j < count; j++) {
-            if (i == j) continue;
+    for (int row = 1; row <= size; row++) {
+        for (int col = 1; col <= size; col++) {
+            std::vector<Particle*>& cell = spatialHash[row][col];
 
-            Particle& p2 = particles[j];
+            for (int r = row-1; r <= row+1; r++) {
+                for (int c = col-1; c <= col+1; c++) {
+                    std::vector<Particle*>& neighbour = spatialHash[r][c];
 
-            particleInteraction(p1, p2);
-
+                    for (Particle* p1 : cell) {
+                        for (Particle* p2 : neighbour) {
+                            if (p1 != p2) {
+                                particleInteraction(*p1, *p2);
+                            }
+                        }
+                    }
+                }
+            }
         }
-    }
+    }            
 
     const float invResistance = 1.0f - resistance;
 
@@ -92,6 +103,16 @@ void ParticleLife::draw() const
 
     rlSetTexture(0);
     rlEnd();
+}
+
+void ParticleLife::randomisePositions()
+{
+    for (Particle& p : particles) {
+        p.type = GetRandomValue(0, types-1);
+        p.pos = Vector2 { posDistr(gen), posDistr(gen) };
+        p.vel = Vector2 { 0.0f, 0.0f };
+    }
+    std::cout << "finsihsed randomising" << std::endl;
 }
 
 void ParticleLife::printCell(int row, int col)

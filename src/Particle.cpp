@@ -14,9 +14,9 @@ Particle::Particle() :
 
 std::ostream& operator<<(std::ostream& os, const Particle& p)
 {
-    os << "| Type: " << p.type <<
-         " | Pos: " << p.fmtVecStr(p.pos, 4, 2) <<
-         " | Vel: " << p.fmtVecStr(p.vel, 3, 3) << " |";
+    os << " "   << p.type <<
+          " : " << p.fmtVecStr(p.pos, 4, 2) <<
+          " : " << p.fmtVecStr(p.vel, 3, 3);
     return os;
 }
 
