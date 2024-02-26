@@ -28,9 +28,7 @@ class SpatialHash
     const float bounds;
 
     std::vector<std::vector<std::vector<Particle*>>> grid;
-
-    std::vector<Particle> wrappedParticles;
-
+    
 };
 
 

@@ -47,41 +47,34 @@ void ParticleLife::update()
     // TODO: spatial hash does not yet produce correct results
     spatialHash.map(particles);
 
+    // for each cell and its neighbours (including itself), interact particles within neighbourhood
     for (int row = 1; row <= size; row++) {
         for (int col = 1; col <= size; col++) {
-            std::vector<Particle*>& cell = spatialHash.getCell(row, col);
-
+            auto& cell = spatialHash.getCell(row, col);
+            
             for (int r = row-1; r <= row+1; r++) {
                 for (int c = col-1; c <= col+1; c++) {
-                    std::vector<Particle*>& neighbour = spatialHash.getCell(r, c);
-                    // std::cout <<"[" << row <<"]["<< col <<"] : ["<< r <<"]["<< c <<"]" << std::endl;
+                    auto& neighbour = spatialHash.getCell(r, c);
 
-                    for (Particle* p1 : cell) {
-                        for (Particle* p2 : neighbour) {
-                            if (p1 != p2) {
+                    for (Particle* p1 : cell)
+                        for (Particle* p2 : neighbour)
+                            if (p1 != p2)
                                 particleInteraction(*p1, *p2);
-                            }
-                        }
-                    }
                 }
             }
         }
     }
 
+    // for each particle, apply resistance, update position and wrap around bounds
     const float invResistance = 1.0f - resistance;
-
     for (Particle& p : particles) {
 
         p.vel.x *= invResistance;
         p.vel.y *= invResistance;
-
+        
         p.pos.x += step * p.vel.x;
         p.pos.y += step * p.vel.y;
 
-        // if (p.pos.x < 0.0f)         p.pos.x = 0.0f,   p.vel.x *= -1.0f;
-        // else if (p.pos.x > bounds)  p.pos.x = bounds, p.vel.x *= -1.0f;
-        // if (p.pos.y < 0.0f)         p.pos.y = 0.0f,   p.vel.y *= -1.0f;
-        // else if (p.pos.y > bounds)  p.pos.y = bounds, p.vel.y *= -1.0f;
         if (p.pos.x < 0.0f)         p.pos.x += bounds;
         else if (p.pos.x > bounds)  p.pos.x -= bounds;
         if (p.pos.y < 0.0f)         p.pos.y += bounds;
