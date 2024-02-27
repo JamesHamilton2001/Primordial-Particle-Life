@@ -14,14 +14,15 @@ class SpatialHash
 
     SpatialHash(int size, int types);
 
-    int hash(float coord) const;
-    void map(std::vector<Particle>& particles);
+    int hash(float coord) const;                        // hash y for row, x for col
+
+    void map(std::vector<Particle>& particles);         // map particles to grid & overlaps
 
     std::vector<Particle*>& getCell(int row, int col);
-    std::vector<Particle>& getCornerWrap(int corner);
-    std::vector<Particle>& getEdgeWrap(int edge);
-
     std::vector<int> countTypesInCell(int row, int col) const;
+
+    void drawGrid() const;
+    void drawGhosts(unsigned int texID) const;
 
  private:
 
@@ -29,11 +30,14 @@ class SpatialHash
     const int size;     // number of cells in one dimension
     const float bounds; // in world grid bounds
 
-    std::vector<std::vector<std::vector<Particle*>>> grid; // [size+2][size+2], corner and edge wraps
+    // [size+2][size+2], corner and edge wraps
+    std::vector<std::vector<std::vector<Particle*>>> grid;
     
-    std::vector<std::vector<Particle>> cornerWraps; // TL, TR, BR, BL
+    // TL, TR, BR, BL
+    std::vector<std::vector<Particle>> cornerWraps;
 
-    std::vector<std::vector<std::vector<Particle>>> edgeWraps;   // T[size],  R[size],  B[size],  L[size]
+    // T[size],  R[size],  B[size],  L[size]
+    std::vector<std::vector<std::vector<Particle>>> edgeWraps;
     
 };
 

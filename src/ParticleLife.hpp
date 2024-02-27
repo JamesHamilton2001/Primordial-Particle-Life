@@ -32,8 +32,13 @@ class ParticleLife
     const int size;
     const float bounds;
 
+
     void update();
-    void draw() const;
+    void draw(unsigned int pTexID) const;
+
+    void drawGrid() const   { spatialHash.drawGrid(); }
+    void drawGhosts(unsigned int pTexID) const { spatialHash.drawGhosts(pTexID); }
+    void drawSoftBorder() const;
 
     void randomisePositions();
 
@@ -56,9 +61,6 @@ class ParticleLife
 
     std::mt19937 gen;
     std::uniform_real_distribution<float> posDistr;
-
-    Texture2D particleTexture;
-    std::vector<Color> particleColors = { RED, BLUE, YELLOW, PURPLE, GREEN, ORANGE, PINK, RAYWHITE, LIGHTGRAY };
 
     void particleInteraction(Particle& p1, Particle& p2);
 

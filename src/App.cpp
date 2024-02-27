@@ -10,22 +10,22 @@
 App::App(int width, int height, int fpsTarget) :
     width(width),
     height(height),
-    fpsTarget(fpsTarget)
+    fpsTarget(fpsTarget),
+    paused(false),
+    drawGrid(true),
+    drawGhosts(true),
+    camera { Vector2 { float(width/2), float(height/2) },
+             Vector2 { 0, 0 }, 0.0f, 25.0f             }
 {
-    paused = false;
-    drawGrid = true;
-
-    // camera.target = Vector2 { float (particleLife.getSize()), float (particleLife.getSize()) };
-    camera.target = Vector2 { 0, 0 };
-    camera.offset = Vector2 { width / 2.0f, height / 2.0f };
-    camera.rotation = 0.0f;
-    camera.zoom = 25.0f;
-
+    Image img = GenImageColor(64, 64, BLANK);
+    ImageDrawCircle(&img, 32, 32, 32, WHITE);
+    particleTexture = LoadTextureFromImage(img);
+    UnloadImage(img);
 }
 
 App::~App()
 {
-    
+    UnloadTexture(particleTexture);
 }
 
 
@@ -49,16 +49,16 @@ void App::update(ParticleLife& particleLife)
         particleLife.printCellAtPos(mouseWorldPos);
     }
 
-    // pause on PRESS_SPACE
-    if (IsKeyPressed(KEY_SPACE)) {
+    // toggle pause on PRESS_SPACE
+    if (IsKeyPressed(KEY_SPACE))
         paused = !paused;
-        if (paused) {}
-            // std::cout << particleLife << std::endl;
-    }
 
     // toggle grid on PRESS_G
     if (IsKeyPressed(KEY_G))
         drawGrid = !drawGrid;
+
+    if (IsKeyPressed(KEY_C))
+        drawGhosts = !drawGhosts;
     
     // update simulation if not paused
     if (!paused)
@@ -69,27 +69,17 @@ void App::update(ParticleLife& particleLife)
 void App::draw(ParticleLife& particleLife) const
 {
     BeginDrawing();
-
         ClearBackground(BLACK);
 
-        // draw simulation scene
         BeginMode2D(camera);
 
-            particleLife.draw();
-
-            // draw grid lines if on
-            if (drawGrid) {
-                rlBegin(RL_LINES);
-                    rlColor4ub(80, 80, 80, 255);
-                    for (int i = 0; i <= particleLife.size; i++)
-                        rlVertex2i(0, i*2), rlVertex2i(particleLife.size*2, i*2),
-                        rlVertex2i(i*2, 0), rlVertex2i(i*2, particleLife.size*2);
-                rlEnd();
-            }
+            particleLife.draw(particleTexture.id);
+            if (drawGrid)   particleLife.drawGrid();
+            if (drawGhosts) particleLife.drawGhosts(particleTexture.id);
+            particleLife.drawSoftBorder();
 
         EndMode2D();
 
         DrawFPS(10, 10);
-
     EndDrawing();
 }

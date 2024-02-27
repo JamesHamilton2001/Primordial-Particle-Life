@@ -14,14 +14,14 @@ int main()
 
     while (true)
     {
-        int width = 800;
-        int height = 800;
+        int width = 1024;
+        int height = 1024;
         int fpsTarget = 0;
         
         ParticleLife::Settings settings;
 
         int option;
-        option = 3;
+        option = 2;
         // std::cin >> option;
 
         switch(option)
@@ -68,16 +68,16 @@ void initSettings()
     }; dbg.seed = 1234;
 
     bigBoy.types = 5;
-    bigBoy.size = 20;
+    bigBoy.size = 24;
     bigBoy.count = 3072;
-    bigBoy.resistance = 0.0015f;
-    bigBoy.innerRadius = 0.5f;
-    bigBoy.step = 0.00003f;
+    bigBoy.resistance = 0.001f;
+    bigBoy.innerRadius = 0.55f;
+    bigBoy.step = 0.00002f;
     bigBoy.attractions = {
-        {  0.02,  0.15,  0.15,  0.20,  -0.10 }, 
-        { -0.05,  0.05,  0.10, -0.05,  0.02 },
-        {  0.05,  0.10, -0.05, -0.05,  0.05 },
-        {  0.10, -0.05,  0.00,  0.05,  0.10 },
+        {  0.02,  0.15,  0.15,  0.20, -0.10 }, 
+        { -0.03,  0.07,  0.10, -0.05,  0.06 },
+        {  0.05,  0.10, -0.02, -0.05,  0.05 },
+        {  0.10, -0.05,  0.04,  0.05,  0.10 },
         { -0.05, -0.10,  0.05,  0.10, -0.05 }
     }; bigBoy.seed = 1234;
 

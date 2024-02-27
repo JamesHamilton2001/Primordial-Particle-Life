@@ -25,8 +25,10 @@ class App
 
     bool paused;
     bool drawGrid;
+    bool drawGhosts;
 
     Camera2D camera;
+    Texture2D particleTexture;
 
 };
 

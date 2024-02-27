@@ -25,16 +25,10 @@ ParticleLife::ParticleLife(Settings settings) :
     particles.resize(count);
     randomisePositions();
 
-    Image temp = GenImageColor(64, 64, BLANK);
-    ImageDrawCircle(&temp, 32, 32, 32, WHITE);
-    particleTexture = LoadTextureFromImage(temp);
-    UnloadImage(temp);
 }
 
 ParticleLife::~ParticleLife()
-{
-    UnloadTexture(particleTexture);
-}
+{}
 
 
 void ParticleLife::update()
@@ -48,11 +42,12 @@ void ParticleLife::update()
     spatialHash.map(particles);
     debugGrid();
 
-    // for each cell and its neighbours (including itself)
+    // for each cell...
     for (int row = 1; row <= size; row++) {
         for (int col = 1; col <= size; col++) {
             auto& cell = spatialHash.getCell(row, col);
 
+            // ...and each neighbour (including itself)
             for (int r = row-1; r <= row+1; r++) {
                 for (int c = col-1; c <= col+1; c++) {
                     auto& neighbour = spatialHash.getCell(r, c);
@@ -85,25 +80,74 @@ void ParticleLife::update()
 }
 
 
-void ParticleLife::draw() const
+void ParticleLife::draw(unsigned int pTexID) const
 {
-    rlSetTexture(particleTexture.id);
+    rlSetTexture(pTexID);
     rlBegin(RL_QUADS);
-
-        for (Particle const& p : particles) {
-            Color colour = particleColors[p.type];
-            rlColor4ub(colour.r, colour.g, colour.b, colour.a);
-            rlNormal3f(0.0f, 0.0f, 1.0f);
-
-            rlTexCoord2f(0.0f, 0.0f); rlVertex2f(p.pos.x-0.05f, p.pos.y-0.05f);
-            rlTexCoord2f(0.0f, 1.0f); rlVertex2f(p.pos.x-0.05f, p.pos.y+0.05f);
-            rlTexCoord2f(1.0f, 1.0f); rlVertex2f(p.pos.x+0.05f, p.pos.y+0.05f);
-            rlTexCoord2f(1.0f, 0.0f); rlVertex2f(p.pos.x+0.05f, p.pos.y-0.05f);
-        }
-
+        for (Particle const& p : particles)
+            p.draw();
     rlSetTexture(0);
     rlEnd();
 }
+
+void ParticleLife::drawSoftBorder() const
+{
+    const float b = bounds;
+
+    rlSetTexture(1);
+    rlBegin(RL_QUADS);
+        rlNormal3f(0.0f, 0.0f, 1.0f);
+        rlColor4ub(0,0,0,255);
+
+        // top left corner
+        rlTexCoord2f(0.0f, 0.0f); rlVertex2f(-2, -2);   // top left
+        rlTexCoord2f(0.0f, 1.0f); rlVertex2f(-2, 0);    // bottom left
+        rlColor4ub(0,0,0,0);
+        rlTexCoord2f(1.0f, 1.0f); rlVertex2f(0, 0);     // bottom right
+        rlColor4ub(0,0,0,255);
+        rlTexCoord2f(1.0f, 0.0f); rlVertex2f(0,-2);     // top right
+
+        // top right corner
+        rlTexCoord2f(1.0f, 0.0f); rlVertex2f(b+2, -2);  // top right
+        rlTexCoord2f(0.0f, 0.0f); rlVertex2f(b, -2);    // top left
+        rlColor4ub(0,0,0,0);
+        rlTexCoord2f(0.0f, 1.0f); rlVertex2f(b, 0);     // bottom left
+        rlColor4ub(0,0,0,255);
+        rlTexCoord2f(1.0f, 1.0f); rlVertex2f(b+2, 0);   // bottom right
+        
+        // bottom right corner
+        rlColor4ub(0,0,0,0);
+        rlTexCoord2f(0.0f, 0.0f); rlVertex2f(b, b);     // top left
+        rlColor4ub(0,0,0,255);
+        rlTexCoord2f(0.0f, 1.0f); rlVertex2f(b, b+2);   // bottom left
+        rlTexCoord2f(1.0f, 1.0f); rlVertex2f(b+2, b+2); // bottom right
+        rlTexCoord2f(1.0f, 0.0f); rlVertex2f(b+2, b);   // top right
+
+        // bottom left corner
+        rlColor4ub(0,0,0,0);
+        rlTexCoord2f(1.0f, 0.0f); rlVertex2f(0, b);     // top right
+        rlColor4ub(0,0,0,255);
+        rlTexCoord2f(0.0f, 0.0f); rlVertex2f(-2, b);    // top left
+        rlTexCoord2f(0.0f, 1.0f); rlVertex2f(-2, b+2);  // bottom left
+        rlTexCoord2f(1.0f, 1.0f); rlVertex2f(0, b+2);   // bottom right
+
+    rlEnd();
+    rlSetTexture(0);
+
+    // edges
+    DrawRectangleGradientV(0, -2, b, 2, BLACK, BLANK); // top
+    DrawRectangleGradientV(0, b, b, 2, BLANK, BLACK);  // bottom
+    DrawRectangleGradientH(-2, 0, 2, b, BLACK, BLANK); // left
+    DrawRectangleGradientH(b, 0, 2, b, BLANK, BLACK);  // right
+
+    // solid outside border
+    DrawRectangle(-3, -3, b+6, 1, BLACK);  // top
+    DrawRectangle(-3, b+2, b+6, 1, BLACK); // bottom
+    DrawRectangle(-3, -3, 1, b+6, BLACK);  // left
+    DrawRectangle(b+2, -3, 1, b+6, BLACK); // right
+    
+}
+
 
 void ParticleLife::randomisePositions()
 {
