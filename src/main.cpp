@@ -21,7 +21,7 @@ int main()
         ParticleLife::Settings settings;
 
         int option;
-        option = 2;
+        option = 1;
         // std::cin >> option;
 
         switch(option)
@@ -37,7 +37,10 @@ int main()
 
         App app(width, height, fpsTarget);
 
-        ParticleLife particleLife(settings);
+        // ParticleLife particleLife(settings);
+        ParticleLife particleLife(app.defaultSettings[1]);
+
+        std::cout << particleLife << std::endl;
 
         while (!WindowShouldClose())
         {

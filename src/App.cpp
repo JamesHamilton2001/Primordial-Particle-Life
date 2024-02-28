@@ -5,6 +5,9 @@
 #include <raylib.h>
 #include <rlgl.h>
 #include <raymath.h>
+#include <iostream>
+#include <vector>
+#include <string>
 
 
 App::App(int width, int height, int fpsTarget) :
@@ -17,10 +20,13 @@ App::App(int width, int height, int fpsTarget) :
     camera { Vector2 { float(width/2), float(height/2) },
              Vector2 { 0, 0 }, 0.0f, 25.0f             }
 {
+    // generate particle texture (64x64 white circle on transparent background)
     Image img = GenImageColor(64, 64, BLANK);
     ImageDrawCircle(&img, 32, 32, 32, WHITE);
     particleTexture = LoadTextureFromImage(img);
     UnloadImage(img);
+
+    loadSettings();
 }
 
 App::~App()
@@ -83,3 +89,43 @@ void App::draw(ParticleLife& particleLife) const
         DrawFPS(10, 10);
     EndDrawing();
 }
+
+
+void App::loadSettings()
+{
+    defaultSettings.emplace_back(ParticleLife::Settings
+    {
+        "debug",
+        5,
+        24,
+        3072,
+        0.55f,
+        0.001f,
+        0.00002f,
+        { {  0.02,  0.15,  0.15,  0.20, -0.10 },
+          { -0.03,  0.07,  0.10, -0.05,  0.06 },
+          {  0.05,  0.10, -0.02, -0.05,  0.05 },
+          {  0.10, -0.05,  0.04,  0.05,  0.10 },
+          { -0.05, -0.10,  0.05,  0.10, -0.05 } },
+        std::vector<Vector2>(0),
+        std::vector<Vector2>(0),
+        1234
+    });
+    defaultSettings.emplace_back(ParticleLife::Settings
+    {
+        "big_boy",
+        3,
+        4,
+        15,
+        0.5f,
+        0.001f,
+        0.001f,
+        { {  0.005,  0.002,  -0.002 },
+          { -0.002,  0.005,   0.002 },
+          {  0.002, -0.002,   0.005 } },
+        std::vector<Vector2>(0),
+        std::vector<Vector2>(0),
+        1234
+    });
+}
+

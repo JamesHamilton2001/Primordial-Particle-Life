@@ -3,6 +3,8 @@
 
 #include <raylib.h>
 #include <iostream>
+#include <vector>
+#include <string>
 
 #include "ParticleLife.hpp"
 
@@ -17,6 +19,8 @@ class App
     void update(ParticleLife& particleLife);
     void draw(ParticleLife& particleLife) const;
     
+    std::vector<ParticleLife::Settings> defaultSettings;
+
  private:
 
     unsigned int width;
@@ -26,9 +30,11 @@ class App
     bool paused;
     bool drawGrid;
     bool drawGhosts;
-
+    
     Camera2D camera;
     Texture2D particleTexture;
+
+    void loadSettings();
 
 };
 

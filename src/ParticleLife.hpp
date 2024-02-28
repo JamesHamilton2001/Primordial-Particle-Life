@@ -5,6 +5,7 @@
 #include "SpatialHash.hpp"
 
 #include <raylib.h>
+#include <string>
 #include <vector>
 #include <random>
 
@@ -15,19 +16,23 @@ class ParticleLife
 
     struct Settings
     {
+        std::string name;
         int types;
         int size;
         int count;
-        float resistance;
         float innerRadius;
+        float resistance;
         float step;
         std::vector<std::vector<float>> attractions;
+        std::vector<Vector2> positions;
+        std::vector<Vector2> velocities;
         int seed;
     };
 
-    ParticleLife(Settings settings);
+    ParticleLife(Settings& settings);
     ~ParticleLife();
 
+    const std::string name;
     const int types;
     const int size;
     const float bounds;
@@ -56,6 +61,8 @@ class ParticleLife
     std::vector<std::vector<float>> attractions;
 
     std::vector<Particle> particles;
+
+    int seed;
 
     SpatialHash spatialHash;
 

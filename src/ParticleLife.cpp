@@ -8,7 +8,8 @@
 #include <iostream>
 
 
-ParticleLife::ParticleLife(Settings settings) :
+ParticleLife::ParticleLife(Settings& settings) :
+    name        (settings.name),
     types       (settings.types),
     size        (settings.size),
     bounds      (2.0f * settings.size),
@@ -17,6 +18,7 @@ ParticleLife::ParticleLife(Settings settings) :
     innerRadius (settings.innerRadius),
     step        (settings.step),
     attractions (settings.attractions),
+    seed        (settings.seed),
     spatialHash (settings.size, settings.types)
 {
     posDistr = std::uniform_real_distribution<float>(0.0f, bounds);
@@ -25,6 +27,8 @@ ParticleLife::ParticleLife(Settings settings) :
     particles.resize(count);
     randomisePositions();
 
+    for (Particle const& p : particles)
+        std::cout << p.pos.x << ", " << p.pos.y << std::endl;
 }
 
 ParticleLife::~ParticleLife()
@@ -226,7 +230,25 @@ void ParticleLife::printCellAtPos(Vector2 pos)
 
 std::ostream& operator << (std::ostream& os, const ParticleLife& particleLife)
 {
-    return os << "| Particle Life | " << std::endl;
+    os << particleLife.name << std::endl <<
+          "| types = " << particleLife.types << std::endl <<
+          "| size = " << particleLife.size << std::endl <<
+          "| count = " << particleLife.count << std::endl <<
+          "| innerRadius = " << particleLife.innerRadius << std::endl <<
+          "| resistance = " << particleLife.resistance << std::endl <<
+          "| step = " << particleLife.step << std::endl <<
+          "| attractions = " << std::endl;
+    
+    for (int i = 0; i < particleLife.types; i++) {
+        os << "|   " << particleLife.attractions[i][0];
+        for (int j = 1; j < particleLife.types; j++)
+            os << ", " << particleLife.attractions[i][j];
+        os << std::endl;
+    }
+
+    os << "| initiation = " << (particleLife.seed==0 ? "preloaded" : "random") << std::endl;
+
+    return os;
 }
 
 
