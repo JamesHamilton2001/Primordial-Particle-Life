@@ -33,12 +33,6 @@ ParticleLife::~ParticleLife()
 
 void ParticleLife::update()
 {
-    // for (Particle& p1 : particles)
-    //     for (Particle& p2 : particles)
-    //         if (&p1 != &p2)
-    //             particleInteraction(p1, p2);
-
-    // TODO: spatial hash does not yet produce correct results
     spatialHash.map(particles);
     debugGrid();
 
@@ -62,16 +56,19 @@ void ParticleLife::update()
         }
     }
 
-    // for each particle, apply resistance, update position and wrap position
+    // for each particle
     const float invResistance = 1.0f - resistance;
     for (Particle& p : particles) {
 
+        // apply resistance
         p.vel.x *= invResistance;
         p.vel.y *= invResistance;
         
+        // update position
         p.pos.x += step * p.vel.x;
         p.pos.y += step * p.vel.y;
 
+        // wrap arouind bounds
         if (p.pos.x < 0.0f)         p.pos.x += bounds;
         else if (p.pos.x > bounds)  p.pos.x -= bounds;
         if (p.pos.y < 0.0f)         p.pos.y += bounds;
@@ -99,7 +96,7 @@ void ParticleLife::drawSoftBorder() const
         rlNormal3f(0.0f, 0.0f, 1.0f);
         rlColor4ub(0,0,0,255);
 
-        // top left corner
+        // SOFT top left corner
         rlTexCoord2f(0.0f, 0.0f); rlVertex2f(-2, -2);   // top left
         rlTexCoord2f(0.0f, 1.0f); rlVertex2f(-2, 0);    // bottom left
         rlColor4ub(0,0,0,0);
@@ -107,7 +104,7 @@ void ParticleLife::drawSoftBorder() const
         rlColor4ub(0,0,0,255);
         rlTexCoord2f(1.0f, 0.0f); rlVertex2f(0,-2);     // top right
 
-        // top right corner
+        // SOFT top right corner
         rlTexCoord2f(1.0f, 0.0f); rlVertex2f(b+2, -2);  // top right
         rlTexCoord2f(0.0f, 0.0f); rlVertex2f(b, -2);    // top left
         rlColor4ub(0,0,0,0);
@@ -115,7 +112,7 @@ void ParticleLife::drawSoftBorder() const
         rlColor4ub(0,0,0,255);
         rlTexCoord2f(1.0f, 1.0f); rlVertex2f(b+2, 0);   // bottom right
         
-        // bottom right corner
+        // SOFT bottom right corner
         rlColor4ub(0,0,0,0);
         rlTexCoord2f(0.0f, 0.0f); rlVertex2f(b, b);     // top left
         rlColor4ub(0,0,0,255);
@@ -123,7 +120,7 @@ void ParticleLife::drawSoftBorder() const
         rlTexCoord2f(1.0f, 1.0f); rlVertex2f(b+2, b+2); // bottom right
         rlTexCoord2f(1.0f, 0.0f); rlVertex2f(b+2, b);   // top right
 
-        // bottom left corner
+        // SOFT bottom left corner
         rlColor4ub(0,0,0,0);
         rlTexCoord2f(1.0f, 0.0f); rlVertex2f(0, b);     // top right
         rlColor4ub(0,0,0,255);
@@ -131,21 +128,66 @@ void ParticleLife::drawSoftBorder() const
         rlTexCoord2f(0.0f, 1.0f); rlVertex2f(-2, b+2);  // bottom left
         rlTexCoord2f(1.0f, 1.0f); rlVertex2f(0, b+2);   // bottom right
 
+        // SOFT top edge
+        rlTexCoord2f(0.0f, 0.0f); rlVertex2f(0, -2);    // top left
+        rlColor4ub(0,0,0,0);
+        rlTexCoord2f(0.0f, 1.0f); rlVertex2f(0, 0);     // bottom left
+        rlTexCoord2f(1.0f, 1.0f); rlVertex2f(b, 0);     // bottom right
+        rlColor4ub(0,0,0,255);
+        rlTexCoord2f(1.0f, 0.0f); rlVertex2f(b, -2);    // top right
+
+        // SOFT bottom edge
+        rlColor4ub(0,0,0,0);
+        rlTexCoord2f(0.0f, 0.0f); rlVertex2f(0, b);     // top left
+        rlColor4ub(0,0,0,255);
+        rlTexCoord2f(0.0f, 1.0f); rlVertex2f(0, b+2);   // bottom left
+        rlTexCoord2f(1.0f, 1.0f); rlVertex2f(b, b+2);   // bottom right
+        rlColor4ub(0,0,0,0);
+        rlTexCoord2f(1.0f, 0.0f); rlVertex2f(b, b);     // top right
+        rlColor4ub(0,0,0,255);
+
+        // SOFT left edge
+        rlColor4ub(0,0,0,255);
+        rlTexCoord2f(0.0f, 0.0f); rlVertex2f(-2, 0);    // top left
+        rlTexCoord2f(0.0f, 1.0f); rlVertex2f(-2, b);    // bottom left
+        rlColor4ub(0,0,0,0);
+        rlTexCoord2f(1.0f, 1.0f); rlVertex2f(0, b);     // bottom right
+        rlTexCoord2f(1.0f, 0.0f); rlVertex2f(0, 0);     // top right
+
+        // SOFT right edge
+        rlColor4ub(0,0,0,0);
+        rlTexCoord2f(0.0f, 0.0f); rlVertex2f(b, 0);     // top left
+        rlTexCoord2f(0.0f, 1.0f); rlVertex2f(b, b);     // bottom left
+        rlColor4ub(0,0,0,255);
+        rlTexCoord2f(1.0f, 1.0f); rlVertex2f(b+2, b);   // bottom right
+        rlTexCoord2f(1.0f, 0.0f); rlVertex2f(b+2, 0);   // top right
+    
+        // HARD top edge
+        rlTexCoord2f(0.0f, 0.0f); rlVertex2f(-3, -3);   // top left
+        rlTexCoord2f(0.0f, 1.0f); rlVertex2f(-3, -2);   // bottom left
+        rlTexCoord2f(1.0f, 1.0f); rlVertex2f(b+3, -2);  // bottom right
+        rlTexCoord2f(1.0f, 0.0f); rlVertex2f(b+3, -3);  // top right
+
+        // HARD bottom edge
+        rlTexCoord2f(0.0f, 0.0f); rlVertex2f(-3, b+2);  // top left
+        rlTexCoord2f(0.0f, 1.0f); rlVertex2f(-3, b+3);  // bottom left
+        rlTexCoord2f(1.0f, 1.0f); rlVertex2f(b+3, b+3); // bottom right
+        rlTexCoord2f(1.0f, 0.0f); rlVertex2f(b+3, b+2); // top right
+
+        // HARD left edge
+        rlTexCoord2f(0.0f, 0.0f); rlVertex2f(-3, -3);   // top left
+        rlTexCoord2f(0.0f, 1.0f); rlVertex2f(-3, b+3);  // bottom left
+        rlTexCoord2f(1.0f, 1.0f); rlVertex2f(-2, b+3);  // bottom right
+        rlTexCoord2f(1.0f, 0.0f); rlVertex2f(-2, -3);   // top right
+
+        // HARD right edge
+        rlTexCoord2f(0.0f, 0.0f); rlVertex2f(b+2, -3);// top left
+        rlTexCoord2f(0.0f, 1.0f); rlVertex2f(b+2, b+3);// bottom left
+        rlTexCoord2f(1.0f, 1.0f); rlVertex2f(b+3, b+3);// bottom right
+        rlTexCoord2f(1.0f, 0.0f); rlVertex2f(b+3, -3);// top right
+
     rlEnd();
     rlSetTexture(0);
-
-    // edges
-    DrawRectangleGradientV(0, -2, b, 2, BLACK, BLANK); // top
-    DrawRectangleGradientV(0, b, b, 2, BLANK, BLACK);  // bottom
-    DrawRectangleGradientH(-2, 0, 2, b, BLACK, BLANK); // left
-    DrawRectangleGradientH(b, 0, 2, b, BLANK, BLACK);  // right
-
-    // solid outside border
-    DrawRectangle(-3, -3, b+6, 1, BLACK);  // top
-    DrawRectangle(-3, b+2, b+6, 1, BLACK); // bottom
-    DrawRectangle(-3, -3, 1, b+6, BLACK);  // left
-    DrawRectangle(b+2, -3, 1, b+6, BLACK); // right
-    
 }
 
 
@@ -190,17 +232,21 @@ std::ostream& operator << (std::ostream& os, const ParticleLife& particleLife)
 
 void ParticleLife::particleInteraction(Particle& p1, Particle& p2)
 {
+    // calculate the square distance between the particles
     const float dx = p2.pos.x - p1.pos.x;
     const float dy = p2.pos.y - p1.pos.y;
     const float sqDist = dx*dx + dy*dy;
 
+    // if square distance is less than 2^2 then interact
     if (sqDist <= 4.0f) {
-        const float dist = sqrt(sqDist);
+        const float dist = sqrtf(sqDist);
 
+        // if particles are within inner radius then repel, otherwise attract
         const float coef = (dist <= innerRadius)
             ? 1.0f - innerRadius / dist
             : attractions[p1.type][p2.type] * (dist - innerRadius) / 2.0f;
 
+        // apply interaction force to particle velocity
         p1.vel.x += coef * (dx / dist);
         p1.vel.y += coef * (dy / dist);
     }
