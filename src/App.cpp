@@ -31,6 +31,8 @@ App::App(int width, int height, int fpsTarget) :
     particleTexture = LoadTextureFromImage(img);
     UnloadImage(img);
 
+    testStringConversions();
+
     loadSettings();
 }
 
@@ -212,3 +214,181 @@ void App::loadSettings()
     }
 }
 
+int App::strToUSInt(const std::string& str) const
+{
+    // validate string size
+    const int len = str.length();
+    if (len == 0) throw std::invalid_argument("cannot convert empty string");
+    
+    // validate, store and count digits
+    int count = 0;
+    std::vector<int> digs;
+    for (int i = 0; i < len; i++) {
+        if (!std::isdigit(str[i]))
+            throw std::invalid_argument("expected digit at s["+std::to_string(i)+"], got '"+str[i]+"'");
+        digs.emplace_back(str[i] - '0');
+        count++;
+    }
+    // convert and return unsigned int
+    int i = 0;
+    int val = 0;
+    for (; i < count-2; i++)
+        if (digs[i] != 0) val += digs[i] * std::pow(10, count - i - 1);
+    val += digs[i++] * 10 + digs[i];
+    return val;
+}
+
+float App::strToFloat(const std::string& s) const
+{
+    const int len = s.length(); // validate string size
+    if (len == 0) throw std::invalid_argument("invalid float, (len == 0)");
+
+    int iCount = 0, fCount = 0;     // count of integer and fractional digit count
+    std::vector<int> idgis, fdigs;  // integer and fractional digits
+    bool neg = false;               // negative flag
+    int i = 0;                      // char index
+
+    if (s[i] == '-') neg = true, i++; // set neg flag, skip 1st char if negative sign
+
+    // validate, store and count integer digits
+    for (; i < len && s[i] != '.'; i++) {
+        if (!std::isdigit(s[i]))
+            throw std::invalid_argument(
+                "Invalid float, expected digit at s["+std::to_string(i)+"], got '"+s[i]+"'"
+            );
+        idgis.emplace_back(s[i] - '0');
+        iCount++;
+    }
+    if (i < len) { // if has fractional part
+        if (++i == len) // skip decimal point, throw if no digits after '.'
+            throw std::invalid_argument("invalid float, no digits after '.'");
+
+        // validate, store and count fractional digits
+        for (; i < len; i++) {
+            if (!std::isdigit(s[i]))
+                throw std::invalid_argument(
+                    "invalid float, i=" + std::to_string(i) + ", s[i]=" + s[i]
+                );
+            fdigs.emplace_back(s[i] - '0');
+            fCount++;
+        }
+    }
+    // convert and return float
+    float val = 0.0f;
+    for (i = 0; i < iCount; i++)
+        val += idgis[i] * std::pow(10, iCount - i - 1);
+    for (i = 0; i < fCount; i++)
+        val += fdigs[i] * std::pow(10, -i - 1);
+    if (neg) val *= -1;
+    return val;
+}
+
+void App::testStringConversions() const
+{
+    // auto validateUint = [this](const std::string& strVal, bool toSucceed) {
+    //     bool raised;
+    //     std::string msg = strVal + " -> ";
+    //     try { unsigned int val = strToUSInt(strVal);
+    //           msg += std::to_string(val);
+    //           int dif = static_cast<int>(val) - static_cast<int>(val);
+    //           if (dif != 0) msg += "  :  DIFFERENCE = " + std::to_string(dif);
+    //           msg = toSucceed ? "|PASSED|  " + msg : "|FAILED|  " + msg;
+    //           raised = false;
+    //     } catch (const std::invalid_argument& e) {
+    //         msg = toSucceed ? "|FAILED|  " + msg : "|PASSED|  " + msg;
+    //         msg += e.what();
+    //         raised = true;
+    //     }
+    //     std::cout << msg << std::endl;
+    //     return (toSucceed && !raised) || (!toSucceed && raised);
+    // };
+    // auto validateFloat = [this](const std::string& strVal, bool toSucceed) {
+    //     bool raised;
+    //     std::string msg = strVal + " -> ";
+    //     try { float val = strToFloat(strVal);
+    //           msg += std::to_string(val);
+    //           float dif = val - std::stof(strVal);
+    //           msg += "  :  dif = " + std::to_string(dif);
+    //           msg = (toSucceed ? "|PASSED|" : "|FAILED|") + msg;
+    //           raised = false;
+    //     } catch (const std::invalid_argument& e) {
+    //         msg = (toSucceed ? "|FAILED|" : "|PASSED|") + msg;
+    //         msg += e.what();
+    //         raised = true;
+    //     }
+    //     std::cout << msg << std::endl;
+    //     return (toSucceed && !raised) || (!toSucceed && raised);
+    // };
+
+    auto validate = [this](const std::string& strVal, bool toSucceed, auto conv, auto comp) {
+        bool raised;
+        std::string msg = strVal + " -> ";
+        try { auto val = conv(strVal);
+              msg += std::to_string(val);
+              msg = toSucceed ? "|PASSED|  " + msg : "|FAILED|  " + msg;
+              raised = false;
+        } catch (const std::invalid_argument& e) {
+            msg = toSucceed ? "|FAILED|  " + msg : "|PASSED|  " + msg;
+            msg += e.what();
+            raised = true;
+        } bool pass = (toSucceed && !raised) || (!toSucceed && raised);
+        if (pass) std::cout << msg << std::endl;
+        return pass;
+    };
+    auto validateUSInt = [this, validate](const std::string& strVal, bool toSucceed) {
+        return validate(
+            strVal, toSucceed,
+            [this](const std::string& str){ return strToUSInt(str); },
+            [](unsigned int val, const std::string& str){ return val - std::stoul(str); }
+        );
+    };
+    auto validateFloat = [this, validate](const std::string& strVal, bool toSucceed) {
+        return validate(
+            strVal, toSucceed,
+            [this](const std::string& str) { return strToFloat(str); },
+            [](float val, const std::string& str) { return val - std::stof(str); }
+        );
+    };
+
+    std::vector<std::string> usIntValids;
+    std::vector<std::string> usIntInvalids;
+    std::vector<std::string> usIntFails;
+
+    std::vector<std::string> floatValids;
+    std::vector<std::string> floatInvalids;
+    std::vector<std::string> floatFails;
+
+    std::cout << "Conversion Tests" << std::endl;
+
+    for (int i = 1; i <= 10; i++) {
+        for (int j = 1; j <= 10; j++) {
+            for (int k = 1; k <= 10; k++) {
+                std::string str = std::to_string(i*i*j*j*k*k);
+                std::string rev = str;
+                std::reverse(rev.begin(), rev.end());
+                floatValids.emplace_back(str+'.'+rev); std::cout << floatValids.back() << std::endl;
+                usIntValids.emplace_back(str);
+                usIntValids.emplace_back(rev);
+                floatValids.emplace_back(str+'.'+str); std::cout << floatValids.back() << std::endl;
+                floatValids.emplace_back(rev+'.'+rev); std::cout << floatValids.back() << std::endl;
+                floatValids.emplace_back(rev+'.'+rev); std::cout << floatValids.back() << std::endl;
+            }
+        }
+    }
+    
+    for (std::string& str : floatValids) {
+        std::cout << "| strToFloat(" << str << ") ";
+        if (validateFloat(str, true)) continue;
+        floatFails.emplace_back(str);
+    } for (std::string& str : usIntValids) {
+        std::cout << "| strToUSInt(" << str << ") ";
+        if (validateUSInt(str, true)) continue;
+        usIntFails.emplace_back(str);
+    }
+
+    for (std::string& fail : usIntFails) {
+        validateUSInt(fail, true);
+    } for (std::string& fail : floatFails) {
+        validateFloat(fail, true);
+    }
+}

@@ -35,7 +35,10 @@ class App
     Texture2D particleTexture;
 
     void loadSettings();
+    int strToUSInt(const std::string& s) const;
+    float strToFloat(const std::string& s) const;
 
+    void testStringConversions() const;
 };
 
 
