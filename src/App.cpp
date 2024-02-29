@@ -101,81 +101,75 @@ void App::loadSettings()
     auto cleanSpaces = [](std::string& s) { s.erase(std::remove_if(s.begin(), s.end(), [](char c) { return std::isspace(c); }), s.end()); };
     auto cleanCommas = [](std::string& s) { s.erase(std::remove_if(s.begin(), s.end(), [](char c) { return c == ','; }), s.end()); };
 
-    auto dataCount = [](const std::string& s) {
-        if (s.empty() || (s.size() == 1 && s[0] == ',')) return 0;
-        int count = 1;
-        for (char c : s) if (c == ',') count++;
-        return count;
+    auto valf = [cleanSpaces](std::istream& ss, std::string& str, float& f) {
+        if (!std::getline(ss, str, ',')) return false;
+        cleanSpaces(str);
+        try { f = std::stof(str); }
+        catch (const std::invalid_argument& e) { return false; }
+        return true;
+    }; auto vali = [cleanSpaces](std::istream& ss, std::string& str, int& i) {
+        if (!std::getline(ss, str, ',')) return false;
+        cleanSpaces(str);
+        try { i = std::stoi(str); }
+        catch (const std::invalid_argument& e) { return false; }
+        return true;
+    };
+    auto linef = [cleanSpaces, cleanCommas, valf](std::ifstream& file, std::string& line, float& f) {
+        if (!std::getline(file, line)) return false;
+        cleanSpaces(line), cleanCommas(line);
+        try { f = std::stof(line); }
+        catch (const std::invalid_argument& e) { return false; }
+        return true;
+    }; auto linei = [cleanSpaces, cleanCommas](std::ifstream& file, std::string& line, int& i) {
+        if (!std::getline(file, line)) return false;
+        cleanSpaces(line), cleanCommas(line);
+        try { i = std::stoi(line); }
+        catch (const std::invalid_argument& e) { return false; }
+        return true;
+    };
+    auto matf = [valf](std::ifstream& file, std::string& line, std::vector<std::vector<float>>& mat) {
+        for (auto& row : mat) {
+            std::getline(file, line);
+            std::stringstream ss(line);
+            std::string str;
+            for (float& f : row) valf(ss, str, f);
+        }
+    };
+    auto pline = [vali, valf](std::ifstream& file, std::string& line, std::vector<Particle>& particles) {
+        if(!std::getline(file, line)) return false;
+        std::stringstream ss(line);
+        std::string str;
+        Particle p;
+        if (!vali(ss, str, p.type) || !valf(ss, str, p.pos.x) || !valf(ss, str, p.pos.y) ||
+            (valf(ss, str, p.vel.x) && !valf(ss, str, p.vel.y)))
+            return false;
+        return particles.emplace_back(p), true;
     };
     
     std::string path = "settings/default/";
-    std::vector<std::string> filenames;
-    for (const auto& entry : fs::directory_iterator(path))
-        filenames.push_back(entry.path().filename().string());
-
-    // load default settings
-    for (const auto& filename : filenames)
-    {
-        std::ifstream file(path + filename);
+    for (const auto& entry : fs::directory_iterator(path)) {
+        std::string filename = entry.path().filename().string();
+        std::ifstream file(path + entry.path().filename().string());
         std::string line;
-        
-        defaultSettings.emplace_back(ParticleLife::Settings());
-        ParticleLife::Settings& set = defaultSettings.back();
+        ParticleLife::Settings set;
 
         set.name = filename.substr(0, filename.length() - 4);
 
-        std::getline(file, line), cleanSpaces(line), cleanCommas(line); // types
-        set.types = std::stoi(line);
-        std::getline(file, line), cleanSpaces(line), cleanCommas(line); // size
-        set.size = std::stoi(line);
-        std::getline(file, line), cleanSpaces(line), cleanCommas(line); // count
-        set.count = std::stoi(line);
-        std::getline(file, line), cleanSpaces(line), cleanCommas(line); // innerRadius
-        set.innerRadius = std::stof(line);
-        std::getline(file, line), cleanSpaces(line), cleanCommas(line); // resistance
-        set.resistance = std::stof(line);
-        std::getline(file, line), cleanSpaces(line), cleanCommas(line); // step
-        set.step = std::stof(line);
+        linei(file, line, set.types);
+        linei(file, line, set.size);
+        linei(file, line, set.count);
+        linef(file, line, set.innerRadius);
+        linef(file, line, set.resistance);
+        linef(file, line, set.step);
 
-        // attractions
-        for (int i = 0; i < set.types; i++) {
-            set.attractions.emplace_back(std::vector<float>());
-            std::getline(file, line);
-            cleanSpaces(line);
-            std::stringstream ss(line);
-            std::string str;
-            for (int j = 0; j < set.types; j++)
-                std::getline(ss, str, ','),
-                set.attractions[i].emplace_back(std::stof(str));
-        }
+        set.attractions = std::vector<std::vector<float>>(set.types, std::vector<float>(set.types, 0));
+        matf(file, line, set.attractions);
 
-        // particles
-        set.particles = std::vector<Particle>(0);
-        for (int i = 0; i < set.count; i++) {
-            std::getline(file, line), cleanSpaces(line);
-            if (dataCount(line) == 0) break;
-            std::stringstream ss(line);
-            std::string str;
-            int t;
-            float x, y;
-            std::getline(ss, str, ','), cleanSpaces(str);
-            t = std::stoi(str);
-            std::getline(ss, str, ','), cleanSpaces(str);
-            x = std::stof(str);
-            std::getline(ss, str, ','), cleanSpaces(str);
-            y = std::stof(str);
-            float vx = 0, vy = 0;
-            if (std::getline(ss, str, ',')) { cleanSpaces(str);
-                vx = std::stof(str);
-                std::getline(ss, str, ','), cleanSpaces(str);
-                vy = std::stof(str);
-            }
-            set.particles.emplace_back(Particle(t, Vector2 { x, y }, Vector2 { vx, vy }));
-        }
+        for (int i = 0; i < set.count && pline(file, line, set.particles); i++);
 
-        // seed
-        std::getline(file, line), cleanSpaces(line), cleanCommas(line); // seed
-        set.seed = std::stoi(line);
+        linei(file, line, set.seed);
+
+        defaultSettings.push_back(set);
         
         file.close();
     }
