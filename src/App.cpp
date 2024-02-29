@@ -127,23 +127,21 @@ void App::loadSettings()
         catch (const std::invalid_argument& e) { return false; }
         return true;
     };
-    auto matf = [valf](std::ifstream& file, std::string& line, std::vector<std::vector<float>>& mat) {
-        for (auto& row : mat) {
-            std::getline(file, line);
-            std::stringstream ss(line);
-            std::string str;
-            for (float& f : row) valf(ss, str, f);
-        }
+    
+    auto invalidArg = [](const std::string& filename, const std::string& value, const std::string type, const std::string dataPoint, int row, int col) {
+        std::string msg = filename + ":" + std::to_string(row) + ':' + std::to_string(col) + " " +
+        msg += "Invalid " + type + " \"" + value + "\" for " + dataPoint + " data point";
+        throw std::invalid_argument(msg);
     };
-    auto pline = [vali, valf](std::ifstream& file, std::string& line, std::vector<Particle>& particles) {
-        if(!std::getline(file, line)) return false;
-        std::stringstream ss(line);
-        std::string str;
-        Particle p;
-        if (!vali(ss, str, p.type) || !valf(ss, str, p.pos.x) || !valf(ss, str, p.pos.y) ||
-            (valf(ss, str, p.vel.x) && !valf(ss, str, p.vel.y)))
-            return false;
-        return particles.emplace_back(p), true;
+    auto invalidArgCount = [](const std::string& filename, const std::string dataPoint, std::vector<int> argsNeeded, int argCount, int row, int col) {
+        std::string msg = filename + ":" + std::to_string(row) + ':' + std::to_string(col) + " " +
+        msg += "Invalid argument count for " + dataPoint + " " +
+               "expected " + std::to_string(argsNeeded[0]);
+        if (argsNeeded.size() > 1)
+            for (int i = 1; i < argsNeeded.size(); i++)
+                msg += " or " + std::to_string(argsNeeded[i]);
+        msg += " but got " + std::to_string(argCount);
+        throw std::invalid_argument(msg);
     };
     
     std::string path = "settings/default/";
@@ -152,26 +150,65 @@ void App::loadSettings()
         std::ifstream file(path + entry.path().filename().string());
         std::string line;
         ParticleLife::Settings set;
+        int row = 1, col = 1;
+        int i, j;
 
         set.name = filename.substr(0, filename.length() - 4);
+        row++;
 
-        linei(file, line, set.types);
-        linei(file, line, set.size);
-        linei(file, line, set.count);
-        linef(file, line, set.innerRadius);
-        linef(file, line, set.resistance);
-        linef(file, line, set.step);
+        if (!linei(file, line, set.types));
+        row++;
+        if (!linei(file, line, set.size));
+        row++;
+        if (!linei(file, line, set.count));
+        row++;
+        if (!linef(file, line, set.innerRadius));
+        row++;
+        if (!linef(file, line, set.resistance));
+        row++;
+        if (!linef(file, line, set.step));
+        row++;
 
+        // matf(file, line, set.attractions);
         set.attractions = std::vector<std::vector<float>>(set.types, std::vector<float>(set.types, 0));
-        matf(file, line, set.attractions);
-
-        for (int i = 0; i < set.count && pline(file, line, set.particles); i++);
+        for (i = 0; i < set.types; i++) {
+            if (!std::getline(file, line)) break;
+            std::stringstream ss(line);
+            std::string str;
+            std::cout << line << std::endl;
+            for (j = 0; j < set.types; j++)
+                if (!valf(ss, str, set.attractions[i][j])) break;
+            if (j < set.types) break;
+        } row += i+1; col += j;
+        // query i and j for validation
 
         linei(file, line, set.seed);
+        row++;
 
-        defaultSettings.push_back(set);
-        
+        if (set.seed == -1) {
+            for (i = 0; i < set.count; i++, j = 0) {
+                if(!std::getline(file, line)) break;
+                std::stringstream ss(line);
+                std::string str;
+                Particle p;
+                if (!vali(ss, str, p.type)) break;
+                j++; 
+                if (!valf(ss, str, p.pos.x)) break;
+                j++;
+                if (!valf(ss, str, p.pos.y)) break;
+                j++;
+                if (valf(ss, str, p.vel.x)) {
+                    j++;
+                    if (!valf(ss, str, p.vel.y)) break;
+                    j++;
+                }
+                set.particles.emplace_back(p);
+            }
+        } row += i+1; col += j+1;
+        // queury i and j for validation
+
         file.close();
+        defaultSettings.push_back(set);
     }
 }
 

@@ -238,8 +238,13 @@ void ParticleLife::printCellAtPos(Vector2 pos)
 
 std::ostream& operator << (std::ostream& os, const ParticleLife& particleLife)
 {
+    std::string initiation;
+    if (particleLife.seed == -1) initiation = "preloaded";
+    else if (particleLife.seed == 0) initiation = "pseudo random";
+    else initiation = "seeded random";
+    
     os << particleLife.name << " : " <<
-              (particleLife.seed==0 ? "preloaded" : "random") << std::endl <<
+          initiation << std::endl <<
           "| types : " << particleLife.types << std::endl <<
           "| size : " << particleLife.size << std::endl <<
           "| count : " << particleLife.count << std::endl <<

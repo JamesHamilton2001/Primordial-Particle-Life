@@ -23,9 +23,9 @@ class ParticleLife
         float innerRadius;
         float resistance;
         float step;
+        int seed;
         std::vector<std::vector<float>> attractions;
         std::vector<Particle> particles;
-        int seed;
     };
 
     ParticleLife(Settings& settings);
