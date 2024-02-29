@@ -8,6 +8,9 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <fstream>
+#include <filesystem>
+namespace fs = std::filesystem;
 
 
 App::App(int width, int height, int fpsTarget) :
@@ -93,39 +96,51 @@ void App::draw(ParticleLife& particleLife) const
 
 void App::loadSettings()
 {
-    defaultSettings.emplace_back(ParticleLife::Settings
-    {
-        "debug",
-        5,
-        24,
-        3072,
-        0.55f,
-        0.001f,
-        0.00002f,
-        { {  0.02,  0.15,  0.15,  0.20, -0.10 },
-          { -0.03,  0.07,  0.10, -0.05,  0.06 },
-          {  0.05,  0.10, -0.02, -0.05,  0.05 },
-          {  0.10, -0.05,  0.04,  0.05,  0.10 },
-          { -0.05, -0.10,  0.05,  0.10, -0.05 } },
-        std::vector<Vector2>(0),
-        std::vector<Vector2>(0),
-        1234
-    });
-    defaultSettings.emplace_back(ParticleLife::Settings
-    {
-        "big_boy",
-        3,
-        4,
-        15,
-        0.5f,
-        0.001f,
-        0.001f,
-        { {  0.005,  0.002,  -0.002 },
-          { -0.002,  0.005,   0.002 },
-          {  0.002, -0.002,   0.005 } },
-        std::vector<Vector2>(0),
-        std::vector<Vector2>(0),
-        1234
-    });
+    // get all filenames for default settings
+    const std::string path = "settings/default";
+    std::vector<std::string> filenames;
+    for (const auto& entry : fs::directory_iterator(path))
+        filenames.push_back(entry.path().filename().string());
+
+    for (const auto& filename : filenames) {
+        defaultSettings.emplace_back(ParticleLife::Settings());
+        ParticleLife::Settings& s = defaultSettings.back();
+        // do some stuff
+    }
+
+    // defaultSettings.emplace_back(ParticleLife::Settings
+    // {
+    //     "debug",
+    //     5,
+    //     24,
+    //     3072,
+    //     0.55f,
+    //     0.001f,
+    //     0.00002f,
+    //     { {  0.02,  0.15,  0.15,  0.20, -0.10 },
+    //       { -0.03,  0.07,  0.10, -0.05,  0.06 },
+    //       {  0.05,  0.10, -0.02, -0.05,  0.05 },
+    //       {  0.10, -0.05,  0.04,  0.05,  0.10 },
+    //       { -0.05, -0.10,  0.05,  0.10, -0.05 } },
+    //     std::vector<Vector2>(0),
+    //     std::vector<Vector2>(0),
+    //     1234
+    // });
+    // defaultSettings.emplace_back(ParticleLife::Settings
+    // {
+    //     "big_boy",
+    //     3,
+    //     4,
+    //     15,
+    //     0.5f,
+    //     0.001f,
+    //     0.001f,
+    //     { {  0.005,  0.002,  -0.002 },
+    //       { -0.002,  0.005,   0.002 },
+    //       {  0.002, -0.002,   0.005 } },
+    //     std::vector<Vector2>(0),
+    //     std::vector<Vector2>(0),
+    //     1234
+    // });
 }
 
