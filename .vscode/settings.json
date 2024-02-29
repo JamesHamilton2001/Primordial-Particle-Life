@@ -64,6 +64,8 @@
         "thread": "cpp",
         "iomanip": "cpp",
         "sstream": "cpp",
-        "*.m": "cpp"
+        "*.m": "cpp",
+        "codecvt": "cpp",
+        "fstream": "cpp"
     }
 }

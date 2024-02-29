@@ -24,8 +24,7 @@ class ParticleLife
         float resistance;
         float step;
         std::vector<std::vector<float>> attractions;
-        std::vector<Vector2> positions;
-        std::vector<Vector2> velocities;
+        std::vector<Particle> particles;
         int seed;
     };
 
@@ -46,6 +45,8 @@ class ParticleLife
     void drawSoftBorder() const;
 
     void randomisePositions();
+
+    std::vector<int> countTypes() const;
 
     void printCell(int row, int col);
     void printCellAtPos(Vector2 pos);

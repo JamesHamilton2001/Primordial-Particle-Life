@@ -23,12 +23,12 @@ ParticleLife::ParticleLife(Settings& settings) :
 {
     posDistr = std::uniform_real_distribution<float>(0.0f, bounds);
     gen.seed(settings.seed);
-
     particles.resize(count);
-    randomisePositions();
 
-    for (Particle const& p : particles)
-        std::cout << p.pos.x << ", " << p.pos.y << std::endl;
+    if (!settings.particles.empty())
+        particles = settings.particles;
+    else
+        randomisePositions();
 }
 
 ParticleLife::~ParticleLife()
@@ -205,6 +205,14 @@ void ParticleLife::randomisePositions()
     std::cout << "finsihsed randomising" << std::endl;
 }
 
+std::vector<int> ParticleLife::countTypes() const
+{
+    std::vector<int> typeCounts(types, 0);
+    for (const Particle& p : particles)
+        typeCounts[p.type]++;
+    return typeCounts;
+}
+
 void ParticleLife::printCell(int row, int col)
 {
     // get the cell and the type counts
@@ -230,23 +238,32 @@ void ParticleLife::printCellAtPos(Vector2 pos)
 
 std::ostream& operator << (std::ostream& os, const ParticleLife& particleLife)
 {
-    os << particleLife.name << std::endl <<
-          "| types = " << particleLife.types << std::endl <<
-          "| size = " << particleLife.size << std::endl <<
-          "| count = " << particleLife.count << std::endl <<
-          "| innerRadius = " << particleLife.innerRadius << std::endl <<
-          "| resistance = " << particleLife.resistance << std::endl <<
-          "| step = " << particleLife.step << std::endl <<
-          "| attractions = " << std::endl;
+    os << particleLife.name << " : " <<
+              (particleLife.seed==0 ? "preloaded" : "random") << std::endl <<
+          "| types : " << particleLife.types << std::endl <<
+          "| size : " << particleLife.size << std::endl <<
+          "| count : " << particleLife.count << std::endl <<
+          "| innerRadius : " << particleLife.innerRadius << std::endl <<
+          "| resistance : " << particleLife.resistance << std::endl <<
+          "| step : " << particleLife.step << std::endl;
     
+    os << "| attractions : " << std::endl;
     for (int i = 0; i < particleLife.types; i++) {
-        os << "|   " << particleLife.attractions[i][0];
+        os << "| | " << particleLife.attractions[i][0];
         for (int j = 1; j < particleLife.types; j++)
             os << ", " << particleLife.attractions[i][j];
         os << std::endl;
     }
 
-    os << "| initiation = " << (particleLife.seed==0 ? "preloaded" : "random") << std::endl;
+    std::vector<int> typeCounts = particleLife.countTypes();
+    os << "| particles : " << particleLife.particles.size() << "(" << typeCounts[0];
+    for (int i = 1; i < particleLife.types; i++)
+        os << ":" << typeCounts[i];
+    os << ")" << std::endl;
+    if (particleLife.particles.size() < 128)
+        for (const Particle& p : particleLife.particles)
+            os << "| | " << p << std::endl;
+    else os << "| | lots..." << std::endl;
 
     return os;
 }

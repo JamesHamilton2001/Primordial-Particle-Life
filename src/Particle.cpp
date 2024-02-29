@@ -32,6 +32,5 @@ Particle::Particle(const Particle& p) :
 
 std::ostream& operator<<(std::ostream& os, const Particle& p)
 {
-    os << " "   << p.type << " : " << p.pos.x << ", " << p.pos.y;
-    return os;
+    return os << p.type <<" : "<< p.pos.x <<", "<< p.pos.y <<" : "<< p.vel.x <<", "<< p.vel.y;
 }
