@@ -285,41 +285,6 @@ float App::strToFloat(const std::string& s) const
 
 void App::testStringConversions() const
 {
-    // auto validateUint = [this](const std::string& strVal, bool toSucceed) {
-    //     bool raised;
-    //     std::string msg = strVal + " -> ";
-    //     try { unsigned int val = strToUSInt(strVal);
-    //           msg += std::to_string(val);
-    //           int dif = static_cast<int>(val) - static_cast<int>(val);
-    //           if (dif != 0) msg += "  :  DIFFERENCE = " + std::to_string(dif);
-    //           msg = toSucceed ? "|PASSED|  " + msg : "|FAILED|  " + msg;
-    //           raised = false;
-    //     } catch (const std::invalid_argument& e) {
-    //         msg = toSucceed ? "|FAILED|  " + msg : "|PASSED|  " + msg;
-    //         msg += e.what();
-    //         raised = true;
-    //     }
-    //     std::cout << msg << std::endl;
-    //     return (toSucceed && !raised) || (!toSucceed && raised);
-    // };
-    // auto validateFloat = [this](const std::string& strVal, bool toSucceed) {
-    //     bool raised;
-    //     std::string msg = strVal + " -> ";
-    //     try { float val = strToFloat(strVal);
-    //           msg += std::to_string(val);
-    //           float dif = val - std::stof(strVal);
-    //           msg += "  :  dif = " + std::to_string(dif);
-    //           msg = (toSucceed ? "|PASSED|" : "|FAILED|") + msg;
-    //           raised = false;
-    //     } catch (const std::invalid_argument& e) {
-    //         msg = (toSucceed ? "|FAILED|" : "|PASSED|") + msg;
-    //         msg += e.what();
-    //         raised = true;
-    //     }
-    //     std::cout << msg << std::endl;
-    //     return (toSucceed && !raised) || (!toSucceed && raised);
-    // };
-
     auto validate = [this](const std::string& strVal, bool toSucceed, auto conv, auto comp) {
         bool raised;
         std::string msg = strVal + " -> ";
@@ -386,9 +351,20 @@ void App::testStringConversions() const
         usIntFails.emplace_back(str);
     }
 
+    
     for (std::string& fail : usIntFails) {
+        std::cout << 
         validateUSInt(fail, true);
     } for (std::string& fail : floatFails) {
         validateFloat(fail, true);
     }
+
+    std::cout << "Conversion Test Results" << std::endl << std::endl;
+
+    std::cout << "|strToFloat(const std::string& s) -> float           " <<
+                 floatValids.size() - floatFails.size() << " / " << floatValids.size() << std::endl;
+
+    std::cout << "|strToUSInt(const std::string& s) -> unsigned int    " <<
+                 usIntValids.size() - usIntFails.size() << " / " << usIntValids.size() << std::endl << std::endl;
+                 
 }
