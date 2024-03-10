@@ -6,6 +6,12 @@
 #include <cmath>
 #include <random>
 #include <iostream>
+#include <string>
+#include <fstream>
+#include <sstream>
+#include <filesystem>
+#include <algorithm>
+namespace fs = std::filesystem;
 
 
 ParticleLife::ParticleLife(Settings& settings) :
@@ -202,7 +208,6 @@ void ParticleLife::randomisePositions()
         p.pos = Vector2 { posDistr(gen), posDistr(gen) };
         p.vel = Vector2 { 0.0f, 0.0f };
     }
-    std::cout << "finsihsed randomising" << std::endl;
 }
 
 std::vector<int> ParticleLife::countTypes() const
@@ -300,3 +305,109 @@ void ParticleLife::debugGrid()
 {
 
 }
+
+ParticleLife::Settings::Settings(const std::filesystem::directory_entry& dirEntry)
+{
+    std::ifstream file(dirEntry.path());
+    std::string line;
+    int row = 1;
+
+    const auto clean = [](std::string& s) {
+        s.erase(std::remove_if(s.begin(), s.end(), [](char c) { return std::isspace(c); }), s.end());
+    };
+    const auto throwBadRead = [&row](const std::string& dataPoint) {
+        throw std::invalid_argument("line:" + std::to_string(row) + " Unreadable " + dataPoint + " data");
+    };
+
+    // get name from filename
+    std::string fileName = dirEntry.path().filename().string();
+    name = fileName.substr(0, fileName.length() - 4);
+
+    // get types
+    if (!std::getline(file, line)) throwBadRead("types");
+    clean(line);
+    types = std::stoi(line);
+    row++;
+
+    // get size
+    if (!std::getline(file, line)) throwBadRead("size");
+    clean(line);
+    size = std::stoi(line);
+    row++;
+
+    //get count
+    if (!std::getline(file, line)) throwBadRead("count");
+    clean(line);
+    count = std::stoi(line);
+    row++;
+
+    // get innerRadius
+    if (!std::getline(file, line)) throwBadRead("innerRadius");
+    clean(line);
+    innerRadius = std::stof(line);
+    row++;
+
+    // get resistance
+    if (!std::getline(file, line)) throwBadRead("resistance");
+    clean(line);
+    resistance = std::stof(line);
+    row++;
+
+    // get step
+    if (!std::getline(file, line)) throwBadRead("step");
+    clean(line);
+    step = std::stof(line);
+    row++;
+
+    // get attractions
+    attractions = std::vector<std::vector<float>>(types, std::vector<float>(types, 0));
+    for (int i = 0; i < types; i++) {
+        if (!std::getline(file, line)) throwBadRead("attractions");
+        clean(line);
+        std::stringstream ss(line);
+        std::string str;
+        for (int j = 0; j < types; j++) {
+            if (!std::getline(ss, str, ',')) throwBadRead("attractions");
+            clean(str);
+            attractions[i][j] = std::stof(str);
+        }
+        row++;
+    }
+
+    // get seed
+    if (!std::getline(file, line)) throwBadRead("seed");
+    clean(line);
+    seed = std::stoi(line);
+    row++;
+
+    // if seed is -1 then get particles
+    if (seed == -1) {
+        for (int i = 0; i < count; i++) {
+            if (!std::getline(file, line)) throwBadRead("particle");
+            clean(line);
+            std::stringstream ss(line);
+            std::string str;
+            Particle p;
+            if (!std::getline(ss, str, ',')) throwBadRead("particle type");
+            clean(str);
+            p.type = std::stoi(str);
+            if (!std::getline(ss, str, ',')) throwBadRead("particle pos.x");
+            clean(str);
+            p.pos.x = std::stof(str);
+            if (!std::getline(ss, str, ',')) throwBadRead("particle pos.y");
+            clean(str);
+            p.pos.y = std::stof(str);
+            if (!std::getline(ss, str, ',')) throwBadRead("particle vel.x");
+            clean(str);
+            p.vel.x = std::stof(str);
+            if (!std::getline(ss, str, ',')) throwBadRead("particle vel.y");
+            clean(str);
+            p.vel.y = std::stof(str);
+            particles.emplace_back(p);
+            row++;
+        }
+    }
+
+    file.close();
+}
+

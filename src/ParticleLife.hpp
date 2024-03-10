@@ -5,9 +5,12 @@
 #include "SpatialHash.hpp"
 
 #include <raylib.h>
-#include <string>
+#include <rlgl.h>
 #include <vector>
 #include <random>
+#include <string>
+#include <filesystem>
+namespace fs = std::filesystem;
 
 
 class ParticleLife
@@ -26,6 +29,9 @@ class ParticleLife
         std::vector<std::vector<float>> attractions;
         int seed;
         std::vector<Particle> particles;
+        
+        Settings() = default;
+        Settings(const std::filesystem::directory_entry& dirEntry);
     };
 
     ParticleLife(Settings& settings);
