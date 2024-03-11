@@ -11,7 +11,7 @@ int main()
 
     App app(width, height, fpsTarget);
 
-    ParticleLife particleLife(app.defaultSettings[1]);
+    ParticleLife particleLife(app.defaultSettings[2]);
 
     std::cout << particleLife << std::endl;
 

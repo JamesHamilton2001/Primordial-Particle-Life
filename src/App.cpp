@@ -70,8 +70,13 @@ void App::update(ParticleLife& particleLife)
     if (IsKeyPressed(KEY_G))
         drawGrid = !drawGrid;
 
+    // toggle ghosts on PRESS_C
     if (IsKeyPressed(KEY_C))
         drawGhosts = !drawGhosts;
+    
+    // save settings to temp conifg on PRESS_ENTER
+    if (paused && IsKeyPressed(KEY_ENTER))
+        particleLife.saveConfig();
     
     // update simulation if not paused
     if (!paused)

@@ -46,6 +46,8 @@ class ParticleLife
     void update();
     void draw(unsigned int pTexID) const;
 
+    void saveConfig() const;
+
     void drawGrid() const   { spatialHash.drawGrid(); }
     void drawGhosts(unsigned int pTexID) const { spatialHash.drawGhosts(pTexID); }
     void drawSoftBorder() const;

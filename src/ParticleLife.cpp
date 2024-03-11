@@ -201,6 +201,39 @@ void ParticleLife::drawSoftBorder() const
 }
 
 
+void ParticleLife::saveConfig() const
+{
+    // open and clear temp config file
+    std::ofstream file("settings/custom/temp.txt", std::ofstream::out);
+    if (!file.is_open()) {
+        throw std::runtime_error("Failed to open temp config file");
+    }
+
+    // write settings to file
+
+    file << std::to_string(types) << '\n';       // types
+    file << std::to_string(size) << '\n';        // size
+    file << std::to_string(count) << '\n';       // count
+    file << std::to_string(innerRadius) << '\n'; // innerRadius
+    file << std::to_string(resistance) << '\n';  // resistance
+    file << std::to_string(step) << '\n';        // step
+
+    for (int i = 0; i < types; i++) {           // attractions
+        file << std::to_string(attractions[i][0]);
+        for (int j = 1; j < types; j++)
+            file << ',' << std::to_string(attractions[i][j]);
+        file << '\n';
+    }
+
+    file << "-1" << '\n';                       // seed (-1 for preloaded)
+
+    for (const Particle& p : particles)         // particles
+        file << std::to_string(p.type)  << ',' <<
+                std::to_string(p.pos.x) << ',' << std::to_string(p.pos.y) << ',' <<
+                std::to_string(p.vel.x) << ',' << std::to_string(p.vel.y) << '\n';
+}
+
+
 void ParticleLife::randomisePositions()
 {
     for (Particle& p : particles) {
