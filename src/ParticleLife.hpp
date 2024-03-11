@@ -28,6 +28,7 @@ class ParticleLife
         float step;
         std::vector<std::vector<float>> attractions;
         int seed;
+        std::vector<int> typeRatio;
         std::vector<Particle> particles;
         
         Settings() = default;

@@ -17,7 +17,8 @@ int main()
 
     while (!WindowShouldClose())
         app.update(particleLife),
-        app.draw(particleLife);
+        app.draw(particleLife),
+        app.gui(particleLife);
 
     CloseWindow();
 

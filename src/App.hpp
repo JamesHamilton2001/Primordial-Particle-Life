@@ -18,6 +18,7 @@ class App
 
     void update(ParticleLife& particleLife);
     void draw(ParticleLife& particleLife) const;
+    void gui(ParticleLife& particleLife);
     
     std::vector<ParticleLife::Settings> defaultSettings;
 

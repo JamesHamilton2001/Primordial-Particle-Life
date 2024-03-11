@@ -31,10 +31,26 @@ ParticleLife::ParticleLife(Settings& settings) :
     gen.seed(settings.seed);
     particles.resize(count);
 
-    if (!settings.particles.empty())
+    // load particles if no seed
+    if (seed == -1)
         particles = settings.particles;
-    else
-        randomisePositions();
+
+    // generate particles to given ratio is seed given
+    else {
+        for (int ct = 0; ct < count;) {
+            for (int i = 0; i < types; i++) {
+                for (int j = 0; j < settings.typeRatio[i]; j++) {
+                    if (ct < count) {
+                        particles[ct].type = i;
+                        particles[ct].pos = Vector2 { posDistr(gen), posDistr(gen) };
+                        particles[ct].vel = Vector2 { 0.0f, 0.0f };
+                        ct++;
+                    }
+                    else break;
+                }
+            }
+        }
+    }
 }
 
 ParticleLife::~ParticleLife()
@@ -231,6 +247,8 @@ void ParticleLife::saveConfig() const
         file << std::to_string(p.type)  << ',' <<
                 std::to_string(p.pos.x) << ',' << std::to_string(p.pos.y) << ',' <<
                 std::to_string(p.vel.x) << ',' << std::to_string(p.vel.y) << '\n';
+    
+    file.close();
 }
 
 
@@ -438,6 +456,19 @@ ParticleLife::Settings::Settings(const std::filesystem::directory_entry& dirEntr
             p.vel.y = std::stof(str);
             particles.emplace_back(p);
             row++;
+        }
+    }
+    // otherwise get particle type ratio
+    else { 
+        typeRatio = std::vector<int>(types, 0);
+        if (!std::getline(file, line)) throwBadRead("typeRatio");
+        clean(line);
+        std::stringstream ss(line);
+        std::string str;
+        for (int i = 0; i < types; i++) {
+            if (!std::getline(ss, str, ',')) throwBadRead("typeRatio");
+            clean(str);
+            typeRatio[i] = std::stoi(str);
         }
     }
 

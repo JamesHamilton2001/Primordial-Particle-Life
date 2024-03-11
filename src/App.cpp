@@ -14,6 +14,9 @@
 #include <algorithm>
 namespace fs = std::filesystem;
 
+#define RAYGUI_IMPLEMENTATION
+#include "raygui.h"
+
 
 App::App(int width, int height, int fpsTarget) :
     width(width),
@@ -98,8 +101,14 @@ void App::draw(ParticleLife& particleLife) const
 
         EndMode2D();
 
-        DrawFPS(10, 10);
+        DrawFPS(GetScreenWidth()-100, 10);
     EndDrawing();
+}
+
+
+void App::gui(ParticleLife& particleLife)
+{
+    GuiDrawText("GUI implementation...", Rectangle { 10, 10, 100, 20 }, TEXT_ALIGN_LEFT, RAYWHITE);
 }
 
 
