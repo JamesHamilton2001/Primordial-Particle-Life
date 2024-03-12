@@ -20,15 +20,34 @@ class Launcher
 
  private:
 
-    bool launch;
-    bool customSetting;
+    struct Widget {
+        Rectangle rect;
+        std::string text;
+    };
 
-    std::string defaultDropDownText;
-    bool defaultDropDownActive;
-    int defaultDropDownActiveIndex;
-    bool defaultDropDownEditMode;
+    struct Button : public Widget { bool active; };
+    struct Toggle : public Button {};
 
+    struct DropDownBox : public Button {
+        int index;      
+    };
+
+    ParticleLife::Settings& choice;
+    ParticleLife::Settings customSetting;
     std::vector<ParticleLife::Settings> defaultSettings;
+
+    Button btnExecute;
+    Toggle tglCustom;
+    DropDownBox drdDefefaults;
+
+    
+
+
+    void button(Button& btn);
+    void toggle(Toggle& tgl);
+    void dropDownBox(DropDownBox& drd);
+
+    void scaleWidgets();
 
 };
 

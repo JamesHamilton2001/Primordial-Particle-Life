@@ -12,8 +12,7 @@ namespace fs = std::filesystem;
 
 
 Launcher::Launcher() :
-        launch(false),
-        customSetting(false)
+    choice(customSetting)
 {
     for (const auto& dirEntry : fs::directory_iterator("settings/default/")) {
         try {
@@ -23,17 +22,72 @@ Launcher::Launcher() :
         }
     }
 
-    defaultDropDownText = defaultSettings[0].name;
+    std::string str;
+    const Rectangle r = { 0, 0, 0, 0, };
+
+    // TOP ROW
+    btnExecute = Button { r, "Execute", false };
+
+    str = defaultSettings[0].name;
     for (int i = 1; i < defaultSettings.size(); i++)
-        defaultDropDownText += ';' + defaultSettings[i].name;
+        str += ";" + defaultSettings[i].name;
+    drdDefefaults = DropDownBox { r, str.c_str(), 0, false };
 
-    defaultDropDownActive = false;
-    defaultDropDownActiveIndex = 0;
-    defaultDropDownEditMode = false;
+    // BOTTOM ROW
+    tglCustom = Toggle { r, "Customise", false };
 
+    scaleWidgets();
 }
 
 bool Launcher::run()
+{
+    BeginDrawing();
+    ClearBackground(LIGHTGRAY);
+
+        // TOP ROW
+        toggle(tglCustom);
+        dropDownBox(drdDefefaults);
+
+        // BOTTOM ROW
+        button(btnExecute);
+
+    EndDrawing();
+
+    if (btnExecute.active){
+        
+        if (tglCustom.active)
+            choice = customSetting;
+        else
+            choice = defaultSettings[drdDefefaults.index];
+        
+        return false;
+    }
+    else return true;
+
+}
+
+ParticleLife::Settings& Launcher::getSettings()
+{
+    return choice;
+}
+
+void Launcher::button(Button& btn)
+{
+    btn.active = GuiButton(btn.rect, btn.text.c_str());
+}
+
+void Launcher::toggle(Toggle& tgl)
+{
+    GuiToggle(tgl.rect, tgl.text.c_str(), &tgl.active);
+}
+
+void Launcher::dropDownBox(DropDownBox& ddb)
+{
+    if (GuiDropdownBox(ddb.rect, ddb.text.c_str(), &ddb.index, ddb.active))
+        ddb.active = !ddb.active;
+}
+
+void Launcher::scaleWidgets()
 {
     const float W = GetScreenWidth();   // screen width
     const float H = GetScreenHeight();  // screen height
@@ -42,33 +96,10 @@ bool Launcher::run()
 
     Rectangle r;
 
-    BeginDrawing();
-    ClearBackground(LIGHTGRAY);
+    // TOP ROW
+    tglCustom.rect = Rectangle { W/4-1.5f*B, M, 3*B, B };
+    drdDefefaults.rect = Rectangle { 3*W/4-1.5f*B, M, 3*B, B };
 
-        // TOP BAR
-
-            // Custom setting: Toggle
-            r = Rectangle { W/4-1.5f*B, M, 3*B, B };
-            GuiToggle(r, "Custom Settings", &customSetting);
-
-            // Default Settings: Dropdown
-            r.x = 3*W/4-1.5f*B;
-            if (GuiDropdownBox(r, defaultDropDownText.c_str(), &defaultDropDownActiveIndex, defaultDropDownEditMode))
-                defaultDropDownEditMode = !defaultDropDownEditMode;
-
-        // BOTTOM BAR
-
-            // Begin Simulation: Button
-            r = Rectangle { W/2-B, H-1.5f*B-M, 3*B, B };
-            launch = GuiButton(r, "Begin Simulation");   // launch button
-
-    EndDrawing();
-
-    return !launch;
+    // BOTTOM ROW
+    btnExecute.rect = Rectangle { W/2-B, H-1.5f*B-M, 3*B, B };
 }
-
-ParticleLife::Settings& Launcher::getSettings()
-{
-    return defaultSettings[1];
-}
-
