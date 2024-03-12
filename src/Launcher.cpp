@@ -23,7 +23,7 @@ Launcher::Launcher() :
     }
 
     customSetting.name = "";
-    customSetting.types = 3;
+    customSetting.types = 9;
     customSetting.size = 0;
     customSetting.count = 0;
     customSetting.innerRadius = 0;
@@ -74,8 +74,6 @@ bool Launcher::run()
     BeginDrawing();
     ClearBackground(BLACK);
 
-        GuiSetStyle(LABEL, TEXT_ALIGNMENT, TEXT_ALIGN_RIGHT);
-
         // TOP ROW
 
             // r = { W/4-1.5f*B, M, 4*B, B };
@@ -85,16 +83,24 @@ bool Launcher::run()
             // dropDownBox(drdDefefaults, r);
 
         // CUSTOM SETTINGS
-            R = Rectangle { M,
-                            M,
-                            7.5*B+2*M,
-                            6*B+7*M     };
+
+            int t = customSetting.types;
+            R = Rectangle {
+                M,
+                M,
+                (7.5f*B + 2*M) + (t*2.5f*B + (t+2)*M),
+                (6*B + 7*M),
+            };
+            h = t*B + M*(t+1) + 2*M + B;
+            if (R.height < h) R.height = h;
+
             GuiGroupBox(R, "Custom Settings");
 
             r = Rectangle { R.x, R.y+M, 5*B, B };
             x = r.x;
             y = r.y;
             w = r.width;
+            GuiSetStyle(LABEL, TEXT_ALIGNMENT, TEXT_ALIGN_RIGHT);
             GuiLabel(r, "Types:");        r.y += r.height + M;
             GuiLabel(r, "Size:");         r.y += r.height + M;
             GuiLabel(r, "Count:");        r.y += r.height + M;
@@ -116,18 +122,23 @@ bool Launcher::run()
             r = Rectangle {
                 7.5*B + 4*M,
                 M,
-                w*customSetting.types + M*(customSetting.types+1),
-                h*customSetting.types + M*(customSetting.types+1),
-            };
-            // DrawRectangleRec(r, WHITE);
-            GuiGroupBox(r, "Attractions");
+                w*t + M*(t+1),
+                R.height
+            };           
+            GuiGroupBox(r, "");
+            GuiSetStyle(LABEL, TEXT_ALIGNMENT, TEXT_ALIGN_CENTER);
+            r.x += M;
+            r.y += M;
+            r.height = B;
+            GuiLabel(r, "Attraction Matrix:");
             r = Rectangle {
-                r.x + M,
+                r.x,
                 r.y + M,
                 w,
                 h,
             };
-            
+            r.y += B;
+
             for (int i = 0; i < customSetting.types; i++) {
                 for (int j = 0; j < customSetting.types; j++) {
                     Rectangle r2 = Rectangle {
