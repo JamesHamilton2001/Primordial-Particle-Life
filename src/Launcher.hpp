@@ -48,15 +48,13 @@ class Launcher
 
     std::vector<std::vector<TextBox>> tbxAttractions;
 
-    DropDownBox drdDefefaults;
+    DropDownBox ddbDefefaults;
 
+    bool button(Rectangle& rect, Button& btn);
+    bool toggle(Rectangle& rect, Toggle& tgl);
+    bool textBox(Rectangle& rect, TextBox& tbx);
+    bool dropDownBox(Rectangle& rect, DropDownBox& ddb);
 
-    bool button(Button& btn, Rectangle& rect);
-    bool toggle(Toggle& tgl, Rectangle& rect);
-    bool textBox(TextBox& tbx, Rectangle& rect);
-    bool dropDownBox(DropDownBox& drd, Rectangle& rect);
-
-    // void scaleWidgets();
 
 };
 

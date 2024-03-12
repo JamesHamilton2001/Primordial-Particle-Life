@@ -44,7 +44,7 @@ Launcher::Launcher() :
         str = defaultSettings[0].name;
         for (int i = 1; i < defaultSettings.size(); i++)
             str += ";" + defaultSettings[i].name;
-        drdDefefaults = DropDownBox { str.c_str(), 0, false };
+        ddbDefefaults = DropDownBox { str.c_str(), 0, false };
 
     // CUSTOM SETTINGS
 
@@ -68,8 +68,6 @@ bool Launcher::run()
     const float H = GetScreenHeight();
     const float B = 16; // button unit
     const float M = 8; // margin unit
-    Rectangle R, r; // group and widget rect buffers
-    float x, y, w, h;
 
     BeginDrawing();
     ClearBackground(BLACK);
@@ -80,82 +78,70 @@ bool Launcher::run()
             // toggle(tglCustom, r);
 
             // r.x = 3*W/4-1.5f*B;
-            // dropDownBox(drdDefefaults, r);
+            // dropDownBox(ddbDefefaults, r);
 
         // CUSTOM SETTINGS
 
-            int t = customSetting.types;
-            R = Rectangle {
+            const int T = customSetting.types;
+            const float lblW = 5*B;
+            const float tbxW = 3*B;
+            Rectangle r;
+
+            // column setup
+            Rectangle col1 = Rectangle {    // all 6 single settings
                 M,
                 M,
-                (7.5f*B + 2*M) + (t*2.5f*B + (t+2)*M),
-                (6*B + 7*M),
+                2*M + lblW + tbxW,
+                6*B + 7*M
             };
-            h = t*B + M*(t+1) + 2*M + B;
-            if (R.height < h) R.height = h;
+            Rectangle col2 = Rectangle {    // attraction matrix
+                col1.x + col1.width + M,
+                col1.y,
+                T*tbxW + (T+1)*M,
+                std::max(B*(T+1) + M*(T+1), col1.height)
+            };
+            col1.height = col2.height;
+            
+            // group box(es)
+            r = Rectangle { col1.x, col1.y, col1.width+col2.width+M, col1.height };
+            GuiGroupBox(r, "Custom Settings");
+            GuiGroupBox(col2, "");
 
-            GuiGroupBox(R, "Custom Settings");
-
-            r = Rectangle { R.x, R.y+M, 5*B, B };
-            x = r.x;
-            y = r.y;
-            w = r.width;
+            // single settings
+            r = Rectangle { col1.x+M, col1.y+M, lblW, B };          // labels...
             GuiSetStyle(LABEL, TEXT_ALIGNMENT, TEXT_ALIGN_RIGHT);
-            GuiLabel(r, "Types:");        r.y += r.height + M;
-            GuiLabel(r, "Size:");         r.y += r.height + M;
-            GuiLabel(r, "Count:");        r.y += r.height + M;
-            GuiLabel(r, "Inner Radius:"); r.y += r.height + M;
-            GuiLabel(r, "Resistance:");   r.y += r.height + M;
-            GuiLabel(r, "Step:");         r.y += r.height + M;
-            r.x += r.width + M;
-            r.y = y;
-            r.width = 2.5f*B;
-            w = r.width;
-            h = r.height;
-            textBox(tbxTypes, r);       r.y += r.height + M;
-            textBox(tbxSize, r);        r.y += r.height + M;
-            textBox(tbxCount, r);       r.y += r.height + M;
-            textBox(tbxInnerRadius, r); r.y += r.height + M;
-            textBox(tbxResistance, r);  r.y += r.height + M;
-            textBox(tbxStep, r);        r.y += r.height + M;
+            GuiLabel(r, "Types:");        r.y += M+B;
+            GuiLabel(r, "Size:");         r.y += M+B;
+            GuiLabel(r, "Count:");        r.y += M+B;
+            GuiLabel(r, "Inner Radius:"); r.y += M+B;
+            GuiLabel(r, "Resistance:");   r.y += M+B;
+            GuiLabel(r, "Step:");         r.y += M+B;
+            r = Rectangle { r.x + lblW+M, col1.y+M, tbxW, B };      // ...and text boxes
+            textBox(r, tbxTypes);       r.y += M+B;
+            textBox(r, tbxSize);        r.y += M+B;
+            textBox(r, tbxCount);       r.y += M+B;
+            textBox(r, tbxInnerRadius); r.y += M+B;
+            textBox(r, tbxResistance);  r.y += M+B;
+            textBox(r, tbxStep);        r.y += M+B;
 
-            r = Rectangle {
-                7.5*B + 4*M,
-                M,
-                w*t + M*(t+1),
-                R.height
-            };           
-            GuiGroupBox(r, "");
+            // attraction matrix
+            r = Rectangle { col2.x, col2.y+M/2, col2.width, B };
             GuiSetStyle(LABEL, TEXT_ALIGNMENT, TEXT_ALIGN_CENTER);
-            r.x += M;
-            r.y += M;
-            r.height = B;
             GuiLabel(r, "Attraction Matrix:");
-            r = Rectangle {
-                r.x,
-                r.y + M,
-                w,
-                h,
-            };
-            r.y += B;
-
-            for (int i = 0; i < customSetting.types; i++) {
-                for (int j = 0; j < customSetting.types; j++) {
-                    Rectangle r2 = Rectangle {
-                        r.x + j*(r.width + M),
-                        r.y + i*(r.height + M),
-                        r.width,
-                        r.height,
-                    };
-                    textBox(tbxAttractions[i][j], r2);
-                }
+            r.x += M;
+            r.y += M/2 + r.height;
+            r.width = tbxW;
+            for (int i = 0; i < T; i++) {
+                for (int j = 0; j < T; j++) {
+                    textBox(r, tbxAttractions[i][j]);
+                    r.x += tbxW + M;
+                } r.x = col2.x + M;
+                  r.y += B + M;
             }
 
-
         // BOTTOM ROW
-
-            r = { W/2-B, H-1.5f*B-M, 3*B, B };
-            button(btnExecute, r);
+            Rectangle r1 = { W/2-B, H-1.5f*B-M, 3*B, B };
+            button(r1, btnExecute);
 
     EndDrawing();
 
@@ -164,7 +150,7 @@ bool Launcher::run()
         if (tglCustom.active)
             choice = customSetting;
         else
-            choice = defaultSettings[drdDefefaults.index];
+            choice = defaultSettings[ddbDefefaults.index];
         
         return false;
     }
@@ -177,26 +163,26 @@ ParticleLife::Settings& Launcher::getSettings()
     return choice;
 }
 
-bool Launcher::button(Button& btn, Rectangle& rect)
+bool Launcher::button(Rectangle& rect, Button& btn)
 {
     int ret = GuiButton(rect, btn.text.c_str());
     btn.active = ret;
     return ret;
 }
 
-bool Launcher::toggle(Toggle& tgl, Rectangle& rect)
+bool Launcher::toggle(Rectangle& rect, Toggle& tgl)
 {
     return GuiToggle(rect, tgl.text.c_str(), &tgl.active);
 }
 
-bool Launcher::textBox(TextBox& tbx, Rectangle& rect)
+bool Launcher::textBox(Rectangle& rect, TextBox& tbx)
 {
     int ret = GuiTextBox(rect, &tbx.text[0], tbx.text.capacity(), tbx.active);
     if (ret) tbx.active = !tbx.active;
     return ret;
 }
 
-bool Launcher::dropDownBox(DropDownBox& ddb, Rectangle& rect)
+bool Launcher::dropDownBox(Rectangle& rect, DropDownBox& ddb)
 {
     int ret = GuiDropdownBox(rect, ddb.text.c_str(), &ddb.index, ddb.active);
     if (ret) ddb.active = !ddb.active;
