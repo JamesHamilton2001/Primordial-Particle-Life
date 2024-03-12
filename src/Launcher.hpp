@@ -21,12 +21,12 @@ class Launcher
  private:
 
     struct Widget {
-        Rectangle rect;
         std::string text;
     };
 
     struct Button : public Widget { bool active; };
     struct Toggle : public Button {};
+    struct TextBox : public Button {};
 
     struct DropDownBox : public Button {
         int index;      
@@ -38,16 +38,25 @@ class Launcher
 
     Button btnExecute;
     Toggle tglCustom;
+
+    TextBox tbxTypes;
+    TextBox tbxSize;
+    TextBox tbxCount;
+    TextBox tbxInnerRadius;
+    TextBox tbxResistance;
+    TextBox tbxStep;
+
+    std::vector<std::vector<TextBox>> tbxAttractions;
+
     DropDownBox drdDefefaults;
 
-    
 
+    bool button(Button& btn, Rectangle& rect);
+    bool toggle(Toggle& tgl, Rectangle& rect);
+    bool textBox(TextBox& tbx, Rectangle& rect);
+    bool dropDownBox(DropDownBox& drd, Rectangle& rect);
 
-    void button(Button& btn);
-    void toggle(Toggle& tgl);
-    void dropDownBox(DropDownBox& drd);
-
-    void scaleWidgets();
+    // void scaleWidgets();
 
 };
 
