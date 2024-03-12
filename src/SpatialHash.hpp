@@ -12,7 +12,10 @@ class SpatialHash
 {
  public:
 
+    SpatialHash() = default;
     SpatialHash(int size, int types);
+
+    SpatialHash& operator =(const SpatialHash& other) = default;
 
     int hash(float coord) const;                        // hash y for row, x for col
 
@@ -26,9 +29,9 @@ class SpatialHash
 
  private:
 
-    const int types;    // number of particle types
-    const int size;     // number of cells in one dimension
-    const float bounds; // in world grid bounds
+    int types;    // number of particle types
+    int size;     // number of cells in one dimension
+    float bounds; // in world grid bounds
 
     // [size+2][size+2], corner and edge wraps
     std::vector<std::vector<std::vector<Particle*>>> grid;

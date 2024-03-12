@@ -14,14 +14,13 @@
 #include <algorithm>
 namespace fs = std::filesystem;
 
-#define RAYGUI_IMPLEMENTATION
-#include "raygui.h"
 
 
-App::App(int width, int height, int fpsTarget) :
+App::App(int width, int height, int fpsTarget, ParticleLife::Settings& settings) :
     width(width),
     height(height),
     fpsTarget(fpsTarget),
+    particleLife(settings),
     paused(false),
     drawGrid(true),
     drawGhosts(true),
@@ -33,10 +32,6 @@ App::App(int width, int height, int fpsTarget) :
     ImageDrawCircle(&img, 32, 32, 32, WHITE);
     particleTexture = LoadTextureFromImage(img);
     UnloadImage(img);
-
-    // testStringConversions();
-
-    loadSettings();
 }
 
 App::~App()
@@ -45,7 +40,7 @@ App::~App()
 }
 
 
-void App::update(ParticleLife& particleLife)
+void App::update()
 {
     // camera zoom on MOUSE_WHEEL
     float wheel = GetMouseWheelMove();
@@ -87,7 +82,7 @@ void App::update(ParticleLife& particleLife)
 }
 
 
-void App::draw(ParticleLife& particleLife) const
+void App::draw() const
 {
     BeginDrawing();
         ClearBackground(BLACK);
@@ -106,19 +101,7 @@ void App::draw(ParticleLife& particleLife) const
 }
 
 
-void App::gui(ParticleLife& particleLife)
+void App::gui()
 {
-    GuiDrawText("GUI implementation...", Rectangle { 10, 10, 100, 20 }, TEXT_ALIGN_LEFT, RAYWHITE);
-}
 
-
-void App::loadSettings()
-{
-    for (const auto& entry : fs::directory_iterator("settings/default/")) {
-        try {
-            defaultSettings.push_back(ParticleLife::Settings(entry));
-        } catch (std::exception& e) { 
-            std::cout << "Failed to load settings from " << entry.path() << ": " << e.what() << std::endl;
-        }
-    }
 }

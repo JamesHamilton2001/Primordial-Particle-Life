@@ -1,24 +1,32 @@
+#include "Launcher.hpp"
 #include "App.hpp"
+
+#define RAYGUI_IMPLEMENTATION
 
 
 int main()
 {
-    int width = 1024;
-    int height = 1024;
+    int width = 800;
+    int height = 800;
     int fpsTarget = 0;
     InitWindow(width, height, "Particle Life");
     SetTargetFPS(fpsTarget);
 
-    App app(width, height, fpsTarget);
+    Launcher launcher;
 
-    ParticleLife particleLife(app.defaultSettings[2]);
+    while (launcher.run()) {
+        if (WindowShouldClose()) {
+            CloseWindow();
+            return EXIT_SUCCESS;
+        }
+    }
 
-    std::cout << particleLife << std::endl;
+    App app(width, height, fpsTarget, launcher.getSettings());
 
     while (!WindowShouldClose())
-        app.update(particleLife),
-        app.draw(particleLife),
-        app.gui(particleLife);
+        app.update(),
+        app.draw(),
+        app.gui();
 
     CloseWindow();
 

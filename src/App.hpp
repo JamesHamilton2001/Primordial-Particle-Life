@@ -13,20 +13,20 @@ class App
 {
  public:
 
-    App(int width, int height, int fpsTarget);
+    App(int width, int height, int fpsTarget, ParticleLife::Settings& settings);
     ~App();
 
-    void update(ParticleLife& particleLife);
-    void draw(ParticleLife& particleLife) const;
-    void gui(ParticleLife& particleLife);
-    
-    std::vector<ParticleLife::Settings> defaultSettings;
+    void update();
+    void draw() const;
+    void gui();
 
  private:
 
-    unsigned int width;
-    unsigned int height;
-    unsigned int fpsTarget;
+    int width;
+    int height;
+    int fpsTarget;
+
+    ParticleLife particleLife;
 
     bool paused;
     bool drawGrid;
@@ -34,8 +34,6 @@ class App
     
     Camera2D camera;
     Texture2D particleTexture;
-
-    void loadSettings();
 
 };
 

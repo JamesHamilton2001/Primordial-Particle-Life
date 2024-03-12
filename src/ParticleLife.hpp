@@ -35,13 +35,15 @@ class ParticleLife
         Settings(const std::filesystem::directory_entry& dirEntry);
     };
 
+    ParticleLife() = default;
     ParticleLife(Settings& settings);
     ~ParticleLife();
+    ParticleLife& operator =(const ParticleLife& other) = default;
 
-    const std::string name;
-    const int types;
-    const int size;
-    const float bounds;
+    std::string name;
+    int types;
+    int size;
+    float bounds;
 
 
     void update();
