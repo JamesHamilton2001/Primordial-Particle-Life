@@ -12,7 +12,7 @@ namespace fs = std::filesystem;
 
 
 Launcher::Launcher() :
-    choice(customSetting)
+    choice(customisedSettings)
 {
     for (const auto& dirEntry : fs::directory_iterator("settings/default/")) {
         try {
@@ -20,85 +20,108 @@ Launcher::Launcher() :
         } catch (std::exception& e) { 
             std::cout << "Failed to load settings from " << dirEntry.path() << ": " << e.what() << std::endl;
         }
+    } for (const auto& dirEntry : fs::directory_iterator("settings/custom/")) {
+        try {
+            customSettings.push_back(ParticleLife::Settings(dirEntry));
+        } catch (std::exception& e) { 
+            std::cout << "Failed to load settings from " << dirEntry.path() << ": " << e.what() << std::endl;
+        }
     }
 
-    customSetting.name = "";
-    customSetting.types = 9;
-    customSetting.size = 0;
-    customSetting.count = 0;
-    customSetting.innerRadius = 0;
-    customSetting.resistance = 0;
-    customSetting.step = 0;
-    customSetting.attractions = std::vector<std::vector<float>>(9, std::vector<float>(9, 0));
-    customSetting.seed = 0;
-    customSetting.typeRatio = std::vector<int>(9, 0);
-    customSetting.particles = std::vector<Particle>();
+    customisedSettings.name = "";
+    customisedSettings.types = 9;
+    customisedSettings.size = 0;
+    customisedSettings.count = 0;
+    customisedSettings.innerRadius = 0;
+    customisedSettings.resistance = 0;
+    customisedSettings.step = 0;
+    customisedSettings.attractions = std::vector<std::vector<float>>(9, std::vector<float>(9, 0));
+    customisedSettings.seed = 0;
+    customisedSettings.typeRatio = std::vector<int>(9, 0);
+    customisedSettings.particles = std::vector<Particle>();
 
     std::string str;
-    const Rectangle r = { 0, 0, 0, 0, };
 
     // TOP ROW
 
-        btnExecute = Button { "Execute", false };
+    tglCustom = Toggle { "Customise", false };
 
+    // CUSTOM
+
+    tbxTypes = TextBox { "", false };
+    tbxSize = TextBox { "", false };
+    tbxCount = TextBox { "", false };
+    tbxInnerRadius = TextBox { "", false };
+    tbxResistance = TextBox { "", false };
+    tbxStep = TextBox { "", false };
+    tbxAttractions = std::vector<std::vector<TextBox>>(9, std::vector<TextBox>(9, TextBox { "", false }));
+
+    // PREDEFINED
+
+    tglDefaultsCustoms = Toggle { "Defaults", false };
+
+    str = "";
+    if (!defaultSettings.empty())
         str = defaultSettings[0].name;
-        for (int i = 1; i < defaultSettings.size(); i++)
+    if (defaultSettings.size() > 1)
+        for (unsigned int i = 1; i < defaultSettings.size(); i++)
             str += ";" + defaultSettings[i].name;
-        ddbDefefaults = DropDownBox { str.c_str(), 0, false };
+    lsvDefaults = ListView { str.c_str(), 0, 0 };
 
-    // CUSTOM SETTINGS
-
-        tbxTypes = TextBox { "", false };
-        tbxSize = TextBox { "", false };
-        tbxCount = TextBox { "", false };
-        tbxInnerRadius = TextBox { "", false };
-        tbxResistance = TextBox { "", false };
-        tbxStep = TextBox { "", false };
-        tbxAttractions = std::vector<std::vector<TextBox>>(9, std::vector<TextBox>(9, TextBox { "", false }));
+    str = "";
+    if (!customSettings.empty())
+        str = customSettings[0].name;
+    if (customSettings.size() > 1)
+        for (unsigned int i = 1; i < customSettings.size(); i++)
+            str += ";" + customSettings[i].name;
+    lsvCustoms = ListView { str.c_str(), 0, 0 };
 
     // BOTTOM ROW
 
-        tglCustom = Toggle { "Customise", false };
+    btnExecute = Button { "Execute", false };
 
 }
 
 bool Launcher::run()
 {
-    const float W = GetScreenWidth();
-    const float H = GetScreenHeight();
-    const float B = 16; // button unit
-    const float M = 8; // margin unit
-
     BeginDrawing();
-    ClearBackground(BLACK);
+    ClearBackground(GetColor(GuiGetStyle(DEFAULT, BACKGROUND_COLOR)));
 
-        // TOP ROW
+        float W = GetScreenWidth();
+        float H = GetScreenHeight();
+        float U = 16; // widget unit
+        float M = 8; // margin unit
+        int T = customisedSettings.types;
+        float lblW = 5*U;
+        float tbxW = 3*U;
+        Rectangle r;
 
-            // r = { W/4-1.5f*B, M, 4*B, B };
-            // toggle(tglCustom, r);
+        // HEADER ------------------------------------------------------------------
 
-            // r.x = 3*W/4-1.5f*B;
-            // dropDownBox(ddbDefefaults, r);
+        Rectangle row1 = Rectangle { M, M, W-2*M, U+2*M };
+
+        GuiGroupBox(row1, "App Settings");
+
+        r = Rectangle { row1.x+M, row1.y+M, lblW, U };
+        toggle(r, tglCustom);
+        tglCustom.text = (tglCustom.active) ? "Customised" : "Predefined";
+
+        // BODY --------------------------------------------------------------------
 
         // CUSTOM SETTINGS
+        if (tglCustom.active) {
 
-            const int T = customSetting.types;
-            const float lblW = 5*B;
-            const float tbxW = 3*B;
-            Rectangle r;
-
-            // column setup
             Rectangle col1 = Rectangle {    // all 6 single settings
                 M,
-                M,
+                row1.y + row1.height + M,
                 2*M + lblW + tbxW,
-                6*B + 7*M
+                7*M + 6*U
             };
             Rectangle col2 = Rectangle {    // attraction matrix
                 col1.x + col1.width + M,
                 col1.y,
                 T*tbxW + (T+1)*M,
-                std::max(B*(T+1) + M*(T+1), col1.height)
+                std::max(U*(T+1) + M*(T+1), col1.height)
             };
             col1.height = col2.height;
             
@@ -108,24 +131,24 @@ bool Launcher::run()
             GuiGroupBox(col2, "");
 
             // single settings
-            r = Rectangle { col1.x+M, col1.y+M, lblW, B };          // labels...
+            r = Rectangle { col1.x+M, col1.y+M, lblW, U };          // labels...
             GuiSetStyle(LABEL, TEXT_ALIGNMENT, TEXT_ALIGN_RIGHT);
-            GuiLabel(r, "Types:");        r.y += M+B;
-            GuiLabel(r, "Size:");         r.y += M+B;
-            GuiLabel(r, "Count:");        r.y += M+B;
-            GuiLabel(r, "Inner Radius:"); r.y += M+B;
-            GuiLabel(r, "Resistance:");   r.y += M+B;
-            GuiLabel(r, "Step:");         r.y += M+B;
-            r = Rectangle { r.x + lblW+M, col1.y+M, tbxW, B };      // ...and text boxes
-            textBox(r, tbxTypes);       r.y += M+B;
-            textBox(r, tbxSize);        r.y += M+B;
-            textBox(r, tbxCount);       r.y += M+B;
-            textBox(r, tbxInnerRadius); r.y += M+B;
-            textBox(r, tbxResistance);  r.y += M+B;
-            textBox(r, tbxStep);        r.y += M+B;
+            GuiLabel(r, "Types:");        r.y += M+U;
+            GuiLabel(r, "Size:");         r.y += M+U;
+            GuiLabel(r, "Count:");        r.y += M+U;
+            GuiLabel(r, "Inner Radius:"); r.y += M+U;
+            GuiLabel(r, "Resistance:");   r.y += M+U;
+            GuiLabel(r, "Step:");         r.y += M+U;
+            r = Rectangle { r.x + lblW+M, col1.y+M, tbxW, U };      // ...and text boxes
+            textBox(r, tbxTypes);       r.y += M+U;
+            textBox(r, tbxSize);        r.y += M+U;
+            textBox(r, tbxCount);       r.y += M+U;
+            textBox(r, tbxInnerRadius); r.y += M+U;
+            textBox(r, tbxResistance);  r.y += M+U;
+            textBox(r, tbxStep);        r.y += M+U;
 
             // attraction matrix
-            r = Rectangle { col2.x, col2.y+M/2, col2.width, B };
+            r = Rectangle { col2.x, col2.y+M/2, col2.width, U };
             GuiSetStyle(LABEL, TEXT_ALIGNMENT, TEXT_ALIGN_CENTER);
             GuiLabel(r, "Attraction Matrix:");
             r.x += M;
@@ -136,24 +159,45 @@ bool Launcher::run()
                     textBox(r, tbxAttractions[i][j]);
                     r.x += tbxW + M;
                 } r.x = col2.x + M;
-                  r.y += B + M;
+                r.y += U + M;
             }
 
-        // BOTTOM ROW
-            Rectangle r1 = { W/2-B, H-1.5f*B-M, 3*B, B };
-            button(r1, btnExecute);
+            // user settings choice is custom
+            choice = customisedSettings;
+        }
+
+        // PREDEFINED SETTINGS
+        else {
+
+            float lsvH = 6*U;
+            float lsvW = 8*U;
+            
+            r = Rectangle { 40, 40, lsvW, U };
+            toggle(r, tglDefaultsCustoms);
+            tglDefaultsCustoms.text = (tglDefaultsCustoms.active) ? "Custom" : "Default";
+
+            r.y += r.height + M;
+            r.height = lsvH;
+            
+            if (tglDefaultsCustoms.active) {
+                listView(r, lsvCustoms);
+                choice = customSettings[lsvCustoms.activeIdx];
+            } else {
+                listView(r, lsvDefaults);
+                choice = defaultSettings[lsvDefaults.activeIdx];
+            }
+
+            choice = defaultSettings[lsvDefaults.activeIdx];
+        }
+
+        // BOTTOM ROW -------------------------------------------------------------
+
+        Rectangle r1 = { W/2-U, H-1.5f*U-M, 3*U, U };
+        button(r1, btnExecute);
 
     EndDrawing();
 
-    if (btnExecute.active){
-        
-        if (tglCustom.active)
-            choice = customSetting;
-        else
-            choice = defaultSettings[ddbDefefaults.index];
-        
-        return false;
-    }
+    if (btnExecute.active) return false;
     else return true;
 
 }
@@ -182,10 +226,14 @@ bool Launcher::textBox(Rectangle& rect, TextBox& tbx)
     return ret;
 }
 
-bool Launcher::dropDownBox(Rectangle& rect, DropDownBox& ddb)
-{
-    int ret = GuiDropdownBox(rect, ddb.text.c_str(), &ddb.index, ddb.active);
-    if (ret) ddb.active = !ddb.active;
-    return ret;
-}
+// bool Launcher::dropDownBox(Rectangle& rect, DropDownBox& ddb)
+// {
+//     int ret = GuiDropdownBox(rect, ddb.text.c_str(), &ddb.index, ddb.active);
+//     if (ret) ddb.active = !ddb.active;
+//     return ret;
+// }
 
+bool Launcher::listView(Rectangle& rect, ListView& lsv)
+{
+    return GuiListView(rect, lsv.text.c_str(), &lsv.scrollIdx, &lsv.activeIdx);
+}

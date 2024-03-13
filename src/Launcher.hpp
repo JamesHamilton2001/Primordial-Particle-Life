@@ -28,15 +28,16 @@ class Launcher
     struct Toggle : public Button {};
     struct TextBox : public Button {};
 
-    struct DropDownBox : public Button {
-        int index;      
-    };
+    // struct DropDownBox : public Button {
+    //     int index;      
+    // };
+
+    struct ListView : public Widget { int scrollIdx, activeIdx; };
 
     ParticleLife::Settings& choice;
-    ParticleLife::Settings customSetting;
+    ParticleLife::Settings customisedSettings;
+    std::vector<ParticleLife::Settings> customSettings;
     std::vector<ParticleLife::Settings> defaultSettings;
-
-    Button btnExecute;
     Toggle tglCustom;
 
     TextBox tbxTypes;
@@ -45,15 +46,20 @@ class Launcher
     TextBox tbxInnerRadius;
     TextBox tbxResistance;
     TextBox tbxStep;
-
     std::vector<std::vector<TextBox>> tbxAttractions;
 
-    DropDownBox ddbDefefaults;
+    // DropDownBox ddbDefefaults;
+    Toggle tglDefaultsCustoms;
+    ListView lsvDefaults;
+    ListView lsvCustoms;
+
+    Button btnExecute;
 
     bool button(Rectangle& rect, Button& btn);
     bool toggle(Rectangle& rect, Toggle& tgl);
     bool textBox(Rectangle& rect, TextBox& tbx);
-    bool dropDownBox(Rectangle& rect, DropDownBox& ddb);
+    // bool dropDownBox(Rectangle& rect, DropDownBox& ddb);
+    bool listView(Rectangle& rect, ListView& lsv);
 
 
 };
