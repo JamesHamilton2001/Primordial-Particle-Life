@@ -178,14 +178,19 @@ bool Launcher::run()
 
             r.y += r.height + M;
             r.height = lsvH;
-            
+
             if (tglDefaultsCustoms.active) {
+                int i = lsvCustoms.activeIdx;
                 listView(r, lsvCustoms);
+                if (lsvCustoms.activeIdx < 0) lsvCustoms.activeIdx = i;
                 choice = customSettings[lsvCustoms.activeIdx];
             } else {
+                int i = lsvDefaults.activeIdx;
                 listView(r, lsvDefaults);
+                if (lsvDefaults.activeIdx < 0) lsvDefaults.activeIdx = i;
                 choice = defaultSettings[lsvDefaults.activeIdx];
             }
+
 
             choice = defaultSettings[lsvDefaults.activeIdx];
         }
