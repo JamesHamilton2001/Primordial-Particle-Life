@@ -184,15 +184,24 @@ bool Launcher::run()
                 listView(r, lsvCustoms);
                 if (lsvCustoms.activeIdx < 0) lsvCustoms.activeIdx = i;
                 choice = customSettings[lsvCustoms.activeIdx];
-            } else {
+            }
+            else {
                 int i = lsvDefaults.activeIdx;
                 listView(r, lsvDefaults);
                 if (lsvDefaults.activeIdx < 0) lsvDefaults.activeIdx = i;
                 choice = defaultSettings[lsvDefaults.activeIdx];
             }
 
+            tbxTypes.text = std::to_string(choice.types);
+            tbxSize.text = std::to_string(choice.size);
+            tbxCount.text = std::to_string(choice.count);
+            tbxInnerRadius.text = std::to_string(choice.innerRadius);
+            tbxResistance.text = std::to_string(choice.resistance);
+            tbxStep.text = std::to_string(choice.step);
+            for (int i = 0; i < T; i++)
+                for (int j = 0; j < T; j++)
+                    tbxAttractions[i][j].text = std::to_string(choice.attractions[i][j]);
 
-            choice = defaultSettings[lsvDefaults.activeIdx];
         }
 
         // BOTTOM ROW -------------------------------------------------------------
