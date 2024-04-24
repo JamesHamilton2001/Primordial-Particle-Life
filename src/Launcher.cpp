@@ -78,6 +78,8 @@ Launcher::Launcher() :
             str += ";" + customSettings[i].name;
     lsvCustoms = ListView { str.c_str(), 0, 0 };
 
+    btnValidateCustomInput = Button { "Validate", false };
+
     // BOTTOM ROW
 
     btnExecute = Button { "Execute", false };
@@ -113,19 +115,19 @@ bool Launcher::run()
         // CUSTOM SETTINGS
         if (tglCustom.active) {
 
-            Rectangle col1 = Rectangle {    // all 6 single settings
+            float height = std::max(7*U + 8*M, (T+3)*U + (3.5f+T)*M);
+            Rectangle col1 = Rectangle {    // all 7 single settings
                 M,
                 row1.y + row1.height + M,
                 2*M + lblW + tbxW,
-                7*M + 6*U
+                height
             };
             Rectangle col2 = Rectangle {    // attraction matrix
                 col1.x + col1.width + M,
                 col1.y,
                 T*tbxW + (T+1)*M,
-                std::max(U*(T+1) + M*(T+1), col1.height)
+                height
             };
-            col1.height = col2.height;
             
             // group box(es)
             r = Rectangle { col1.x, col1.y, col1.width+col2.width+M, col1.height };
@@ -152,7 +154,7 @@ bool Launcher::run()
             textBox(r, tbxStep);        r.y += M+U;
 
             // attraction matrix
-            r = Rectangle { col2.x, col2.y+M/2, col2.width, U };
+            r = Rectangle { col2.x, col2.y+M, col2.width, U };
             GuiSetStyle(LABEL, TEXT_ALIGNMENT, TEXT_ALIGN_CENTER);
             GuiLabel(r, "Attraction Matrix:");
             r.x += M;
@@ -162,14 +164,15 @@ bool Launcher::run()
                 for (int j = 0; j < T; j++) {
                     textBox(r, tbxAttractions[i][j]);
                     r.x += tbxW + M;
-                } r.x = col2.x + M;
+                }
+                r.x = col2.x + M;
                 r.y += U + M;
             }
 
             // type ratios
-            r = Rectangle { col2.x, col2.y + U+3*M/2 + customisedSettings.types*(U+M), col2.width, U };
+            r = Rectangle { col2.x, col2.y + U+2*M + customisedSettings.types*(U+M), col2.width, U };
             GuiLabel(r, "Type Ratios:");
-            r = Rectangle { r.x + M, r.y + U+M, tbxW, U };
+            r = Rectangle { r.x + M, r.y + U+M/2, tbxW, U };
             for (int i = 0; i < T; i++) {
                 textBox(r, tbxTypeRatio[i]);
                 r.x += tbxW + M;
@@ -267,7 +270,6 @@ bool Launcher::listView(Rectangle& rect, ListView& lsv)
     return GuiListView(rect, lsv.text.c_str(), &lsv.scrollIdx, &lsv.activeIdx);
 }
 
-
 bool Launcher::strIsInt(const std::string& str)
 {
     for (char c : str)
@@ -280,7 +282,7 @@ bool Launcher::strIsFloat(const std::string& str)
 {
     if (str.empty()) return false;
     bool hasDot = false;
-    for (int i = 0; i < str.size(); i++) {
+    for (unsigned int i = 0; i < str.size(); i++) {
         if (!isdigit(str[i])) {
             if (str[i] == '.' && !hasDot) {
                 hasDot = true;
@@ -290,4 +292,11 @@ bool Launcher::strIsFloat(const std::string& str)
         }
     }
     return true;
+}
+
+bool Launcher::validateCustomInput()
+{
+    return false;
+    // ...
+    // return true;
 }

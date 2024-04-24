@@ -44,6 +44,7 @@ class Launcher
     Toggle tglDefaultsCustoms;
     ListView lsvDefaults;
     ListView lsvCustoms;
+    Button btnValidateCustomInput;
     Button btnExecute;
 
     bool button(Rectangle& rect, Button& btn);
@@ -53,7 +54,7 @@ class Launcher
 
     bool strIsInt(const std::string& str);
     bool strIsFloat(const std::string& str);
-    // bool validateCustomSettingsInput();
+    bool validateCustomInput();
 
 };
 
