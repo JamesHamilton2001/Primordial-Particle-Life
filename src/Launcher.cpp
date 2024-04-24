@@ -48,6 +48,7 @@ Launcher::Launcher() :
 
     // CUSTOM
 
+    tbxName = TextBox { "", false };
     tbxTypes = TextBox { "", false };
     tbxSize = TextBox { "", false };
     tbxCount = TextBox { "", false };
@@ -55,6 +56,7 @@ Launcher::Launcher() :
     tbxResistance = TextBox { "", false };
     tbxStep = TextBox { "", false };
     tbxAttractions = std::vector<std::vector<TextBox>>(9, std::vector<TextBox>(9, TextBox { "", false }));
+    tbxTypeRatio = std::vector<TextBox>(9, TextBox { "", false });
 
     // PREDEFINED
 
@@ -90,7 +92,7 @@ bool Launcher::run()
         float W = GetScreenWidth();
         float H = GetScreenHeight();
         float U = 16; // widget unit
-        float M = 8; // margin unit
+        float M = 8;  // margin unit
         int T = customisedSettings.types;
         float lblW = 5*U;
         float tbxW = 3*U;
@@ -133,6 +135,7 @@ bool Launcher::run()
             // single settings
             r = Rectangle { col1.x+M, col1.y+M, lblW, U };          // labels...
             GuiSetStyle(LABEL, TEXT_ALIGNMENT, TEXT_ALIGN_RIGHT);
+            GuiLabel(r, "Name:");         r.y += M+U;
             GuiLabel(r, "Types:");        r.y += M+U;
             GuiLabel(r, "Size:");         r.y += M+U;
             GuiLabel(r, "Count:");        r.y += M+U;
@@ -140,6 +143,7 @@ bool Launcher::run()
             GuiLabel(r, "Resistance:");   r.y += M+U;
             GuiLabel(r, "Step:");         r.y += M+U;
             r = Rectangle { r.x + lblW+M, col1.y+M, tbxW, U };      // ...and text boxes
+            textBox(r, tbxName);        r.y += M+U;
             textBox(r, tbxTypes);       r.y += M+U;
             textBox(r, tbxSize);        r.y += M+U;
             textBox(r, tbxCount);       r.y += M+U;
@@ -162,8 +166,18 @@ bool Launcher::run()
                 r.y += U + M;
             }
 
+            // type ratios
+            r = Rectangle { col2.x, col2.y + U+3*M/2 + customisedSettings.types*(U+M), col2.width, U };
+            GuiLabel(r, "Type Ratios:");
+            r = Rectangle { r.x + M, r.y + U+M, tbxW, U };
+            for (int i = 0; i < T; i++) {
+                textBox(r, tbxTypeRatio[i]);
+                r.x += tbxW + M;
+            }
+
             // user settings choice is custom
             choice = customisedSettings;
+            
         }
 
         // PREDEFINED SETTINGS
@@ -192,6 +206,7 @@ bool Launcher::run()
                 choice = defaultSettings[lsvDefaults.activeIdx];
             }
 
+            tbxName.text = choice.name;
             tbxTypes.text = std::to_string(choice.types);
             tbxSize.text = std::to_string(choice.size);
             tbxCount.text = std::to_string(choice.count);
@@ -204,15 +219,22 @@ bool Launcher::run()
 
         }
 
-        // BOTTOM ROW -------------------------------------------------------------
+        // FOOTER -----------------------------------------------------------------
 
         Rectangle r1 = { W/2-U, H-1.5f*U-M, 3*U, U };
         button(r1, btnExecute);
 
     EndDrawing();
 
-    if (btnExecute.active) return false;
-    else return true;
+    if (btnExecute.active) {
+        return false;
+    }
+    else {
+
+
+        return true;
+    }
+        
 
 }
 
@@ -240,14 +262,32 @@ bool Launcher::textBox(Rectangle& rect, TextBox& tbx)
     return ret;
 }
 
-// bool Launcher::dropDownBox(Rectangle& rect, DropDownBox& ddb)
-// {
-//     int ret = GuiDropdownBox(rect, ddb.text.c_str(), &ddb.index, ddb.active);
-//     if (ret) ddb.active = !ddb.active;
-//     return ret;
-// }
-
 bool Launcher::listView(Rectangle& rect, ListView& lsv)
 {
     return GuiListView(rect, lsv.text.c_str(), &lsv.scrollIdx, &lsv.activeIdx);
+}
+
+
+bool Launcher::strIsInt(const std::string& str)
+{
+    for (char c : str)
+        if (!isdigit(c))
+            return false;
+    return true;
+}
+
+bool Launcher::strIsFloat(const std::string& str)
+{
+    if (str.empty()) return false;
+    bool hasDot = false;
+    for (int i = 0; i < str.size(); i++) {
+        if (!isdigit(str[i])) {
+            if (str[i] == '.' && !hasDot) {
+                hasDot = true;
+                continue;
+            }
+            return false;
+        }
+    }
+    return true;
 }

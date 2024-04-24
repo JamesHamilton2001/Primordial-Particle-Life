@@ -9,7 +9,7 @@
 
 class Launcher
 {
- public:
+  public:
     
         Launcher();
         ~Launcher() = default;
@@ -18,28 +18,20 @@ class Launcher
 
         ParticleLife::Settings& getSettings();
 
- private:
+  private:
 
-    struct Widget {
-        std::string text;
-    };
-
+    struct Widget { std::string text; };
     struct Button : public Widget { bool active; };
     struct Toggle : public Button {};
     struct TextBox : public Button {};
-
-    // struct DropDownBox : public Button {
-    //     int index;      
-    // };
-
     struct ListView : public Widget { int scrollIdx, activeIdx; };
 
     ParticleLife::Settings& choice;
     ParticleLife::Settings customisedSettings;
     std::vector<ParticleLife::Settings> customSettings;
     std::vector<ParticleLife::Settings> defaultSettings;
-    Toggle tglCustom;
 
+    TextBox tbxName;
     TextBox tbxTypes;
     TextBox tbxSize;
     TextBox tbxCount;
@@ -47,20 +39,21 @@ class Launcher
     TextBox tbxResistance;
     TextBox tbxStep;
     std::vector<std::vector<TextBox>> tbxAttractions;
-
-    // DropDownBox ddbDefefaults;
+    std::vector<TextBox> tbxTypeRatio;
+    Toggle tglCustom;
     Toggle tglDefaultsCustoms;
     ListView lsvDefaults;
     ListView lsvCustoms;
-
     Button btnExecute;
 
     bool button(Rectangle& rect, Button& btn);
     bool toggle(Rectangle& rect, Toggle& tgl);
     bool textBox(Rectangle& rect, TextBox& tbx);
-    // bool dropDownBox(Rectangle& rect, DropDownBox& ddb);
     bool listView(Rectangle& rect, ListView& lsv);
 
+    bool strIsInt(const std::string& str);
+    bool strIsFloat(const std::string& str);
+    // bool validateCustomSettingsInput();
 
 };
 
