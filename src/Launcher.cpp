@@ -216,9 +216,11 @@ bool Launcher::run()
             tbxInnerRadius.text = std::to_string(choice.innerRadius);
             tbxResistance.text = std::to_string(choice.resistance);
             tbxStep.text = std::to_string(choice.step);
-            for (int i = 0; i < T; i++)
+            for (int i = 0; i < T; i++) {
+                tbxTypeRatio[i].text = std::to_string(choice.typeRatio[i]);
                 for (int j = 0; j < T; j++)
                     tbxAttractions[i][j].text = std::to_string(choice.attractions[i][j]);
+            }
 
         }
 
