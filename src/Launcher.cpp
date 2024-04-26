@@ -115,24 +115,46 @@ bool Launcher::run()
         // CUSTOM SETTINGS
         if (tglCustom.active) {
 
-            float height = std::max(7*U + 8*M, (T+3)*U + (3.5f+T)*M);
+            float colH = std::max(7*U + 8*M, (T+3)*U + (3.5f+T)*M);
             Rectangle col1 = Rectangle {    // all 7 single settings
                 M,
                 row1.y + row1.height + M,
                 2*M + lblW + tbxW,
-                height
+                colH
             };
             Rectangle col2 = Rectangle {    // attraction matrix
                 col1.x + col1.width + M,
                 col1.y,
                 T*tbxW + (T+1)*M,
-                height
+                colH
             };
+            Rectangle botm = Rectangle {
+                col1.x,
+                col1.y + col1.height - 1,
+                col1.x + col1.width + col2.width,
+                U + M 
+            };
+
+            std::cout << "col1 top left: (" << col1.x << ", " << col1.y << ")" << std::endl;
+            std::cout << "col1 top right: (" << col1.x + col1.width << ", " << col1.y << ")" << std::endl;
+            std::cout << "col1 bottom left: (" << col1.x << ", " << col1.y + col1.height << ")" << std::endl;
+            std::cout << "col1 bottom right: (" << col1.x + col1.width << ", " << col1.y + col1.height << ")" << std::endl;
+
+            std::cout << "col2 top left: (" << col2.x << ", " << col2.y << ")" << std::endl;
+            std::cout << "col2 top right: (" << col2.x + col2.width << ", " << col2.y << ")" << std::endl;
+            std::cout << "col2 bottom left: (" << col2.x << ", " << col2.y + col2.height << ")" << std::endl;
+            std::cout << "col2 bottom right: (" << col2.x + col2.width << ", " << col2.y + col2.height << ")" << std::endl;
+
+            std::cout << "botm top left: (" << botm.x << ", " << botm.y << ")" << std::endl;
+            std::cout << "botm top right: (" << botm.x + botm.width << ", " << botm.y << ")" << std::endl;
+            std::cout << "botm bottom left: (" << botm.x << ", " << botm.y + botm.height << ")" << std::endl;
+            std::cout << "botm bottom right: (" << botm.x + botm.width << ", " << botm.y + botm.height << ")" << std::endl;
             
             // group box(es)
             r = Rectangle { col1.x, col1.y, col1.width+col2.width+M, col1.height };
             GuiGroupBox(r, "Custom Settings");
             GuiGroupBox(col2, "");
+            GuiGroupBox(botm, "");
 
             // single settings
             r = Rectangle { col1.x+M, col1.y+M, lblW, U };          // labels...
@@ -221,7 +243,6 @@ bool Launcher::run()
                 for (int j = 0; j < T; j++)
                     tbxAttractions[i][j].text = std::to_string(choice.attractions[i][j]);
             }
-
         }
 
         // FOOTER -----------------------------------------------------------------
