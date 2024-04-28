@@ -319,8 +319,25 @@ bool Launcher::strIsFloat(const std::string& str)
 
 bool Launcher::validateCustomInput()
 {
-    // // return false;
-    // ...
-    return true;
+    std::cout << "Validating custom input:" << std::endl;
+    std::cout << "| Name:             " << tbxName.text << std::endl;
+    std::cout << "| Types:            " << tbxTypes.text << std::endl;
+    std::cout << "| Size:             " << tbxSize.text << std::endl;
+    std::cout << "| Count:            " << tbxCount.text << std::endl;
+    std::cout << "| Inner Radius:     " << tbxInnerRadius.text << std::endl;
+    std::cout << "| Resistance:       " << tbxResistance.text << std::endl;
+    std::cout << "| Step:             " << tbxStep.text << std::endl;
+    std::cout << "| Attraction Matrix:" << std::endl;
+    for (int i = 0; i < customisedSettings.types; i++) {
+        std::cout << "| |";
+        for (int j = 0; j < customisedSettings.types; j++)
+            std::cout << " [" << tbxAttractions[i][j].text << "]";
+        std::cout << std::endl;
+    }
+    std::cout << "| Type Ratios:      ";
+    for (int i = 0; i < customisedSettings.types; i++)
+        std::cout << " [" << tbxTypeRatio[i].text << "]";
+    std::cout << std::endl;
 
+    return false;
 }
