@@ -40,8 +40,13 @@ class Btn : public Wdgt
     bool update(Rectangle& rect) override;
 };
 
-// class Tbx : public Wdgt
 
+class Tbx : public Wdgt
+{
+  public: using Wdgt::Wdgt;
+
+    bool update(Rectangle& rect) override;
+};
 
 
 class Launcher
@@ -56,6 +61,7 @@ class Launcher
         ParticleLife::Settings& getSettings();
 
         Btn btnKek;
+        Tbx tbxKek;
 
   private:
 

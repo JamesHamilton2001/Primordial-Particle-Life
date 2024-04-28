@@ -58,6 +58,14 @@ bool Btn::update(Rectangle& rect)
     return active;
 }
 
+bool Tbx::update(Rectangle& rect)
+{
+    if (GuiTextBox(rect, text, textBufferSize, active)) {
+        active = !active;
+        return true;
+    } return false;
+}
+
 
 Launcher::Launcher() :
     choice(customisedSettings)
@@ -159,7 +167,17 @@ bool Launcher::run()
                     tmp++;
                 }
                 if (*tmp != '\0') throw std::runtime_error("not null terminated");
-                std::cout << btnKek << std::endl;
+                std::cout << "btnKek: " << btnKek << std::endl;
+            }
+            // test text box update and text manipulation
+            r = Rectangle { 100, 630, 600, 20 };
+            if (tbxKek.update(r)) {
+                const char* tmp = tbxKek.text;
+                while (*tmp != '\0') {
+                    tmp++;
+                }
+                if (*tmp != '\0') throw std::runtime_error("not null terminated");
+                std::cout << "tbxKek" << tbxKek << std::endl;
             }
         }
         catch (std::exception& e) { std::cout << "Exception: " << e.what() << std::endl; }
