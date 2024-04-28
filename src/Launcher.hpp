@@ -5,10 +5,11 @@
 
 #include <string>
 #include <vector>
+#include <cstring>
 #include <iostream>
 
 
-#define DEFAULT_WIDGET_TEXT_BUFFER_SIZE 64
+#define DEFAULT_WIDGET_TEXT_BUFFER_SIZE 8
 
 
 class Wdgt
@@ -17,12 +18,14 @@ class Wdgt
 
     bool active;
     int textBufferSize;
+    int textSize;
     char* text;
 
     Wdgt(int textBufferSize, const char* cstr) :
       active(false),
       textBufferSize(textBufferSize),
-      text(new char[textBufferSize]) {
+      textSize(strlen(cstr)),
+      text(new char[textBufferSize+1]) {
         setText(cstr);
     }
     Wdgt(int textBufferSize) : Wdgt(textBufferSize, "") {};

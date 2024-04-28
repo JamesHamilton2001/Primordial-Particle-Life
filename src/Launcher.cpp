@@ -14,16 +14,16 @@ namespace fs = std::filesystem;
 
 void Wdgt::setText(const char* cstr)
 {
-    int i = 0;
-    while (cstr[i] != '\0' && i < textBufferSize) {
-        text[i] = cstr[i];
-        i++;
-    } text[i] = '\0';
+    textSize = 0;
+    while (cstr[textSize] != '\0' && textSize < textBufferSize) {
+        text[textSize] = cstr[textSize];
+        textSize++;
+    } text[textSize] = '\0';
 }
 
 std::ostream& operator <<(std::ostream& os, const Wdgt& w)
 {
-    return os << w.active << ", " << w.textBufferSize << ", \"" << w.text << "\"";
+    return os << w.active << ", " << w.textSize <<"/"<< w.textBufferSize << ", \"" << w.text << "\"";
 }
 
 bool Lbl::update(Rectangle& rect)
@@ -39,8 +39,10 @@ bool Btn::update(Rectangle& rect)
 
 bool Tbx::update(Rectangle& rect)
 {
-    if (GuiTextBox(rect, text, textBufferSize, active)) {
+    if (GuiTextBox(rect, text, textBufferSize+1, active)) {
         active = !active;
+        if (!active)
+            textSize = strlen(text);
         return true;
     } return false;
 }
