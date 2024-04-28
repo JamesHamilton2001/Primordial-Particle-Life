@@ -19,11 +19,16 @@ class Wdgt
     int textBufferSize;
     char* text;
 
-    Wdgt(int textBufferSize, const char* cstr);
-    Wdgt(int textBufferSize);
-    Wdgt(const char* cstr);
-    Wdgt();
-    ~Wdgt();
+    Wdgt(int textBufferSize, const char* cstr) :
+      active(false),
+      textBufferSize(textBufferSize),
+      text(new char[textBufferSize]) {
+        setText(cstr);
+    }
+    Wdgt(int textBufferSize) : Wdgt(textBufferSize, "") {};
+    Wdgt(const char* cstr)   : Wdgt(DEFAULT_WIDGET_TEXT_BUFFER_SIZE, cstr) {};
+    Wdgt()                   : Wdgt(DEFAULT_WIDGET_TEXT_BUFFER_SIZE) {};
+    ~Wdgt() { delete[] text; }
 
     virtual bool update(Rectangle& rect) = 0;
 

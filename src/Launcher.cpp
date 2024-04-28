@@ -12,32 +12,6 @@ namespace fs = std::filesystem;
 
 
 
-
-Wdgt::Wdgt(int textBufferSize, const char* cstr) 
-{
-    this->active = false;
-    this->textBufferSize = textBufferSize;
-    this->text = new char[textBufferSize+1];
-    setText(cstr);
-}
-
-Wdgt::Wdgt(int textBufferSize)  :
-    Wdgt(textBufferSize, "")
-{ }
-
-Wdgt::Wdgt(const char* cstr) :
-    Wdgt(DEFAULT_WIDGET_TEXT_BUFFER_SIZE, cstr)
-{ }
-
-Wdgt::Wdgt() :
-    Wdgt(DEFAULT_WIDGET_TEXT_BUFFER_SIZE, "")
-{ }
-
-Wdgt::~Wdgt()
-{
-    delete[] this->text;
-}
-
 void Wdgt::setText(const char* cstr)
 {
     int i = 0;
