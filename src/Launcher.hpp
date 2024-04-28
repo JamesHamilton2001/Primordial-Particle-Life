@@ -5,6 +5,38 @@
 
 #include <string>
 #include <vector>
+#include <iostream>
+
+
+#define DEFAULT_WIDGET_TEXT_BUFFER_SIZE 64
+
+
+class Wdgt
+{
+  public :
+
+    bool active;
+    char* text;
+
+    Wdgt(const char* cstr);
+    Wdgt();
+    ~Wdgt();
+
+    virtual bool update(Rectangle& rect) = 0;
+
+    void setText(const char* cstr);
+
+    friend std::ostream& operator <<(std::ostream& os, const Wdgt& w);
+
+};
+
+class Btn : public Wdgt
+{
+  public: using Wdgt::Wdgt;
+  
+    bool update(Rectangle& rect) override;
+};
+
 
 
 class Launcher

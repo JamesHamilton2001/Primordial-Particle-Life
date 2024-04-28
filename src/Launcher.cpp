@@ -12,6 +12,48 @@ namespace fs = std::filesystem;
 
 
 
+
+Wdgt::Wdgt(const char* cstr)
+{
+    active = false;
+    setText(cstr);
+}
+
+Wdgt::Wdgt() :
+    Wdgt("")
+{
+    
+}
+
+Wdgt::~Wdgt()
+{
+    delete[] text;
+}
+
+void Wdgt::setText(const char* cstr)
+{
+    if (cstr != nullptr) {
+        int length = strlen(cstr);
+        text = new char[length + 1];
+        strncpy(text, cstr, length);
+        text[length] = '\0';
+    } else {
+        setText("nullptr?!");
+    }
+}
+
+std::ostream& operator <<(std::ostream& os, const Wdgt& w)
+{
+    return os << w.active << ", \"" << w.text << "\"";
+}
+
+bool Btn::update(Rectangle& rect)
+{
+    active = GuiButton(rect, &text[0]);
+    return active;
+}
+
+
 Launcher::Launcher() :
     choice(customisedSettings)
 {
