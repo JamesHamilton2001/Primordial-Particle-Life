@@ -23,6 +23,7 @@ int main()
 
     App app(width, height, 0, launcher.getSettings());
 
+    SetTargetFPS(0);
     while (!WindowShouldClose())
         app.update(),
         app.draw(),
