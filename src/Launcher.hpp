@@ -33,6 +33,13 @@ class Wdgt
 
 };
 
+class Lbl : public Wdgt
+{
+  public: using Wdgt::Wdgt;
+
+    bool update(Rectangle& rect) override;
+};
+
 class Btn : public Wdgt
 {
   public: using Wdgt::Wdgt;
@@ -40,13 +47,13 @@ class Btn : public Wdgt
     bool update(Rectangle& rect) override;
 };
 
-
 class Tbx : public Wdgt
 {
   public: using Wdgt::Wdgt;
 
     bool update(Rectangle& rect) override;
 };
+
 
 
 class Launcher
@@ -60,8 +67,9 @@ class Launcher
 
         ParticleLife::Settings& getSettings();
 
-        Btn btnKek;
-        Tbx tbxKek;
+        Lbl lblKek = Lbl("this is kek");
+        Btn btnKek = Btn("press 4 kek");
+        Tbx tbxKek = Tbx("enter 4 kek");
 
   private:
 

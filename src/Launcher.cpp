@@ -52,6 +52,11 @@ std::ostream& operator <<(std::ostream& os, const Wdgt& w)
     return os << w.active << ", " << w.textBufferSize << ", \"" << w.text << "\"";
 }
 
+bool Lbl::update(Rectangle& rect)
+{
+    return GuiLabel(rect, text);
+}
+
 bool Btn::update(Rectangle& rect)
 {
     active = GuiButton(rect, &text[0]);
@@ -158,10 +163,14 @@ bool Launcher::run()
 
         // BEGIN TESTYNESS
         try {
-            // test button update and text manipulation
             r = Rectangle { 100, 600, 600, 20 };
+
+            lblKek.update(r);
+
+            // test button update and text manipulation
+            r.y += 25;
             if (btnKek.update(r)) {
-                btnKek.setText((std::string(btnKek.text) + std::string("kek ")).c_str());
+                btnKek.setText((std::string(btnKek.text) + std::string(" kek")).c_str());
                 const char* tmp = btnKek.text;
                 while (*tmp != '\0') {
                     tmp++;
@@ -170,7 +179,7 @@ bool Launcher::run()
                 std::cout << "btnKek: " << btnKek << std::endl;
             }
             // test text box update and text manipulation
-            r = Rectangle { 100, 630, 600, 20 };
+            r.y += 25;
             if (tbxKek.update(r)) {
                 const char* tmp = tbxKek.text;
                 while (*tmp != '\0') {
