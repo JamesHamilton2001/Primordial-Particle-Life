@@ -8,12 +8,12 @@ int main()
 {
     int width = 800;
     int height = 800;
-    int fpsTarget = 0;
+
     InitWindow(width, height, "Particle Life");
-    SetTargetFPS(fpsTarget);
 
     Launcher launcher;
 
+    SetTargetFPS(60);
     while (launcher.run()) {
         if (WindowShouldClose()) {
             CloseWindow();
@@ -21,7 +21,7 @@ int main()
         }
     }
 
-    App app(width, height, fpsTarget, launcher.getSettings());
+    App app(width, height, 0, launcher.getSettings());
 
     while (!WindowShouldClose())
         app.update(),
