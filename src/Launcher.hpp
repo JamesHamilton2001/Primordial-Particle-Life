@@ -47,6 +47,9 @@ class Launcher
     Button btnValidateCustomInput;
     Button btnExecute;
 
+    static const std::string defaultSettingsPath;
+    static const std::string customSettingsPath;
+
     bool button(Rectangle& rect, Button& btn);
     bool toggle(Rectangle& rect, Toggle& tgl);
     bool textBox(Rectangle& rect, TextBox& tbx);

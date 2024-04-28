@@ -11,16 +11,21 @@ namespace fs = std::filesystem;
 #include "raygui.h"
 
 
+
+const std::string Launcher::defaultSettingsPath = "settings/default/";
+const std::string Launcher::customSettingsPath = "settings/custom/";
+
+
 Launcher::Launcher() :
     choice(customisedSettings)
 {
-    for (const auto& dirEntry : fs::directory_iterator("settings/default/")) {
+    for (const auto& dirEntry : fs::directory_iterator(defaultSettingsPath)) {
         try {
             defaultSettings.push_back(ParticleLife::Settings(dirEntry));
         } catch (std::exception& e) { 
             std::cout << "Failed to load settings from " << dirEntry.path() << ": " << e.what() << std::endl;
         }
-    } for (const auto& dirEntry : fs::directory_iterator("settings/custom/")) {
+    } for (const auto& dirEntry : fs::directory_iterator(customSettingsPath)) {
         try {
             customSettings.push_back(ParticleLife::Settings(dirEntry));
         } catch (std::exception& e) { 
@@ -132,24 +137,9 @@ bool Launcher::run()
                 col1.x,
                 col1.y + col1.height - 1,
                 col1.x + col1.width + col2.width,
-                U + M 
+                U + 2*M
             };
 
-            std::cout << "col1 top left: (" << col1.x << ", " << col1.y << ")" << std::endl;
-            std::cout << "col1 top right: (" << col1.x + col1.width << ", " << col1.y << ")" << std::endl;
-            std::cout << "col1 bottom left: (" << col1.x << ", " << col1.y + col1.height << ")" << std::endl;
-            std::cout << "col1 bottom right: (" << col1.x + col1.width << ", " << col1.y + col1.height << ")" << std::endl;
-
-            std::cout << "col2 top left: (" << col2.x << ", " << col2.y << ")" << std::endl;
-            std::cout << "col2 top right: (" << col2.x + col2.width << ", " << col2.y << ")" << std::endl;
-            std::cout << "col2 bottom left: (" << col2.x << ", " << col2.y + col2.height << ")" << std::endl;
-            std::cout << "col2 bottom right: (" << col2.x + col2.width << ", " << col2.y + col2.height << ")" << std::endl;
-
-            std::cout << "botm top left: (" << botm.x << ", " << botm.y << ")" << std::endl;
-            std::cout << "botm top right: (" << botm.x + botm.width << ", " << botm.y << ")" << std::endl;
-            std::cout << "botm bottom left: (" << botm.x << ", " << botm.y + botm.height << ")" << std::endl;
-            std::cout << "botm bottom right: (" << botm.x + botm.width << ", " << botm.y + botm.height << ")" << std::endl;
-            
             // group box(es)
             r = Rectangle { col1.x, col1.y, col1.width+col2.width+M, col1.height };
             GuiGroupBox(r, "Custom Settings");
@@ -198,6 +188,20 @@ bool Launcher::run()
             for (int i = 0; i < T; i++) {
                 textBox(r, tbxTypeRatio[i]);
                 r.x += tbxW + M;
+            }
+
+            // VALIDATION AND MANIPULATION
+
+            r = Rectangle { botm.x + M, botm.y + M, 3*U, U };
+            button(r, btnValidateCustomInput);
+
+            if (btnValidateCustomInput.active) {
+                if (validateCustomInput()) {
+                    // ...
+                }
+                else {
+                    // ...
+                }
             }
 
             // user settings choice is custom
@@ -319,7 +323,9 @@ bool Launcher::strIsFloat(const std::string& str)
 
 bool Launcher::validateCustomInput()
 {
-    return false;
+    // // return false;
     // ...
     // return true;
+
+
 }
