@@ -13,38 +13,43 @@ namespace fs = std::filesystem;
 
 
 
-Wdgt::Wdgt(const char* cstr)
+Wdgt::Wdgt(int textBufferSize, const char* cstr) 
 {
-    active = false;
+    this->active = false;
+    this->textBufferSize = textBufferSize;
+    this->text = new char[textBufferSize+1];
     setText(cstr);
 }
 
+Wdgt::Wdgt(int textBufferSize)  :
+    Wdgt(textBufferSize, "")
+{ }
+
+Wdgt::Wdgt(const char* cstr) :
+    Wdgt(DEFAULT_WIDGET_TEXT_BUFFER_SIZE, cstr)
+{ }
+
 Wdgt::Wdgt() :
-    Wdgt("")
-{
-    
-}
+    Wdgt(DEFAULT_WIDGET_TEXT_BUFFER_SIZE, "")
+{ }
 
 Wdgt::~Wdgt()
 {
-    delete[] text;
+    delete[] this->text;
 }
 
 void Wdgt::setText(const char* cstr)
 {
-    if (cstr != nullptr) {
-        int length = strlen(cstr);
-        text = new char[length + 1];
-        strncpy(text, cstr, length);
-        text[length] = '\0';
-    } else {
-        setText("nullptr?!");
-    }
+    int i = 0;
+    while (cstr[i] != '\0' && i < textBufferSize) {
+        text[i] = cstr[i];
+        i++;
+    } text[i] = '\0';
 }
 
 std::ostream& operator <<(std::ostream& os, const Wdgt& w)
 {
-    return os << w.active << ", \"" << w.text << "\"";
+    return os << w.active << ", " << w.textBufferSize << ", \"" << w.text << "\"";
 }
 
 bool Btn::update(Rectangle& rect)
@@ -142,6 +147,23 @@ bool Launcher::run()
         float lblW = 5*U;
         float tbxW = 3*U;
         Rectangle r;
+
+        // BEGIN TESTYNESS
+        try {
+            // test button update and text manipulation
+            r = Rectangle { 100, 600, 600, 20 };
+            if (btnKek.update(r)) {
+                btnKek.setText((std::string(btnKek.text) + std::string("kek ")).c_str());
+                const char* tmp = btnKek.text;
+                while (*tmp != '\0') {
+                    tmp++;
+                }
+                if (*tmp != '\0') throw std::runtime_error("not null terminated");
+                std::cout << btnKek << std::endl;
+            }
+        }
+        catch (std::exception& e) { std::cout << "Exception: " << e.what() << std::endl; }
+        // FINISH TESTYNESS
 
         // HEADER ------------------------------------------------------------------
 

@@ -16,8 +16,11 @@ class Wdgt
   public :
 
     bool active;
+    int textBufferSize;
     char* text;
 
+    Wdgt(int textBufferSize, const char* cstr);
+    Wdgt(int textBufferSize);
     Wdgt(const char* cstr);
     Wdgt();
     ~Wdgt();
@@ -37,6 +40,8 @@ class Btn : public Wdgt
     bool update(Rectangle& rect) override;
 };
 
+// class Tbx : public Wdgt
+
 
 
 class Launcher
@@ -49,6 +54,8 @@ class Launcher
         bool run();
 
         ParticleLife::Settings& getSettings();
+
+        Btn btnKek;
 
   private:
 
