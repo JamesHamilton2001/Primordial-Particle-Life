@@ -12,8 +12,8 @@ namespace fs = std::filesystem;
 
 
 
-const std::string Launcher::defaultSettingsPath = "settings/default/";
-const std::string Launcher::customSettingsPath = "settings/custom/";
+const std::string Launcher::defaultSettingsPath = "./settings/default/";
+const std::string Launcher::customSettingsPath = "./settings/custom/";
 
 
 Launcher::Launcher() :
@@ -326,6 +326,5 @@ bool Launcher::validateCustomInput()
     // // return false;
     // ...
     // return true;
-
 
 }
