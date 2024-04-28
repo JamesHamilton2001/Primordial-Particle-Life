@@ -47,8 +47,8 @@ class Launcher
     Button btnValidateCustomInput;
     Button btnExecute;
 
-    static const std::string defaultSettingsPath;
-    static const std::string customSettingsPath;
+    const char defaultSettingsPath[20] = "./settings/default/";
+    const char customSettingsPath[19] = "./settings/custom/";
 
     bool button(Rectangle& rect, Button& btn);
     bool toggle(Rectangle& rect, Toggle& tgl);
