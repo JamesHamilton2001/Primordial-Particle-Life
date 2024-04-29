@@ -11,6 +11,13 @@
 
 #define DEFAULT_WIDGET_TEXT_BUFFER_SIZE 8
 
+#if !defined(RAYGUI_VALUEBOX_MAX_CHARS)
+#define RAYGUI_VALUEBOX_MAX_CHARS  32
+#endif
+
+// Custom input box that works with float values. Basicly GuiValueBox(), but with some changes
+int GuiFloatBox(Rectangle bounds, const char* text, float* value, int minValue, int maxValue, bool editMode);
+
 
 class Wdgt
 {
@@ -62,6 +69,27 @@ class Tbx : public Wdgt
     bool update(Rectangle& rect) override;
 };
 
+class Fbx : public Wdgt
+{
+  public:
+
+    float value;
+    int minValue;
+    int maxValue;
+
+    Fbx(int minValue, int maxValue, float value) {
+        this->minValue = minValue;
+        this->maxValue = maxValue;
+        this->value = value;
+    }
+    Fbx(int minValue, int maxValue) : Fbx(minValue, maxValue, 0.0f) {};
+
+    bool update(Rectangle& rect) override;
+
+    friend std::ostream& operator <<(std::ostream& os, const Fbx& fbx);
+
+};
+
 
 
 class Launcher
@@ -78,6 +106,7 @@ class Launcher
         Lbl lblKek = Lbl("this is kek");
         Btn btnKek = Btn("press 4 kek");
         Tbx tbxKek = Tbx("enter 4 kek");
+        Fbx fbxKek = Fbx(-1, 1, -0.42f);
 
   private:
 
