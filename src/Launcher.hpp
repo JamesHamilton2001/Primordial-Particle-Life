@@ -64,6 +64,26 @@ class Tbx : public Wdgt
     bool update(Rectangle& rect) override;
 };
 
+class Ibx : public Wdgt
+{
+  public:
+
+    int value;
+    int minValue;
+    int maxValue;
+
+    Ibx(int value, int minValue, int maxValue) :
+        value(value),
+        minValue(minValue),
+        maxValue(maxValue) {};
+    Ibx(int minValue, int maxValue) : Ibx(0, minValue, maxValue) {};
+
+    bool update(Rectangle& rect) override;
+
+    friend std::ostream& operator <<(std::ostream& os, const Ibx& ibx);
+        
+};
+
 class Fbx : public Tbx
 {
   public:
@@ -73,7 +93,6 @@ class Fbx : public Tbx
     float maxValue;
     char* oldText;
 
-    // TODO: move to source file
     Fbx(float value, float minValue, float maxValue) :
         Tbx(std::to_string(value).c_str()),
         value(value),
@@ -107,6 +126,7 @@ class Launcher
         Btn btnKek = Btn("press 4 kek");
         Tbx tbxKek = Tbx("enter 4 kek");
         Fbx fbxKek = Fbx(0.42f, -1.0f, 1.0f);
+        Ibx ibxKek = Ibx(42, -100, 100);
 
   private:
 

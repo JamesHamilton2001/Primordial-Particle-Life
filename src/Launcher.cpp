@@ -47,6 +47,19 @@ bool Tbx::update(Rectangle& rect)
     } return false;
 }
 
+bool Ibx::update(Rectangle& rect)
+{
+    if (GuiValueBox(rect, NULL, &value, minValue, maxValue, active)) {
+        active = !active;
+        return true;
+    } return false;
+}
+
+std::ostream& operator <<(std::ostream& os, const Ibx& ibx)
+{
+    return os << ibx.minValue << " <= " << ibx.value << " <= " << ibx.maxValue;
+}
+
 bool Fbx::update(Rectangle& rect)
 {
     if (GuiTextBox(rect, text, textBufferSize+1, active))
@@ -92,7 +105,7 @@ bool Fbx::update(Rectangle& rect)
             
             if (isFloat) {
                 float v = strtof(text, nullptr);
-                if (v < maxValue && v > minValue) {
+                if (v <= maxValue && v >= minValue) {
                     value = v;
                     strcpy(oldText, text);
                     textSize = strlen(text);
@@ -227,6 +240,11 @@ bool Launcher::run()
                 }
                 if (*tmp != '\0') throw std::runtime_error("not null terminated");
                 std::cout << "tbxKek" << tbxKek << std::endl;
+            }
+            // test int box update and text manipulation
+            r.y += 25;
+            if (ibxKek.update(r)) {
+                std::cout << "ibxKek" << ibxKek << std::endl;
             }
             // test float box update and text manipulation
             r.y += 25;
