@@ -92,7 +92,7 @@ bool Fbx::update(Rectangle& rect)
             
             if (isFloat) {
                 float v = strtof(text, nullptr);
-                if (v <= maxValue && v >= minValue) {
+                if (v < maxValue && v > minValue) {
                     value = v;
                     strcpy(oldText, text);
                     textSize = strlen(text);
