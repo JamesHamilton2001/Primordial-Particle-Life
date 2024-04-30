@@ -11,6 +11,7 @@
 
 #define DEFAULT_WIDGET_TEXT_BUFFER_SIZE 8
 
+// TODO: seperate widget class into their own files
 
 class Wdgt
 {
@@ -21,6 +22,7 @@ class Wdgt
     int textSize;
     char* text;
 
+    // TODO: move to source file
     Wdgt(int textBufferSize, const char* cstr) :
       active(false),
       textBufferSize(textBufferSize),
@@ -62,6 +64,27 @@ class Tbx : public Wdgt
     bool update(Rectangle& rect) override;
 };
 
+class Fbx : public Tbx
+{
+  public:
+
+    float value;
+    char* oldText;
+
+    // TODO: move to source file
+    Fbx(float value) :
+        Tbx(std::to_string(value).c_str()),
+        value(value),
+        oldText(new char[textBufferSize+1]) {
+            std::strcpy(oldText, text);
+        };
+    Fbx() : Fbx(0.0f) {};
+
+    bool update(Rectangle& rect) override;
+
+    friend std::ostream& operator <<(std::ostream& os, const Fbx& fbx);
+};
+
 
 
 class Launcher
@@ -78,6 +101,7 @@ class Launcher
         Lbl lblKek = Lbl("this is kek");
         Btn btnKek = Btn("press 4 kek");
         Tbx tbxKek = Tbx("enter 4 kek");
+        Fbx fbxKek = Fbx(4.2f);
 
   private:
 

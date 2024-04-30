@@ -3,7 +3,7 @@
 #include <raylib.h>
 #include <iostream>
 #include <string>
-
+#include <algorithm>
 #include <filesystem>
 namespace fs = std::filesystem;
 
@@ -45,6 +45,67 @@ bool Tbx::update(Rectangle& rect)
             textSize = strlen(text);
         return true;
     } return false;
+}
+
+bool Fbx::update(Rectangle& rect)
+{
+    if (GuiTextBox(rect, text, textBufferSize+1, active))
+    {
+        active = !active;
+
+        if (!active) // new value entered
+        {
+            bool isFloat = true;
+
+            int sign = 0;
+            int pIdx = -1;
+
+            for (int i = 0; text[i] != '\0'; i++) { // validate input, get sign value and point index
+                char c = text[i];
+                
+                if (c >= '0' && c <= '9') { // digit valid at any position
+                    continue;
+                }
+                else if (c == '-') {
+                    if (sign != 0 || pIdx != -1) {  // -sign must be first character
+                        isFloat = false;
+                        break;
+                    } else sign = -1;
+                }
+                else if (c == '+') {
+                    if (sign != 0 || pIdx != -1) {  // +sign must be first character
+                        isFloat = false;
+                        break;
+                    } else sign = 1;
+                }
+                else if (c == '.') { // only one point allowed
+                    if (pIdx != -1) {
+                        isFloat = false;
+                        break;
+                    } else pIdx = i;
+                }
+                else { // invalid character
+                    isFloat = false;
+                    break;
+                }
+            }
+
+            // TODO: manual float conversion, manual text copy
+            if (isFloat) {
+                value = strtof(text, nullptr);
+                strcpy(oldText, text);
+                return true; // return true if valid float input
+            }
+            strcpy(text, oldText); // revert text if invalid float input
+        }
+        return false; // return false if invalid float input
+    }
+    return false; // return false if contents not updated
+}
+
+std::ostream& operator <<(std::ostream& os, const Fbx& fbx)
+{
+    return os << static_cast<const Tbx&>(fbx) << ", " << fbx.value;
 }
 
 
@@ -163,6 +224,11 @@ bool Launcher::run()
                 }
                 if (*tmp != '\0') throw std::runtime_error("not null terminated");
                 std::cout << "tbxKek" << tbxKek << std::endl;
+            }
+            // test float box update and text manipulation
+            r.y += 25;
+            if (fbxKek.update(r)) {
+                std::cout << "fbxKek" << fbxKek << std::endl;
             }
         }
         catch (std::exception& e) { std::cout << "Exception: " << e.what() << std::endl; }
