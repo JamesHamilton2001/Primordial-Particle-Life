@@ -83,6 +83,7 @@ class Fbx : public Tbx
             std::strcpy(oldText, text);
         };
     Fbx(float minValue, float maxValue) : Fbx(0.0f, minValue, maxValue) {};
+    ~Fbx() { delete[] oldText; }
 
     bool update(Rectangle& rect) override;
 
