@@ -89,12 +89,15 @@ bool Fbx::update(Rectangle& rect)
                     break;
                 }
             }
-
-            // TODO: manual float conversion, manual text copy
+            
             if (isFloat) {
-                value = strtof(text, nullptr);
-                strcpy(oldText, text);
-                return true; // return true if valid float input
+                float v = strtof(text, nullptr);
+                if (v <= maxValue && v >= minValue) {
+                    value = v;
+                    strcpy(oldText, text);
+                    textSize = strlen(text);
+                    return true; // return true if valid in range float input
+                }
             }
             strcpy(text, oldText); // revert text if invalid float input
         }

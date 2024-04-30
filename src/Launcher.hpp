@@ -69,16 +69,20 @@ class Fbx : public Tbx
   public:
 
     float value;
+    float minValue;
+    float maxValue;
     char* oldText;
 
     // TODO: move to source file
-    Fbx(float value) :
+    Fbx(float value, float minValue, float maxValue) :
         Tbx(std::to_string(value).c_str()),
         value(value),
+        minValue(minValue),
+        maxValue(maxValue),
         oldText(new char[textBufferSize+1]) {
             std::strcpy(oldText, text);
         };
-    Fbx() : Fbx(0.0f) {};
+    Fbx(float minValue, float maxValue) : Fbx(0.0f, minValue, maxValue) {};
 
     bool update(Rectangle& rect) override;
 
@@ -101,7 +105,7 @@ class Launcher
         Lbl lblKek = Lbl("this is kek");
         Btn btnKek = Btn("press 4 kek");
         Tbx tbxKek = Tbx("enter 4 kek");
-        Fbx fbxKek = Fbx(4.2f);
+        Fbx fbxKek = Fbx(0.42f, -1.0f, 1.0f);
 
   private:
 
