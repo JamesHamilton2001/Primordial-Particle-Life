@@ -4,6 +4,8 @@
 #include <iostream>
 #include <string>
 #include <algorithm>
+#include <dirent.h>
+
 #include <filesystem>
 namespace fs = std::filesystem;
 
@@ -124,6 +126,38 @@ std::ostream& operator <<(std::ostream& os, const Fbx& fbx)
     return os << static_cast<const Tbx&>(fbx) << ", " << fbx.value;
 }
 
+bool Lsv::update(Rectangle& rect)
+{
+    if (GuiListView(rect, text, &scrollIdx, &activeIdx))
+        return true;
+    return false;
+}
+
+std::ostream& operator <<(std::ostream& os, const Lsv& lsv)
+{
+    return os << lsv.scrollIdx << ", " << lsv.activeIdx << ", " << lsv.text;
+}
+
+void FLsv::updateContents()
+{
+    struct dirent* entry;
+    DIR* dir = opendir(dirPath);
+    if (dir == NULL) {
+        strcpy(text, "Failed to open directory.");
+        return;
+    }
+    strcpy(text, "");
+    while ((entry = readdir(dir)) != NULL) {
+        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+            continue;
+        strcat(text, entry->d_name);
+        strcat(text, ";");
+    }
+    closedir(dir);
+    if (strlen(text) > 0)
+        text[strlen(text)-1] = '\0';
+}
+
 
 Launcher::Launcher() :
     choice(customisedSettings)
@@ -216,41 +250,26 @@ bool Launcher::run()
 
         // BEGIN TESTYNESS
         try {
-            r = Rectangle { 100, 600, 600, 20 };
+            r = Rectangle { 100, 500, 600, 20 };
 
             lblKek.update(r);
 
-            // test button update and text manipulation
             r.y += 25;
-            if (btnKek.update(r)) {
-                btnKek.setText((std::string(btnKek.text) + std::string(" kek")).c_str());
-                const char* tmp = btnKek.text;
-                while (*tmp != '\0') {
-                    tmp++;
-                }
-                if (*tmp != '\0') throw std::runtime_error("not null terminated");
-                std::cout << "btnKek: " << btnKek << std::endl;
-            }
-            // test text box update and text manipulation
+            if (btnKek.update(r))
+                std::cout << "btnKek " << btnKek << std::endl;
             r.y += 25;
-            if (tbxKek.update(r)) {
-                const char* tmp = tbxKek.text;
-                while (*tmp != '\0') {
-                    tmp++;
-                }
-                if (*tmp != '\0') throw std::runtime_error("not null terminated");
-                std::cout << "tbxKek" << tbxKek << std::endl;
-            }
-            // test int box update and text manipulation
+            if (tbxKek.update(r))
+                std::cout << "tbxKek " << tbxKek << std::endl;
             r.y += 25;
-            if (ibxKek.update(r)) {
-                std::cout << "ibxKek" << ibxKek << std::endl;
-            }
-            // test float box update and text manipulation
+            if (ibxKek.update(r))
+                std::cout << "ibxKek " << ibxKek << std::endl;
             r.y += 25;
-            if (fbxKek.update(r)) {
-                std::cout << "fbxKek" << fbxKek << std::endl;
-            }
+            if (fbxKek.update(r))
+                std::cout << "fbxKek " << fbxKek << std::endl;
+            r.y += 25; r.height = 100;
+            if (lsvKek.update(r))
+                std::cout << "flsvKek " << lsvKek << std::endl;
+            
         }
         catch (std::exception& e) { std::cout << "Exception: " << e.what() << std::endl; }
         // FINISH TESTYNESS

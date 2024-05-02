@@ -9,9 +9,10 @@
 #include <iostream>
 
 
-#define DEFAULT_WIDGET_TEXT_BUFFER_SIZE 8
+#define DEFAULT_WIDGET_TEXT_BUFFER_SIZE 256
 
-// TODO: seperate widget class into their own files
+// TODO: own header and source file for widgets,
+//       move constructor and destructor to source file
 
 class Wdgt
 {
@@ -109,24 +110,57 @@ class Fbx : public Tbx
     friend std::ostream& operator <<(std::ostream& os, const Fbx& fbx);
 };
 
+class Lsv : public Wdgt
+{
+  public:
+
+    int scrollIdx;
+    int activeIdx;
+
+    Lsv(const char* items) :
+        Wdgt(1024, items),
+        scrollIdx(0),
+        activeIdx(0) {};
+    Lsv() : Lsv("") {};
+
+    bool update(Rectangle& rect) override;
+
+    friend std::ostream& operator <<(std::ostream& os, const Lsv& lsv);
+};
+
+class FLsv : public Lsv
+{
+  public:
+
+    const char* dirPath;
+
+    FLsv(const char* dirPath) :
+        Lsv(),
+        dirPath(dirPath)
+        { updateContents(); };
+
+    void updateContents();
+
+};
 
 
 class Launcher
 {
   public:
     
-        Launcher();
-        ~Launcher() = default;
-    
-        bool run();
+    Launcher();
+    ~Launcher() = default;
 
-        ParticleLife::Settings& getSettings();
+    bool run();
 
-        Lbl lblKek = Lbl("this is kek");
-        Btn btnKek = Btn("press 4 kek");
-        Tbx tbxKek = Tbx("enter 4 kek");
-        Fbx fbxKek = Fbx(0.42f, -1.0f, 1.0f);
-        Ibx ibxKek = Ibx(42, -100, 100);
+    ParticleLife::Settings& getSettings();
+
+    Lbl lblKek = Lbl("this is kek");
+    Btn btnKek = Btn("press 4 kek");
+    Tbx tbxKek = Tbx("enter 4 kek");
+    Fbx fbxKek = Fbx(0.42f, -1.0f, 1.0f);
+    Ibx ibxKek = Ibx(42, -100, 100);
+    FLsv lsvKek = FLsv("./settings/default/");
 
   private:
 
