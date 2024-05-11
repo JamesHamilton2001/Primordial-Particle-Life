@@ -143,6 +143,20 @@ class FLsv : public Lsv
 
 };
 
+class TglGrp : public Wdgt
+{
+  public:
+
+    int activeToggle;
+
+    TglGrp(const char* items) :
+        Wdgt(items),
+        activeToggle(0) {};
+    
+    bool update(Rectangle& rect) override;
+
+    friend std::ostream& operator <<(std::ostream& os, const TglGrp& tglGrp);
+};
 
 class Launcher
 {
@@ -161,6 +175,7 @@ class Launcher
     Fbx fbxKek = Fbx(0.42f, -1.0f, 1.0f);
     Ibx ibxKek = Ibx(42, -100, 100);
     FLsv lsvKek = FLsv("./settings/default/");
+    TglGrp tglgrpKek = TglGrp("kek1;kek2;kek3");
 
   private:
 

@@ -158,6 +158,18 @@ void FLsv::updateContents()
         text[strlen(text)-1] = '\0';
 }
 
+bool TglGrp::update(Rectangle& rect)
+{
+    if (GuiToggleGroup(rect, text, &activeToggle))
+        return true;
+    return false;
+}
+
+std::ostream& operator <<(std::ostream& os, const TglGrp& tglGrp)
+{
+    return os << tglGrp.activeToggle << ", " << tglGrp.text;
+}
+
 
 Launcher::Launcher() :
     choice(customisedSettings)
@@ -269,6 +281,9 @@ bool Launcher::run()
             r.y += 25; r.height = 100;
             if (lsvKek.update(r))
                 std::cout << "flsvKek " << lsvKek << std::endl;
+            r = (Rectangle) { r.x, r.y+100, 25, 20 };
+            if (tglgrpKek.update(r))
+                std::cout << "tglgrpKek " << tglgrpKek << std::endl;
             
         }
         catch (std::exception& e) { std::cout << "Exception: " << e.what() << std::endl; }
