@@ -33,6 +33,16 @@ bool Lbl::update(Rectangle& rect)
     return GuiLabel(rect, text);
 }
 
+bool Pnl::update(Rectangle& rect)
+{
+    return GuiPanel(rect, NULL);
+}
+
+bool Grp::update(Rectangle& rect)
+{
+    return GuiGroupBox(rect, text);
+}
+
 bool Btn::update(Rectangle& rect)
 {
     active = GuiButton(rect, &text[0]);
@@ -262,8 +272,11 @@ bool Launcher::run()
 
         // BEGIN TESTYNESS
         try {
+
+
             r = Rectangle { 100, 500, 600, 20 };
 
+            grpKek.update(r);
             lblKek.update(r);
 
             r.y += 25;

@@ -51,6 +51,24 @@ class Lbl : public Wdgt
     bool update(Rectangle& rect) override;
 };
 
+class Pnl : public Wdgt
+{
+  public:
+    
+    Pnl() : Wdgt() {};
+
+    bool update(Rectangle& rect) override;
+};
+
+class Grp : public Wdgt
+{
+  public:
+
+    Grp(const char* text) : Wdgt(32, text) {};
+
+    bool update(Rectangle& rect) override;
+};
+
 class Btn : public Wdgt
 {
   public: using Wdgt::Wdgt;
@@ -169,6 +187,8 @@ class Launcher
 
     ParticleLife::Settings& getSettings();
 
+    Pnl pnlKek = Pnl();
+    Grp grpKek = Grp("kek");
     Lbl lblKek = Lbl("this is kek");
     Btn btnKek = Btn("press 4 kek");
     Tbx tbxKek = Tbx("enter 4 kek");
