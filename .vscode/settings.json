@@ -67,6 +67,7 @@
         "*.m": "cpp",
         "codecvt": "cpp",
         "fstream": "cpp",
-        "filesystem": "cpp"
+        "filesystem": "cpp",
+        "cstring": "cpp"
     }
 }

@@ -565,16 +565,16 @@ Launcher::Launcher() :
 
     grpCustomisedSettings("Customised Settings"),
 
-    // lblName("Name:"),                   tbxName(),
-    // lblTypes("Types:"),                 ibxTypes(0, 9),
-    // lblSize("Size:"),                   ibxSize( 0, 256),
-    // lblCount("Count:"),                 ibxCount(0, 65536),
-    // lblInnerRadius("Inner Radius:"),    fbxInnerRadius(0, 2.0f),
-    // lblResistance("Resistance:"),       fbxResistance(0, 1.0f),
-    // lblStep("Step:"),                   fbxStep(0, 1.0f),
+    lblName("Name:"),                   tbxName(),
+    lblTypes("Types:"),                 ibxTypes(0, 9),
+    lblSize("Size:"),                   ibxSize( 0, 256),
+    lblCount("Count:"),                 ibxCount(0, 65536),
+    lblInnerRadius("Inner Radius:"),    fbxInnerRadius(0, 2.0f),
+    lblResistance("Resistance:"),       fbxResistance(0, 1.0f),
+    lblStep("Step:"),                   fbxStep(0, 1.0f),
 
-    // lblAttractions("Attractions"),      fbxAttractions(9, std::vector<Fbx>(9, Fbx(0, 1.0f))),
-    // lblTypeRatios("Type Ratio"),        fbxTypeRatios(9, Ibx(0, 65536)),
+    lblAttractions("Attractions"),      fbxAttractions(9, std::vector<Fbx>(9, Fbx(-1.0f, 1.0f))),
+    lblTypeRatios("Type Ratio"),        fbxTypeRatios(9, Ibx(0, 65536)),
     
     // METRICS
 
@@ -657,17 +657,88 @@ bool Launcher::preloaded()
 
 bool Launcher::customised()
 {
-    // set body rect, update group box
-    bodyRect = { 
-        headerRect.x,
-        headerRect.y + headerRect.height + M,
-        W - 2*M,
-        H - headerRect.height - 3*M
-    };
-    grpCustomisedSettings.update(bodyRect);
-    
-    Rectangle r;
+   // set body position
+    bodyRect.x = headerRect.x;
+    bodyRect.y = headerRect.y + headerRect.height + M;
 
+    // widget related counts
+    int T = 9;       // number of types     TODO: get from customisedSettings
+    int singles = 7; // number of single settings in col1
+    int multis = 2;  // number of multi settings in col2
+
+    // widget widths
+    float singleFieldWidth = 4*U;
+    float singleLabelWidth = 5*U;
+    float matrixFieldWidth = 4*U;
+
+    // column dimesnions
+    Rectangle col1 = {
+        bodyRect.x,
+        bodyRect.y,
+        3*M + singleLabelWidth + singleFieldWidth,
+        singles*(U+M)+M
+    };
+    Rectangle col2 = {
+        col1.x + col1.width,
+        col1.y,
+        T*(matrixFieldWidth+M)+M,
+        T*(U+M)+M + multis*(U+M)+M
+    };
+    DrawRectangleRec(col1, Color{ 255, 0, 0, 127 }); // visualise column 1
+    DrawRectangleRec(col2, Color{ 0, 255, 0, 127 }); // visualise column 2
+
+    // set body size, update group box
+    bodyRect.width = col1.width + col2.width;
+    bodyRect.height = std::max(col1.height, col2.height);
+    grpCustomisedSettings.update(bodyRect);
+
+    Rectangle r; // rectangle buffer
+
+    // SINGEL SETTINGS
+
+    // single setting column labels
+    r = { col1.x+M, col1.y+M, singleLabelWidth, U };
+    lblName.update(r);          r.y += M+U;
+    lblTypes.update(r);         r.y += M+U;
+    lblSize.update(r);          r.y += M+U;
+    lblCount.update(r);         r.y += M+U;
+    lblInnerRadius.update(r);   r.y += M+U;
+    lblResistance.update(r);    r.y += M+U;
+    lblStep.update(r);          r.y += M+U;
+
+    // single setting column fields
+    r = { col1.x + 2*M + singleLabelWidth, col1.y + M, singleFieldWidth, U };
+    tbxName.update(r);          r.y += M+U;
+    ibxTypes.update(r);         r.y += M+U;
+    ibxSize.update(r);          r.y += M+U;
+    ibxCount.update(r);         r.y += M+U;
+    fbxInnerRadius.update(r);   r.y += M+U;
+    fbxResistance.update(r);    r.y += M+U;
+    fbxStep.update(r);          r.y += M+U;
+
+    // MULTI SETTINGS
+
+    // attraction matrix
+    r = { col2.x+M, col2.y+M, col2.width-2*M, U };
+    lblAttractions.update(r);
+    r = { r.x, r.y+U, matrixFieldWidth, U };
+    for (int i = 0; i < T; i++) {
+        for (int j = 0; j < T; j++) {
+            fbxAttractions[i][j].update(r);
+            r.x += matrixFieldWidth + M;
+        } r.x = col2.x + M;
+          r.y += U + M;
+    }
+
+    // type ratios
+    r = { col2.x+M, r.y, col2.width-2*M, U };
+    lblTypeRatios.update(r);
+    r = { r.x, r.y+U, matrixFieldWidth, U };
+    for (int i = 0; i < T; i++) {
+        fbxTypeRatios[i].update(r);
+        r.x += matrixFieldWidth + M;
+    }
+    
     // TODO: return true if valid settings are entered and user presses execute
 
     return false;

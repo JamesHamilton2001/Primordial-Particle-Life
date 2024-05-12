@@ -6,8 +6,8 @@
 
 int main()
 {
-    int width = 800;
-    int height = 800;
+    int width = 1024;
+    int height = 768;
 
     InitWindow(width, height, "Particle Life");
 

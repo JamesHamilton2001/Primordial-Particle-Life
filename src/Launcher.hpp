@@ -7,12 +7,16 @@
 #include <vector>
 #include <cstring>
 #include <iostream>
+#include <limits>
 
 
 #define DEFAULT_WIDGET_TEXT_BUFFER_SIZE 256
 
 // TODO: own header and source file for widgets,
 //       move constructor and destructor to source file
+//       move operator= to source file
+//       create copy constructors and assignment operators for all widgets
+//       create custom int box widget
 
 class Wdgt
 {
@@ -35,6 +39,24 @@ class Wdgt
     Wdgt(const char* cstr)   : Wdgt(DEFAULT_WIDGET_TEXT_BUFFER_SIZE, cstr) {};
     Wdgt()                   : Wdgt(DEFAULT_WIDGET_TEXT_BUFFER_SIZE) {};
     ~Wdgt() { delete[] text; }
+
+    Wdgt(const Wdgt& other) :
+        active(other.active),
+        textBufferSize(other.textBufferSize),
+        textSize(other.textSize),
+        text(new char[textBufferSize+1]) {
+            std::strcpy(text, other.text);
+    }
+
+    Wdgt& operator =(const Wdgt& other) {
+        if (this != &other) {
+            active = other.active;
+            textBufferSize = other.textBufferSize;
+            textSize = other.textSize;
+            std::strcpy(text, other.text);
+        }
+        return *this;
+    }
 
     virtual bool update(Rectangle& rect) = 0;
 
@@ -121,7 +143,28 @@ class Fbx : public Tbx
             std::strcpy(oldText, text);
         };
     Fbx(float minValue, float maxValue) : Fbx(0.0f, minValue, maxValue) {};
+    Fbx() : Fbx(std::numeric_limits<float>::min(), std::numeric_limits<float>::max()) {};
     ~Fbx() { delete[] oldText; }
+
+    Fbx(const Fbx& other) :
+        Tbx(other),
+        value(other.value),
+        minValue(other.minValue),
+        maxValue(other.maxValue),
+        oldText(new char[textBufferSize+1]) {
+            std::strcpy(oldText, other.oldText);
+        }
+
+    Fbx& operator =(const Fbx& other) {
+        if (this != &other) {
+            Tbx::operator =(other);
+            value = other.value;
+            minValue = other.minValue;
+            maxValue = other.maxValue;
+            std::strcpy(oldText, other.oldText);
+        }
+        return *this;
+    }
 
     bool update(Rectangle& rect) override;
 
@@ -279,16 +322,16 @@ class Launcher
 
     Grp grpCustomisedSettings;
 
-    // Lbl lblName;        Tbx tbxName;
-    // Lbl lblTypes;       Ibx ibxTypes;
-    // Lbl lblSize;        Ibx ibxSize;
-    // Lbl lblCount;       Ibx ibxCount;
-    // Lbl lblInnerRadius; Fbx fbxInnerRadius;
-    // Lbl lblResistance;  Fbx fbxResistance;
-    // Lbl lblStep;        Fbx fbxStep;
+    Lbl lblName;        Tbx tbxName;
+    Lbl lblTypes;       Ibx ibxTypes;
+    Lbl lblSize;        Ibx ibxSize;
+    Lbl lblCount;       Ibx ibxCount;
+    Lbl lblInnerRadius; Fbx fbxInnerRadius;
+    Lbl lblResistance;  Fbx fbxResistance;
+    Lbl lblStep;        Fbx fbxStep;
 
-    // Lbl lblAttractions; std::vector<std::vector<Fbx>> fbxAttractions;
-    // Lbl lblTypeRatios;   std::vector<Ibx> fbxTypeRatios;
+    Lbl lblAttractions; std::vector<std::vector<Fbx>> fbxAttractions;
+    Lbl lblTypeRatios;  std::vector<Ibx> fbxTypeRatios;
 
     // METRICS
 
