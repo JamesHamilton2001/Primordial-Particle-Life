@@ -311,7 +311,9 @@ class Launcher
     std::vector<ParticleLife::Settings> defaultSettings;    // hard copy of all default settings
     std::vector<ParticleLife::Settings> customSettings;     // hard copy of all custom settings
 
-    ParticleLife::Settings userCustomisedSettings;
+    ParticleLife::Settings userCustomisedSettings;  // user customised settings
+
+    ParticleLife::Settings* currentSettingsPtr;        // reference to current settings
 
     // HEADER WIDGETS
 
@@ -385,8 +387,8 @@ class Launcher
 
     // UTIL METHODS
 
-    void validateSettings(ParticleLife::Settings& settings);
-    void saveSettings(ParticleLife::Settings& settings);
+    bool validateInputSettings();
+    bool saveCustomisedSettings();
 
     void readPreloadedSettings(FLsv& flsv, std::vector<ParticleLife::Settings>& settings);
 

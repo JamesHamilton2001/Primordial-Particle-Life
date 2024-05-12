@@ -7,6 +7,7 @@
 #include <raylib.h>
 #include <rlgl.h>
 #include <vector>
+#include <iostream>
 #include <random>
 #include <string>
 #include <filesystem>
@@ -54,8 +55,10 @@ class ParticleLife
         std::vector<int> typeRatio;
         std::vector<Particle> particles;
         
-        Settings() = default;
+        Settings();
         Settings(const std::filesystem::directory_entry& dirEntry);
+
+        friend std::ostream& operator <<(std::ostream& os, const Settings& settings);
     };
 
     ParticleLife() = default;

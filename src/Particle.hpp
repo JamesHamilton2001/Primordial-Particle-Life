@@ -13,8 +13,11 @@ class Particle
 
     static const unsigned char R[9], G[9], B[9];
 
-    Particle();
     Particle(int type, Vector2 pos, Vector2 vel);
+    Particle(int type, Vector2 pos);
+    Particle(int type, float x, float y, float xv, float xy);
+    Particle(int type, float x, float y);
+    Particle();
     Particle(const Particle& p);
 
     int type;

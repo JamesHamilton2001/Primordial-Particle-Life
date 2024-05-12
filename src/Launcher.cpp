@@ -171,12 +171,14 @@ void FLsv::updateContents()
     while ((entry = readdir(dir)) != NULL) {
         if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
             continue;
-        strcat(text, entry->d_name);
+        strncat(text, entry->d_name, strlen(entry->d_name) - 4);
         strcat(text, ";");
+        
     }
     closedir(dir);
     if (strlen(text) > 0)
         text[strlen(text)-1] = '\0';
+    else strcpy(text, "No files found...");
 }
 
 bool TglGrp::update(Rectangle& rect)
@@ -558,6 +560,15 @@ bool Launcher::validateCustomInput()
 
 Launcher::Launcher() :
 
+    // PARTICLE LIFE SETTINGS DATA
+
+    // add defaulted settings to first settings entries
+    defaultSettings(std::vector<ParticleLife::Settings>(1, ParticleLife::Settings())),
+    customSettings (std::vector<ParticleLife::Settings>(1, ParticleLife::Settings())),
+
+    userCustomisedSettings(ParticleLife::Settings()),  // defaults to default
+    currentSettingsPtr(&userCustomisedSettings),       // defaults guaranteed instance
+
     // HEADER WIDGETS
 
     grpHeader("Simulation Settings"),
@@ -635,7 +646,20 @@ Launcher::Launcher() :
 
 bool Launcher::run()
 {
-    if (windowWidth != GetScreenWidth() || windowHeight != GetScreenHeight()) SetWindowSize(windowWidth, windowHeight);
+    if (windowWidth != GetScreenWidth() || windowHeight != GetScreenHeight())
+        SetWindowSize(windowWidth, windowHeight);
+
+    auto previousSettings = currentSettingsPtr;
+
+    if (tglgrpSettingsTab.activeToggle == 0)
+        currentSettingsPtr = (tglgrpSelectPreloadedSettings.activeToggle == 0)
+          ? &defaultSettings[flsvSelectDefaultSettings.activeIdx]
+          : &customSettings[flsvSelectCustomSettings.activeIdx];
+    else currentSettingsPtr = &userCustomisedSettings;
+
+    if (previousSettings != currentSettingsPtr)
+        std::cout << (currentSettingsPtr == &userCustomisedSettings ? "customise" : "load") << " settings " << std::endl << std::endl,
+        std::cout << *currentSettingsPtr << std::endl;
     
     BeginDrawing();
     ClearBackground(GetColor(GuiGetStyle(DEFAULT, BACKGROUND_COLOR)));
@@ -656,8 +680,7 @@ bool Launcher::run()
 
 ParticleLife::Settings& Launcher::getSettings()
 {
-    // TODO: return settings based on active toggle and selections
-    return userCustomisedSettings;
+    return *currentSettingsPtr;
 }
 
 void Launcher::header()
@@ -732,7 +755,9 @@ bool Launcher::preloaded()
 
     // validate button
     r = { footerRec.x + footerRec.width/2 - btnWidth/2, footerRec.y + M, btnWidth, U };
-    btnExecute.update(r);
+    if (btnExecute.update(r)) {
+        
+    }
 
     // TODO: return true if settings are selected and user presses execute
 
@@ -741,6 +766,8 @@ bool Launcher::preloaded()
 
 bool Launcher::customised()
 {
+
+    
     // widget related counts
     int T = 9;       // number of types     TODO: get from customisedSettings
     int singles = 7; // number of single settings in col1
@@ -926,16 +953,30 @@ bool Launcher::customised()
     // footer groupbox
     grpFooter.update(footerRec);
 
-    float middleGap = (footerRec.width - btnWidth) / 2;
+    float midGap = (footerRec.width - btnWidth) / 2;
     r = { 0, footerRec.y + M, btnWidth, U };
 
-    r.x = footerRec.x + (middleGap - btnWidth) / 2;
-    btnValidateCustomSettings.update(r);
-    r.x = footerRec.x + middleGap;
-    btnSaveCustomSettings.update(r);
-    r.x = footerRec.x + footerRec.width - (middleGap + btnWidth) / 2;
-    btnExecute.update(r);
+    // validate button
+    r.x = footerRec.x + (midGap - btnWidth) / 2;
+    if (btnValidateCustomSettings.update(r)) {
+        bool validity = validateInputSettings();
+    }
 
+    // save button
+    r.x = footerRec.x + midGap;
+    if (btnSaveCustomSettings.update(r)) {
+        bool saved = saveCustomisedSettings();
+    }
+
+    // execute button
+    r.x = footerRec.x + footerRec.width - (midGap + btnWidth) / 2;
+    if (btnExecute.update(r)) {
+        bool validity = validateInputSettings();
+        // TODO: clean oversized vectors
+        return validity;
+    }
+
+    // continue running launcher
     return false;
 }
 
@@ -949,15 +990,35 @@ void Launcher::readPreloadedSettings(FLsv& flsv, std::vector<ParticleLife::Setti
             std::cout << "Failed to load settings from " << dirEntry.path() << ": " << e.what() << std::endl;
         }
     }
+    if (settings.empty())
+        settings.push_back(ParticleLife::Settings());
     flsv.updateContents();
 }
 
-void Launcher::validateSettings(ParticleLife::Settings& settings)
+bool Launcher::validateInputSettings()
 {
+    bool validity = true;
 
+    // validate customised settings input
+    if (currentSettingsPtr == &userCustomisedSettings) {
+        std::cout << "Validating custom input: " << std::endl;
+        std::cout << currentSettingsPtr << std::endl;
+
+        validity = false;
+        return validity;
+    }
+    
+    // validate preloaded settings input
+    std::cout << "Validating preloaded input:" << std::endl;
+    std::cout << currentSettingsPtr << std::endl;
+
+    validity = false;
+    return validity;
 }
 
-void Launcher::saveSettings(ParticleLife::Settings& settings)
+bool Launcher::saveCustomisedSettings()
 {
+    bool validity = validateInputSettings();
 
+    return false;
 }
