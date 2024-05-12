@@ -176,6 +176,7 @@ class TglGrp : public Wdgt
     friend std::ostream& operator <<(std::ostream& os, const TglGrp& tglGrp);
 };
 
+/*
 class Launcher
 {
   public:
@@ -237,6 +238,79 @@ class Launcher
     bool strIsInt(const std::string& str);
     bool strIsFloat(const std::string& str);
     bool validateCustomInput();
+
+};
+*/
+
+class Launcher
+{
+  public:
+
+    Launcher();
+    
+    bool run();
+
+    ParticleLife::Settings& getSettings();
+
+  private:
+
+    // PARTICLE LIFE SETTINGS CONTAINERS
+
+    std::vector<ParticleLife::Settings> defaultSettings;
+    std::vector<ParticleLife::Settings> customSettings;
+
+    ParticleLife::Settings userCustomisedSettings;
+
+    // HEADER WIDGETS
+
+    Grp grpHeader;
+
+    TglGrp tglgrpSettingsTab;
+
+    // PRELOADED SETTINGS TAB WIDGETS
+
+    Grp grpPreloadedSettings;
+
+    TglGrp tglgrpPreloadedSettings;
+    FLsv flsvDefaultSettings;
+    FLsv flsvCustomSettings;
+
+    // CUSTOMISED SETTINGS TAB WIDGETS
+
+    Grp grpCustomisedSettings;
+
+    // Lbl lblName;        Tbx tbxName;
+    // Lbl lblTypes;       Ibx ibxTypes;
+    // Lbl lblSize;        Ibx ibxSize;
+    // Lbl lblCount;       Ibx ibxCount;
+    // Lbl lblInnerRadius; Fbx fbxInnerRadius;
+    // Lbl lblResistance;  Fbx fbxResistance;
+    // Lbl lblStep;        Fbx fbxStep;
+
+    // Lbl lblAttractions; std::vector<std::vector<Fbx>> fbxAttractions;
+    // Lbl lblTypeRatios;   std::vector<Ibx> fbxTypeRatios;
+
+    // METRICS
+
+    float W;            // window width
+    float H;            // window height
+    const float U;      // widget unit of measure
+    const float M;      // margin unit of measure
+
+    Rectangle headerRect;
+    Rectangle bodyRect;
+
+    // GUI HANDLER METHODS
+
+    void header();      // handles header widgets
+    bool preloaded();   // handles preloaded tab widgets, returns true on click execute preloaded settings, otherwise false
+    bool customised();  // handles customise tab widgets, returns true execution of valid custom settings, otherwise false
+
+    // UTIL METHODS
+
+    void readPreloadedDefaultSettings();    // loads default settings from file, updates widget
+    void readPreloadedCustomSettings();     // loads custom settings from file, updates widget
+    void readPreloadedSettings(FLsv& flsv, std::vector<ParticleLife::Settings>& settings);
 
 };
 

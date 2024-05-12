@@ -181,6 +181,7 @@ std::ostream& operator <<(std::ostream& os, const TglGrp& tglGrp)
 }
 
 
+/*
 Launcher::Launcher() :
     choice(customisedSettings)
 {
@@ -541,4 +542,155 @@ bool Launcher::validateCustomInput()
     std::cout << std::endl;
 
     return false;
+}
+*/
+
+Launcher::Launcher() :
+
+    // HEADER
+
+    grpHeader("Simulation Settings"),
+
+    tglgrpSettingsTab("Preloaded;Customised"),
+
+    // PRELOADED SETTINGS TAB
+
+    grpPreloadedSettings("Preloaded Settings"),
+
+    tglgrpPreloadedSettings("Default;Custom"),
+    flsvDefaultSettings("./settings/default/"),
+    flsvCustomSettings("./settings/custom/"),
+
+    // CUSTOMISED SETTINGS TAB
+
+    grpCustomisedSettings("Customised Settings"),
+
+    // lblName("Name:"),                   tbxName(),
+    // lblTypes("Types:"),                 ibxTypes(0, 9),
+    // lblSize("Size:"),                   ibxSize( 0, 256),
+    // lblCount("Count:"),                 ibxCount(0, 65536),
+    // lblInnerRadius("Inner Radius:"),    fbxInnerRadius(0, 2.0f),
+    // lblResistance("Resistance:"),       fbxResistance(0, 1.0f),
+    // lblStep("Step:"),                   fbxStep(0, 1.0f),
+
+    // lblAttractions("Attractions"),      fbxAttractions(9, std::vector<Fbx>(9, Fbx(0, 1.0f))),
+    // lblTypeRatios("Type Ratio"),        fbxTypeRatios(9, Ibx(0, 65536)),
+    
+    // METRICS
+
+    U(16),
+    M(8)
+{
+    // read preloaded default and custom settings
+    readPreloadedDefaultSettings();
+    readPreloadedCustomSettings();
+}
+
+bool Launcher::run()
+{
+    W = GetScreenWidth();   // update screen width variable
+    H = GetScreenHeight();  // update screen height variable
+
+    BeginDrawing();
+    ClearBackground(GetColor(GuiGetStyle(DEFAULT, BACKGROUND_COLOR)));
+
+    header();
+
+    bool submitted = (tglgrpSettingsTab.activeToggle == 0)
+        ? preloaded()
+        : customised();
+
+    EndDrawing();
+
+    return !submitted;
+}
+
+ParticleLife::Settings& Launcher::getSettings()
+{
+    // TODO: return settings based on active toggle and selections
+    return userCustomisedSettings;
+}
+
+void Launcher::header()
+{
+    Rectangle r;
+    
+    headerRect = Rectangle { M, M, W-2*M, U+2*M };
+    grpHeader.update(headerRect);
+
+    r = Rectangle { headerRect.x + M, headerRect.y + M, 4*U, U };
+    tglgrpSettingsTab.update(r);
+}
+
+bool Launcher::preloaded()
+{
+    // set body rect, update group box
+    bodyRect = {
+        headerRect.x,
+        headerRect.y + headerRect.height + M,
+        W - 2*M,
+        H - headerRect.height - 3*M
+    };
+    grpPreloadedSettings.update(bodyRect);
+
+    Rectangle r;
+
+    // preloaded/custom settings toggle group
+    r = { bodyRect.x + M, bodyRect.y + M, 4*U, U };
+    tglgrpPreloadedSettings.update(r);
+
+    // update settings file list view
+    r = { r.x,
+          r.y + r.height + M,
+          bodyRect.width - 2*M,
+          bodyRect.height - r.height - 3*M
+    }; switch (tglgrpPreloadedSettings.activeToggle) {
+        case 0: flsvDefaultSettings.update(r); break;
+        case 1: flsvCustomSettings.update(r); break;
+        default: break;
+    }
+
+    // TODO: return true if settings are selected and user presses execute
+
+    return false;
+}
+
+bool Launcher::customised()
+{
+    // set body rect, update group box
+    bodyRect = { 
+        headerRect.x,
+        headerRect.y + headerRect.height + M,
+        W - 2*M,
+        H - headerRect.height - 3*M
+    };
+    grpCustomisedSettings.update(bodyRect);
+    
+    Rectangle r;
+
+    // TODO: return true if valid settings are entered and user presses execute
+
+    return false;
+}
+
+void Launcher::readPreloadedDefaultSettings()
+{
+    readPreloadedSettings(flsvDefaultSettings, defaultSettings);
+}
+
+void Launcher::readPreloadedCustomSettings()
+{
+    readPreloadedSettings(flsvCustomSettings, customSettings);
+}
+
+void Launcher::readPreloadedSettings(FLsv& flsv, std::vector<ParticleLife::Settings>& settings)
+{
+    for (const auto& dirEntry : fs::directory_iterator(flsv.dirPath)) {
+        try {
+            settings.push_back(ParticleLife::Settings(dirEntry));
+        } catch (std::exception& e) { 
+            std::cout << "Failed to load settings from " << dirEntry.path() << ": " << e.what() << std::endl;
+        }
+    }
+    flsv.updateContents();
 }
