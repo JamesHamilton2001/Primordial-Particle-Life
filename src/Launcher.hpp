@@ -300,7 +300,7 @@ class Launcher
 
     Launcher();
     
-    bool run();
+    bool run(); // returns true on execute button press with valid settings, otherwise false
 
     ParticleLife::Settings& getSettings();
 
@@ -308,8 +308,8 @@ class Launcher
 
     // PARTICLE LIFE SETTINGS DATA
 
-    std::vector<ParticleLife::Settings> defaultSettings;
-    std::vector<ParticleLife::Settings> customSettings;
+    std::vector<ParticleLife::Settings> defaultSettings;    // hard copy of all default settings
+    std::vector<ParticleLife::Settings> customSettings;     // hard copy of all custom settings
 
     ParticleLife::Settings userCustomisedSettings;
 
@@ -328,42 +328,45 @@ class Launcher
 
     // CUSTOMISED SETTINGS TAB WIDGETS
 
-    Grp grpCustomisedSettings;
-    Lbl lblName;        Tbx tbxName;
-    Lbl lblTypes;       Ibx ibxTypes;
-    Lbl lblSize;        Ibx ibxSize;
-    Lbl lblCount;       Ibx ibxCount;
-    Lbl lblInnerRadius; Fbx fbxInnerRadius;
-    Lbl lblResistance;  Fbx fbxResistance;
-    Lbl lblStep;        Fbx fbxStep;
-    Lbl lblAttractions; std::vector<std::vector<Fbx>> fbxAttractions;
-    Lbl lblTypeRatios;  std::vector<Ibx> fbxTypeRatios;
+    // NOTE: attractions initialised to max size, use types variable. is resized before use in simulation
+    Grp grpCustomisedSettings;                                         // customised settings group
+    Lbl lblName;        Tbx tbxName;                                   // name text box
+    Lbl lblTypes;       Ibx ibxTypes;                                  // types int box
+    Lbl lblSize;        Ibx ibxSize;                                   // size int box
+    Lbl lblCount;       Ibx ibxCount;                                  // count int box
+    Lbl lblInnerRadius; Fbx fbxInnerRadius;                            // inner radius float box
+    Lbl lblResistance;  Fbx fbxResistance;                             // resistance float box
+    Lbl lblStep;        Fbx fbxStep;                                   // step float box
+    Lbl lblAttractions; std::vector<std::vector<Fbx>> fbxAttractions;  // attractions matrix float boxes
+    Lbl lblTypeRatios;  std::vector<Ibx> fbxTypeRatios;                // type ratios int boxes
 
-    Grp grpCopyPreloadedSettings;
-    TglGrp tglgrpCopyPreloadedSettings;
-    FLsv flsvCopyDefaultSettings;
-    FLsv flsvCopyCustomSettings;
-    Btn btnCopyPreloadedSettings;
+    Grp grpCopyPreloadedSettings;       // copy preloaded settings group
+    TglGrp tglgrpCopyPreloadedSettings; // toggle default/custom settings to copy
+    FLsv flsvCopyDefaultSettings;       // file list view to copy default settings for customisation
+    FLsv flsvCopyCustomSettings;        // copy custom settings file list view
+    Btn btnCopyPreloadedSettings;       // copy preloaded settings into customised settings button
 
-    Btn btnValidateSettings;
-    Btn btnSaveSettings;
+    Btn btnValidateCustomSettings; // validate settings button
+    Btn btnSaveCustomSettings;     // save settings button
 
-    Grp grpErrors;
-    Lsv lsvErrors;      // TODO: update on validation
+    Grp grpErrors;  // errors group box
+    Lsv lsvErrors;  // list view of current errors    // TODO: update on validation
 
     // UNIVRSAL WIDGETS
 
-    Grp grpFooter;
-    Btn btnExecute;
+    Grp grpFooter;   // footer group box
+    Btn btnExecute;  
 
     // METRICS
 
-    int W;                        // window width
-    int H;                        // window height
+    int windowWidth;        // window width
+    int windowHeight;       // window height
+    Rectangle headerRec;    // header dimensions
+    Rectangle bodyRec;      // body dimensions
+    Rectangle footerRec;    // footer dimensions
 
     const float U;                  // widget unit of measure
-    const float M;                  // margin unit of measure
-
+    const float M;                  // widget gap unit of measure
     const float tglbtnWidth;        // width of a toggle button, also for in toggle groups
     const float flsvPreloadWidth;   // width of a file list view to load settings
     const float flsvPreloadHeight;  // height of a file list view to load settings
@@ -374,10 +377,6 @@ class Launcher
     const float lsvErrorsHeight;    // height of a list view for errors
     const float btnWidth;           // width of a button
 
-    Rectangle headerRec;            // header dimensions
-    Rectangle bodyRec;              // body dimensions
-    Rectangle footerRec;            // footer dimensions
-
     // GUI HANDLER METHODS
 
     void header();      // handles header widgets
@@ -386,9 +385,10 @@ class Launcher
 
     // UTIL METHODS
 
-    void readPreloadedSettings(FLsv& flsv, std::vector<ParticleLife::Settings>& settings);
     void validateSettings(ParticleLife::Settings& settings);
     void saveSettings(ParticleLife::Settings& settings);
+
+    void readPreloadedSettings(FLsv& flsv, std::vector<ParticleLife::Settings>& settings);
 
 };
 

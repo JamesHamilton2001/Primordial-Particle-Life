@@ -580,8 +580,8 @@ Launcher::Launcher() :
     flsvCopyCustomSettings      ("./settings/custom/"),
     btnCopyPreloadedSettings    ("Copy"),
 
-    btnValidateSettings("Validate"),
-    btnSaveSettings    ("Save"),
+    btnValidateCustomSettings("Validate"),
+    btnSaveCustomSettings    ("Save"),
 
     grpErrors("Errors"),
     lsvErrors("TEST_ERROR_1;TEST_ERROR_2;TEST_ERROR_3;TEST_ERROR_4;TEST_ERROR_5;TEST_ERROR_6;TEST_ERROR_7"),
@@ -593,25 +593,23 @@ Launcher::Launcher() :
     
     // METRICS
 
-    W                   (GetScreenWidth()),
-    H                   (GetScreenHeight()),
+    windowWidth (GetScreenWidth()),
+    windowHeight(GetScreenHeight()),
+    headerRec { 0, 0, 0, 0 },
+    bodyRec   { 0, 0, 0, 0 },
+    footerRec { 0, 0, 0, 0 },
 
-    U                   (16),
-    M                   (8),
-
-    tglbtnWidth         (4*U),
-    flsvPreloadWidth    (16*U),
-    flsvPreloadHeight   (12*U),
-    fieldWidth          (4*U),
-    inlineLabelWidth    (5*U),
-    matrixFieldWidth    (3.5*U),
-    flsvCopyWidth       (10*U),
-    lsvErrorsHeight     (6*U),
-    btnWidth            (4*U),
-
-    headerRec           { 0, 0, 0, 0 },
-    bodyRec             { 0, 0, 0, 0 },
-    footerRec           { 0, 0, 0, 0 }
+    U                 ( 16    ),
+    M                 ( 8     ),
+    tglbtnWidth       ( 4*U   ),
+    flsvPreloadWidth  ( 16*U  ),
+    flsvPreloadHeight ( 12*U  ),
+    fieldWidth        ( 4*U   ),
+    inlineLabelWidth  ( 5*U   ),
+    matrixFieldWidth  ( 3.5*U ),
+    flsvCopyWidth     ( 10*U  ),
+    lsvErrorsHeight   ( 6*U   ),
+    btnWidth          ( 4* U  )
 
 {
     // read preloaded default and custom settings
@@ -623,7 +621,7 @@ Launcher::Launcher() :
 
 bool Launcher::run()
 {
-    if (W != GetScreenWidth() || H != GetScreenHeight()) SetWindowSize(W, H);
+    if (windowWidth != GetScreenWidth() || windowHeight != GetScreenHeight()) SetWindowSize(windowWidth, windowHeight);
     
     BeginDrawing();
     ClearBackground(GetColor(GuiGetStyle(DEFAULT, BACKGROUND_COLOR)));
@@ -652,7 +650,7 @@ void Launcher::header()
 {
     Rectangle r;
     
-    headerRec = Rectangle { M, M, W-2*M, U+2*M };
+    headerRec = Rectangle { M, M, windowWidth-2*M, U+2*M };
     grpHeader.update(headerRec);
 
     r = Rectangle { headerRec.x + M, headerRec.y + M, 4*U, U };
@@ -686,8 +684,8 @@ bool Launcher::preloaded()
     };
 
     // update window size variables
-    W = bodyRec.width + 2*M;
-    H = footerRec.y + footerRec.height + M;
+    windowWidth = bodyRec.width + 2*M;
+    windowHeight = footerRec.y + footerRec.height + M;
 
     // // visualise formatting
     // unsigned char C = 255, A = 31;
@@ -816,8 +814,8 @@ bool Launcher::customised()
     };
 
     // update window size variables
-    W = bodyRec.width + 2*M;
-    H = footerRec.y + footerRec.height + M;
+    windowWidth = bodyRec.width + 2*M;
+    windowHeight = footerRec.y + footerRec.height + M;
 
     // // visualise formatting
     // unsigned char C = 255, A = 31;
@@ -913,19 +911,15 @@ bool Launcher::customised()
     // footer groupbox
     grpFooter.update(footerRec);
 
-    // validate button
-    r = { footerRec.x + M, footerRec.y + M, btnWidth, U };
-    btnValidateSettings.update(r);
+    float middleGap = (footerRec.width - btnWidth) / 2;
+    r = { 0, footerRec.y + M, btnWidth, U };
 
-    // save button
-    r.x += btnWidth + M;
-    btnSaveSettings.update(r);
-
-    // execute button
-    r = { footerRec.x + footerRec.width - btnWidth - M, footerRec.y + M, btnWidth, U };
+    r.x = footerRec.x + (middleGap - btnWidth) / 2;
+    btnValidateCustomSettings.update(r);
+    r.x = footerRec.x + middleGap;
+    btnSaveCustomSettings.update(r);
+    r.x = footerRec.x + footerRec.width - (middleGap + btnWidth) / 2;
     btnExecute.update(r);
-    
-    // TODO: return true if valid settings are entered and user presses execute
 
     return false;
 }
