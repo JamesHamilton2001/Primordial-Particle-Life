@@ -23,7 +23,7 @@
     - move operator= to source file
     - create copy constructors and assignment operators for all widgets
     - create custom int box widget
-    - clean up flsvs
+    - clean up file list view widgets
 */
 
 class Wdgt
@@ -359,11 +359,11 @@ class Launcher
 
     // METRICS
 
-    int windowWidth;        // window width
-    int windowHeight;       // window height
-    Rectangle headerRec;    // header dimensions
-    Rectangle bodyRec;      // body dimensions
-    Rectangle footerRec;    // footer dimensions
+    int windowWidth;      // window width
+    int windowHeight;     // window height
+    Rectangle headerRec;  // header dimensions
+    Rectangle bodyRec;    // body dimensions
+    Rectangle footerRec;  // footer dimensions
 
     const float U;                  // widget unit of measure
     const float M;                  // widget gap unit of measure

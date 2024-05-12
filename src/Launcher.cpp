@@ -13,6 +13,17 @@ namespace fs = std::filesystem;
 #include "raygui.h"
 
 
+#define PARTICLE_LIFE_MIN_MAX_TYPES         PARTICLE_LIFE_MIN_TYPES, PARTICLE_LIFE_MAX_TYPES
+#define PARTICLE_LIFE_MIN_MAX_GRID_SIZE     PARTICLE_LIFE_MIN_GRID_SIZE, PARTICLE_LIFE_MAX_GRID_SIZE
+#define PARTICLE_LIFE_MIN_MAX_COUNT         PARTICLE_LIFE_MIN_COUNT, PARTICLE_LIFE_MAX_COUNT
+#define PARTICLE_LIFE_MIN_MAX_INNER_RADIUS  PARTICLE_LIFE_MIN_INNER_RADIUS, PARTICLE_LIFE_MAX_INNER_RADIUS
+#define PARTICLE_LIFE_MIN_MAX_STEP          PARTICLE_LIFE_MIN_STEP, PARTICLE_LIFE_MAX_STEP
+#define PARTICLE_LIFE_MIN_MAX_RESISTANCE    PARTICLE_LIFE_MIN_RESISTANCE, PARTICLE_LIFE_MAX_RESISTANCE
+#define PARTICLE_LIFE_MIN_MAX_ATTRACTION    PARTICLE_LIFE_MIN_ATTRACTION, PARTICLE_LIFE_MAX_ATTRACTION
+#define PARTICLE_LIFE_MIN_MAX_SEED          PARTICLE_LIFE_MIN_SEED, PARTICLE_LIFE_MAX_SEED
+#define PARTICLE_LIFE_MIN_MAX_RATIO         PARTICLE_LIFE_MIN_RATIO, PARTICLE_LIFE_MAX_RATIO
+
+
 
 void Wdgt::setText(const char* cstr)
 {
@@ -564,21 +575,24 @@ Launcher::Launcher() :
     // CUSTOMISED SETTINGS TAB WIDGETS
 
     grpCustomisedSettings("Customise Settings"),
-    lblName         ("Name:"),          tbxName(),
-    lblTypes        ("Types:"),         ibxTypes(0, 9),
-    lblSize         ("Size:"),          ibxSize( 0, 256),
-    lblCount        ("Count:"),         ibxCount(0, 65536),
-    lblInnerRadius  ("Inner Radius:"),  fbxInnerRadius(0, 2.0f),
-    lblResistance   ("Resistance:"),    fbxResistance(0, 1.0f),
-    lblStep         ("Step:"),          fbxStep(0, 1.0f),
-    lblAttractions  ("Attractions"),    fbxAttractions(9, std::vector<Fbx>(9, Fbx(-1.0f, 1.0f))),
-    lblTypeRatios   ("Type Ratio"),     fbxTypeRatios(9, Ibx(0, 65536)),
 
-    grpCopyPreloadedSettings    ("Copy Settings"),
-    tglgrpCopyPreloadedSettings ("Default;Custom"),
-    flsvCopyDefaultSettings     ("./settings/default/"),
-    flsvCopyCustomSettings      ("./settings/custom/"),
-    btnCopyPreloadedSettings    ("Copy"),
+    lblName("Name:"),                   tbxName(),  // NOTE: MIN_MAX substitutes two arguments:  min, max
+    lblTypes("Types:"),                 ibxTypes(PARTICLE_LIFE_MIN_MAX_TYPES),              
+    lblSize("Size:"),                   ibxSize(PARTICLE_LIFE_MIN_MAX_GRID_SIZE),           
+    lblCount("Count:"),                 ibxCount(PARTICLE_LIFE_MIN_MAX_COUNT),              
+    lblInnerRadius("Inner Radius:"),    fbxInnerRadius(PARTICLE_LIFE_MIN_MAX_INNER_RADIUS), 
+    lblResistance("Resistance:"),       fbxResistance(PARTICLE_LIFE_MIN_MAX_RESISTANCE),
+    lblStep("Step:"),                   fbxStep(PARTICLE_LIFE_MIN_MAX_STEP),
+    lblAttractions("Attractions"),      fbxAttractions(PARTICLE_LIFE_MAX_TYPES, std::vector<Fbx>(PARTICLE_LIFE_MAX_TYPES, Fbx(PARTICLE_LIFE_MIN_MAX_ATTRACTION))),
+    lblTypeRatios("Type Ratio"),        fbxTypeRatios(PARTICLE_LIFE_MAX_TYPES, Ibx(PARTICLE_LIFE_MIN_MAX_RATIO)),
+
+    grpCopyPreloadedSettings("Copy Settings"),
+    tglgrpCopyPreloadedSettings("Default;Custom"),
+
+    flsvCopyDefaultSettings("./settings/default/"),
+    flsvCopyCustomSettings("./settings/custom/"),
+
+    btnCopyPreloadedSettings("Copy"),
 
     btnValidateCustomSettings("Validate"),
     btnSaveCustomSettings    ("Save"),
@@ -848,6 +862,7 @@ bool Launcher::customised()
 
     // col1: single setting column fields
     r = { customSettingsRec.x + 2*M + inlineLabelWidth, customSettingsRec.y + M, fieldWidth, U };
+
     tbxName.update(r);          r.y += M + U;
     ibxTypes.update(r);         r.y += M + U;
     ibxSize.update(r);          r.y += M + U;
@@ -926,6 +941,7 @@ bool Launcher::customised()
 
 void Launcher::readPreloadedSettings(FLsv& flsv, std::vector<ParticleLife::Settings>& settings)
 {
+    settings.clear();
     for (const auto& dirEntry : fs::directory_iterator(flsv.dirPath)) {
         try {
             settings.push_back(ParticleLife::Settings(dirEntry));
