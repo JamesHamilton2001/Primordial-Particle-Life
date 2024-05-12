@@ -12,11 +12,19 @@
 
 #define DEFAULT_WIDGET_TEXT_BUFFER_SIZE 256
 
-// TODO: own header and source file for widgets,
-//       move constructor and destructor to source file
-//       move operator= to source file
-//       create copy constructors and assignment operators for all widgets
-//       create custom int box widget
+/* TODO list:
+    - field validation function
+    - write custom settings to file on save (on valid settings)
+    - execute button (on valid settings)
+    - notify when settings with explicit particles are copied, and hide type ratios
+    - format text alignment in widgets
+    - own header and source file for widgets,
+    - move constructor and destructor to source file
+    - move operator= to source file
+    - create copy constructors and assignment operators for all widgets
+    - create custom int box widget
+    - clean up flsvs
+*/
 
 class Wdgt
 {
@@ -86,7 +94,8 @@ class Grp : public Wdgt
 {
   public:
 
-    Grp(const char* text) : Wdgt(32, text) {};
+    Grp(const char* text) : Wdgt(64, text) {};
+    Grp() : Grp("") {};
 
     bool update(Rectangle& rect) override;
 };
@@ -297,7 +306,7 @@ class Launcher
 
   private:
 
-    // PARTICLE LIFE SETTINGS CONTAINERS
+    // PARTICLE LIFE SETTINGS DATA
 
     std::vector<ParticleLife::Settings> defaultSettings;
     std::vector<ParticleLife::Settings> customSettings;
@@ -307,21 +316,19 @@ class Launcher
     // HEADER WIDGETS
 
     Grp grpHeader;
-
     TglGrp tglgrpSettingsTab;
 
     // PRELOADED SETTINGS TAB WIDGETS
 
     Grp grpPreloadedSettings;
 
-    TglGrp tglgrpPreloadedSettings;
-    FLsv flsvDefaultSettings;
-    FLsv flsvCustomSettings;
+    TglGrp tglgrpSelectPreloadedSettings;
+    FLsv flsvSelectDefaultSettings;
+    FLsv flsvSelectCustomSettings;
 
     // CUSTOMISED SETTINGS TAB WIDGETS
 
     Grp grpCustomisedSettings;
-
     Lbl lblName;        Tbx tbxName;
     Lbl lblTypes;       Ibx ibxTypes;
     Lbl lblSize;        Ibx ibxSize;
@@ -329,19 +336,47 @@ class Launcher
     Lbl lblInnerRadius; Fbx fbxInnerRadius;
     Lbl lblResistance;  Fbx fbxResistance;
     Lbl lblStep;        Fbx fbxStep;
-
     Lbl lblAttractions; std::vector<std::vector<Fbx>> fbxAttractions;
     Lbl lblTypeRatios;  std::vector<Ibx> fbxTypeRatios;
 
+    Grp grpCopyPreloadedSettings;
+    TglGrp tglgrpCopyPreloadedSettings;
+    FLsv flsvCopyDefaultSettings;
+    FLsv flsvCopyCustomSettings;
+    Btn btnCopyPreloadedSettings;
+
+    Btn btnValidateSettings;
+    Btn btnSaveSettings;
+
+    Grp grpErrors;
+    Lsv lsvErrors;      // TODO: update on validation
+
+    // UNIVRSAL WIDGETS
+
+    Grp grpFooter;
+    Btn btnExecute;
+
     // METRICS
 
-    float W;            // window width
-    float H;            // window height
-    const float U;      // widget unit of measure
-    const float M;      // margin unit of measure
+    int W;                        // window width
+    int H;                        // window height
 
-    Rectangle headerRect;
-    Rectangle bodyRect;
+    const float U;                  // widget unit of measure
+    const float M;                  // margin unit of measure
+
+    const float tglbtnWidth;        // width of a toggle button, also for in toggle groups
+    const float flsvPreloadWidth;   // width of a file list view to load settings
+    const float flsvPreloadHeight;  // height of a file list view to load settings
+    const float fieldWidth;         // width of a field representing a single value
+    const float inlineLabelWidth;   // width of a label representing a single value
+    const float matrixFieldWidth;   // width of a field representing a value in a matrix
+    const float flsvCopyWidth;      // width of a file list view to copy settings
+    const float lsvErrorsHeight;    // height of a list view for errors
+    const float btnWidth;           // width of a button
+
+    Rectangle headerRec;            // header dimensions
+    Rectangle bodyRec;              // body dimensions
+    Rectangle footerRec;            // footer dimensions
 
     // GUI HANDLER METHODS
 
@@ -351,9 +386,9 @@ class Launcher
 
     // UTIL METHODS
 
-    void readPreloadedDefaultSettings();    // loads default settings from file, updates widget
-    void readPreloadedCustomSettings();     // loads custom settings from file, updates widget
     void readPreloadedSettings(FLsv& flsv, std::vector<ParticleLife::Settings>& settings);
+    void validateSettings(ParticleLife::Settings& settings);
+    void saveSettings(ParticleLife::Settings& settings);
 
 };
 

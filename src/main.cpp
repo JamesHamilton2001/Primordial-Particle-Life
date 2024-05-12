@@ -13,7 +13,7 @@ int main()
 
     Launcher launcher;
 
-    SetTargetFPS(60);
+    SetTargetFPS(30);
     while (launcher.run()) {
         if (WindowShouldClose()) {
             CloseWindow();

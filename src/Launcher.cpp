@@ -547,58 +547,95 @@ bool Launcher::validateCustomInput()
 
 Launcher::Launcher() :
 
-    // HEADER
+    // HEADER WIDGETS
 
     grpHeader("Simulation Settings"),
 
     tglgrpSettingsTab("Preloaded;Customised"),
 
-    // PRELOADED SETTINGS TAB
+    // PRELOADED SETTINGS TAB WIDGETS
 
     grpPreloadedSettings("Preloaded Settings"),
 
-    tglgrpPreloadedSettings("Default;Custom"),
-    flsvDefaultSettings("./settings/default/"),
-    flsvCustomSettings("./settings/custom/"),
+    tglgrpSelectPreloadedSettings("Default;Custom"),
+    flsvSelectDefaultSettings("./settings/default/"),
+    flsvSelectCustomSettings ("./settings/custom/"),
 
-    // CUSTOMISED SETTINGS TAB
+    // CUSTOMISED SETTINGS TAB WIDGETS
 
-    grpCustomisedSettings("Customised Settings"),
+    grpCustomisedSettings("Customise Settings"),
+    lblName         ("Name:"),          tbxName(),
+    lblTypes        ("Types:"),         ibxTypes(0, 9),
+    lblSize         ("Size:"),          ibxSize( 0, 256),
+    lblCount        ("Count:"),         ibxCount(0, 65536),
+    lblInnerRadius  ("Inner Radius:"),  fbxInnerRadius(0, 2.0f),
+    lblResistance   ("Resistance:"),    fbxResistance(0, 1.0f),
+    lblStep         ("Step:"),          fbxStep(0, 1.0f),
+    lblAttractions  ("Attractions"),    fbxAttractions(9, std::vector<Fbx>(9, Fbx(-1.0f, 1.0f))),
+    lblTypeRatios   ("Type Ratio"),     fbxTypeRatios(9, Ibx(0, 65536)),
 
-    lblName("Name:"),                   tbxName(),
-    lblTypes("Types:"),                 ibxTypes(0, 9),
-    lblSize("Size:"),                   ibxSize( 0, 256),
-    lblCount("Count:"),                 ibxCount(0, 65536),
-    lblInnerRadius("Inner Radius:"),    fbxInnerRadius(0, 2.0f),
-    lblResistance("Resistance:"),       fbxResistance(0, 1.0f),
-    lblStep("Step:"),                   fbxStep(0, 1.0f),
+    grpCopyPreloadedSettings    ("Copy Settings"),
+    tglgrpCopyPreloadedSettings ("Default;Custom"),
+    flsvCopyDefaultSettings     ("./settings/default/"),
+    flsvCopyCustomSettings      ("./settings/custom/"),
+    btnCopyPreloadedSettings    ("Copy"),
 
-    lblAttractions("Attractions"),      fbxAttractions(9, std::vector<Fbx>(9, Fbx(-1.0f, 1.0f))),
-    lblTypeRatios("Type Ratio"),        fbxTypeRatios(9, Ibx(0, 65536)),
+    btnValidateSettings("Validate"),
+    btnSaveSettings    ("Save"),
+
+    grpErrors("Errors"),
+    lsvErrors("TEST_ERROR_1;TEST_ERROR_2;TEST_ERROR_3;TEST_ERROR_4;TEST_ERROR_5;TEST_ERROR_6;TEST_ERROR_7"),
+
+    // UNIVERSAL WIDGETS
+
+    grpFooter ("Actions"),
+    btnExecute("Execute"),
     
     // METRICS
 
-    U(16),
-    M(8)
+    W                   (GetScreenWidth()),
+    H                   (GetScreenHeight()),
+
+    U                   (16),
+    M                   (8),
+
+    tglbtnWidth         (4*U),
+    flsvPreloadWidth    (16*U),
+    flsvPreloadHeight   (12*U),
+    fieldWidth          (4*U),
+    inlineLabelWidth    (5*U),
+    matrixFieldWidth    (3.5*U),
+    flsvCopyWidth       (10*U),
+    lsvErrorsHeight     (6*U),
+    btnWidth            (4*U),
+
+    headerRec           { 0, 0, 0, 0 },
+    bodyRec             { 0, 0, 0, 0 },
+    footerRec           { 0, 0, 0, 0 }
+
 {
     // read preloaded default and custom settings
-    readPreloadedDefaultSettings();
-    readPreloadedCustomSettings();
+    readPreloadedSettings(flsvSelectDefaultSettings, defaultSettings);
+    readPreloadedSettings(flsvSelectCustomSettings, customSettings);
+    readPreloadedSettings(flsvCopyDefaultSettings, defaultSettings);
+    readPreloadedSettings(flsvCopyCustomSettings, customSettings);
 }
 
 bool Launcher::run()
 {
-    W = GetScreenWidth();   // update screen width variable
-    H = GetScreenHeight();  // update screen height variable
-
+    if (W != GetScreenWidth() || H != GetScreenHeight()) SetWindowSize(W, H);
+    
     BeginDrawing();
     ClearBackground(GetColor(GuiGetStyle(DEFAULT, BACKGROUND_COLOR)));
 
     header();
 
-    bool submitted = (tglgrpSettingsTab.activeToggle == 0)
-        ? preloaded()
-        : customised();
+    bool submitted = false;
+    switch (tglgrpSettingsTab.activeToggle) {
+        case 0: submitted = preloaded(); break;
+        case 1: submitted = customised(); break;
+        default: break;
+    }
 
     EndDrawing();
 
@@ -615,40 +652,75 @@ void Launcher::header()
 {
     Rectangle r;
     
-    headerRect = Rectangle { M, M, W-2*M, U+2*M };
-    grpHeader.update(headerRect);
+    headerRec = Rectangle { M, M, W-2*M, U+2*M };
+    grpHeader.update(headerRec);
 
-    r = Rectangle { headerRect.x + M, headerRect.y + M, 4*U, U };
+    r = Rectangle { headerRec.x + M, headerRec.y + M, 4*U, U };
     tglgrpSettingsTab.update(r);
 }
 
 bool Launcher::preloaded()
 {
-    // set body rect, update group box
-    bodyRect = {
-        headerRect.x,
-        headerRect.y + headerRect.height + M,
-        W - 2*M,
-        H - headerRect.height - 3*M
+    // set body position
+    bodyRec.x = headerRec.x;
+    bodyRec.y = headerRec.y + headerRec.height + M;
+
+    // set preloaded settings groupbox dimensions
+    Rectangle preloadedSettingsRec = {
+        bodyRec.x,
+        bodyRec.y,
+        flsvPreloadWidth + 2*M,
+        flsvPreloadHeight + U + 3*M
     };
-    grpPreloadedSettings.update(bodyRect);
+
+    // set body size
+    bodyRec.width = preloadedSettingsRec.width;
+    bodyRec.height = preloadedSettingsRec.height;
+
+    // set footer dimensions
+    footerRec = {
+        bodyRec.x,
+        bodyRec.y + bodyRec.height + M,
+        bodyRec.width,
+        U + 2*M
+    };
+
+    // update window size variables
+    W = bodyRec.width + 2*M;
+    H = footerRec.y + footerRec.height + M;
+
+    // // visualise formatting
+    // unsigned char C = 255, A = 31;
+    // DrawRectangleRec(headerRec,            Color{ 0, 0, 0, A });
+    // DrawRectangleRec(bodyRec,              Color{ 0, 0, 0, A });
+    // // DrawRectangleRec(preloadedSettingsRec, Color{ C, 0, 0, A });
+    // DrawRectangleRec(footerRec,            Color{ 0, 0, 0, A });
+
+    // preloaded settings groupbox
+    grpPreloadedSettings.update(preloadedSettingsRec);
 
     Rectangle r;
 
-    // preloaded/custom settings toggle group
-    r = { bodyRect.x + M, bodyRect.y + M, 4*U, U };
-    tglgrpPreloadedSettings.update(r);
+    // update select default/custom settings toggle group
+    r = { preloadedSettingsRec.x + M, preloadedSettingsRec.y + M, tglbtnWidth, U };
+    tglgrpSelectPreloadedSettings.update(r);
 
     // update settings file list view
-    r = { r.x,
-          r.y + r.height + M,
-          bodyRect.width - 2*M,
-          bodyRect.height - r.height - 3*M
-    }; switch (tglgrpPreloadedSettings.activeToggle) {
-        case 0: flsvDefaultSettings.update(r); break;
-        case 1: flsvCustomSettings.update(r); break;
+    r = { r.x, r.y + r.height + M, flsvPreloadWidth, flsvPreloadHeight };
+    switch (tglgrpSelectPreloadedSettings.activeToggle) {
+        case 0: flsvSelectDefaultSettings.update(r); break;
+        case 1: flsvSelectCustomSettings.update(r); break;
         default: break;
     }
+
+    // FOOTER
+
+    // footer groupbox
+    grpFooter.update(footerRec);
+
+    // validate button
+    r = { footerRec.x + footerRec.width/2 - btnWidth/2, footerRec.y + M, btnWidth, U };
+    btnExecute.update(r);
 
     // TODO: return true if settings are selected and user presses execute
 
@@ -657,101 +729,205 @@ bool Launcher::preloaded()
 
 bool Launcher::customised()
 {
-   // set body position
-    bodyRect.x = headerRect.x;
-    bodyRect.y = headerRect.y + headerRect.height + M;
-
     // widget related counts
     int T = 9;       // number of types     TODO: get from customisedSettings
     int singles = 7; // number of single settings in col1
     int multis = 2;  // number of multi settings in col2
 
-    // widget widths
-    float singleFieldWidth = 4*U;
-    float singleLabelWidth = 5*U;
-    float matrixFieldWidth = 4*U;
+    // set body position
+    bodyRec.x = headerRec.x;
+    bodyRec.y = headerRec.y + headerRec.height + M;
 
-    // column dimesnions
-    Rectangle col1 = {
-        bodyRect.x,
-        bodyRect.y,
-        3*M + singleLabelWidth + singleFieldWidth,
+    // set custom settings columns
+    Rectangle customiseColumn1 = {
+        bodyRec.x,
+        bodyRec.y,
+        inlineLabelWidth + fieldWidth + 3*M,
         singles*(U+M)+M
     };
-    Rectangle col2 = {
-        col1.x + col1.width,
-        col1.y,
-        T*(matrixFieldWidth+M)+M,
-        T*(U+M)+M + multis*(U+M)+M
+    Rectangle customiseColumn2 = {
+        customiseColumn1.x + customiseColumn1.width,
+        customiseColumn1.y,
+        T*(matrixFieldWidth + M) + M,
+        T*(U+M) + multis*(U+M) + 2*M
     };
-    DrawRectangleRec(col1, Color{ 255, 0, 0, 127 }); // visualise column 1
-    DrawRectangleRec(col2, Color{ 0, 255, 0, 127 }); // visualise column 2
 
-    // set body size, update group box
-    bodyRect.width = col1.width + col2.width;
-    bodyRect.height = std::max(col1.height, col2.height);
-    grpCustomisedSettings.update(bodyRect);
+    // update body height
+    bodyRec.height = std::max(customiseColumn1.height, customiseColumn2.height);
+
+    // set copy settings rows
+    Rectangle copyRow1 = {
+        customiseColumn2.x + customiseColumn2.width + M,
+        customiseColumn2.y,
+        flsvCopyWidth + 2*M,
+        bodyRec.height - U - 2*M
+    };
+    Rectangle copyRow2 = {
+        copyRow1.x,
+        copyRow1.y + copyRow1.height,
+        copyRow1.width,
+        bodyRec.height - copyRow1.height
+    };
+
+    // set custom settings groupbox dimensions
+    Rectangle customSettingsRec = {
+        customiseColumn1.x,
+        customiseColumn2.y,
+        customiseColumn1.width + customiseColumn2.width,
+        bodyRec.height
+    };
+
+    // set copy settings groupbox dimensions
+    Rectangle copySettingsRec = {
+        customSettingsRec.x + customSettingsRec.width + M,
+        customSettingsRec.y,
+        flsvCopyWidth + 2*M,
+        bodyRec.height
+    };
+
+    // update body width
+    bodyRec.width = -customSettingsRec.x + copySettingsRec.x + copySettingsRec.width;
+
+    // set error widget dimensions
+    Rectangle errorsRec = { 0, 0, 0, 0 };
+    Rectangle lsvErrorsRec = { 0, 0, 0, 0 };
+    if (lsvErrors.text[0] != '\0') {
+        errorsRec = {
+            bodyRec.x,
+            bodyRec.y + bodyRec.height + M,
+            bodyRec.width,
+            lsvErrorsHeight + 2*M
+        };
+        lsvErrorsRec = {
+            errorsRec.x + M,
+            errorsRec.y + M,
+            errorsRec.width - 2*M,
+            errorsRec.height - 2*M
+        };
+        bodyRec.height += errorsRec.height + M; // update body height
+    }
+
+    // set footer dimensions
+    footerRec = {
+        bodyRec.x,
+        bodyRec.y + bodyRec.height + M,
+        bodyRec.width,
+        U + 2*M
+    };
+
+    // update window size variables
+    W = bodyRec.width + 2*M;
+    H = footerRec.y + footerRec.height + M;
+
+    // // visualise formatting
+    // unsigned char C = 255, A = 31;
+    // DrawRectangleRec(headerRec,         Color{ 0, 0, 0, A });
+    // DrawRectangleRec(bodyRec,           Color{ 0, 0, 0, A });
+    // DrawRectangleRec(customSettingsRec, Color{ 0, 0, 0, A });
+    // DrawRectangleRec(customiseColumn1,  Color{ C, 0, 0, A });
+    // DrawRectangleRec(customiseColumn2,  Color{ 0, C, 0, A });
+    // DrawRectangleRec(copySettingsRec,   Color{ 0, 0, 0, A });
+    // DrawRectangleRec(copyRow1,          Color{ C, C, 0, A });
+    // DrawRectangleRec(copyRow2,          Color{ 0, C, C, A });
+    // DrawRectangleRec(errorsRec,         Color{ C, 0, C, A });
+    // DrawRectangleRec(footerRec,         Color{ 0, 0, 0, A });
 
     Rectangle r; // rectangle buffer
 
-    // SINGEL SETTINGS
+    // EDIT CUSTOM SETTINGS
 
-    // single setting column labels
-    r = { col1.x+M, col1.y+M, singleLabelWidth, U };
-    lblName.update(r);          r.y += M+U;
-    lblTypes.update(r);         r.y += M+U;
-    lblSize.update(r);          r.y += M+U;
-    lblCount.update(r);         r.y += M+U;
-    lblInnerRadius.update(r);   r.y += M+U;
-    lblResistance.update(r);    r.y += M+U;
-    lblStep.update(r);          r.y += M+U;
+    grpCustomisedSettings.update(customSettingsRec);
 
-    // single setting column fields
-    r = { col1.x + 2*M + singleLabelWidth, col1.y + M, singleFieldWidth, U };
-    tbxName.update(r);          r.y += M+U;
-    ibxTypes.update(r);         r.y += M+U;
-    ibxSize.update(r);          r.y += M+U;
-    ibxCount.update(r);         r.y += M+U;
-    fbxInnerRadius.update(r);   r.y += M+U;
-    fbxResistance.update(r);    r.y += M+U;
-    fbxStep.update(r);          r.y += M+U;
+    // col1: single setting column labels
+    r = { customSettingsRec.x+M, customSettingsRec.y+M, inlineLabelWidth, U };
+    lblName.update(r);          r.y += M + U;
+    lblTypes.update(r);         r.y += M + U;
+    lblSize.update(r);          r.y += M + U;
+    lblCount.update(r);         r.y += M + U;
+    lblInnerRadius.update(r);   r.y += M + U;
+    lblResistance.update(r);    r.y += M + U;
+    lblStep.update(r);          r.y += M + U;
 
-    // MULTI SETTINGS
+    // col1: single setting column fields
+    r = { customSettingsRec.x + 2*M + inlineLabelWidth, customSettingsRec.y + M, fieldWidth, U };
+    tbxName.update(r);          r.y += M + U;
+    ibxTypes.update(r);         r.y += M + U;
+    ibxSize.update(r);          r.y += M + U;
+    ibxCount.update(r);         r.y += M + U;
+    fbxInnerRadius.update(r);   r.y += M + U;
+    fbxResistance.update(r);    r.y += M + U;
+    fbxStep.update(r);          r.y += M + U;
 
-    // attraction matrix
-    r = { col2.x+M, col2.y+M, col2.width-2*M, U };
+    // col2: attraction matrix
+    r = { customiseColumn2.x+M, customiseColumn2.y+M, customiseColumn2.width-2*M, U };
     lblAttractions.update(r);
     r = { r.x, r.y+U, matrixFieldWidth, U };
     for (int i = 0; i < T; i++) {
         for (int j = 0; j < T; j++) {
             fbxAttractions[i][j].update(r);
             r.x += matrixFieldWidth + M;
-        } r.x = col2.x + M;
+        } r.x = customiseColumn2.x + M;
           r.y += U + M;
     }
 
-    // type ratios
-    r = { col2.x+M, r.y, col2.width-2*M, U };
+    // col2: type ratios
+    r = { customiseColumn2.x+M, r.y, customiseColumn2.width-2*M, U };
     lblTypeRatios.update(r);
     r = { r.x, r.y+U, matrixFieldWidth, U };
     for (int i = 0; i < T; i++) {
         fbxTypeRatios[i].update(r);
         r.x += matrixFieldWidth + M;
     }
+
+    // COPY PRELOADED SETTINGS
+
+    grpCopyPreloadedSettings.update(copySettingsRec);
+
+    // copy default/custom toggle group
+    r = { copySettingsRec.x + M, copySettingsRec.y + M, tglbtnWidth, U };
+    tglgrpCopyPreloadedSettings.update(r);
+
+    // update copy settings file list view
+    r = { r.x,
+          r.y + r.height + M,
+          flsvCopyWidth,
+          copyRow2.y - (r.y + r.height + M)
+          
+    }; switch (tglgrpCopyPreloadedSettings.activeToggle) {
+        case 0: flsvCopyDefaultSettings.update(r); break;
+        case 1: flsvCopyCustomSettings.update(r); break;
+        default: break;
+    }
+
+    // copy settings button
+    r = { copyRow2.x + M, copyRow2.y + M, btnWidth, U };
+    btnCopyPreloadedSettings.update(r);
+
+    // ERRORS
+
+    grpErrors.update(errorsRec);
+    lsvErrors.update(lsvErrorsRec);
+
+    // FOOTER
+
+    // footer groupbox
+    grpFooter.update(footerRec);
+
+    // validate button
+    r = { footerRec.x + M, footerRec.y + M, btnWidth, U };
+    btnValidateSettings.update(r);
+
+    // save button
+    r.x += btnWidth + M;
+    btnSaveSettings.update(r);
+
+    // execute button
+    r = { footerRec.x + footerRec.width - btnWidth - M, footerRec.y + M, btnWidth, U };
+    btnExecute.update(r);
     
     // TODO: return true if valid settings are entered and user presses execute
 
     return false;
-}
-
-void Launcher::readPreloadedDefaultSettings()
-{
-    readPreloadedSettings(flsvDefaultSettings, defaultSettings);
-}
-
-void Launcher::readPreloadedCustomSettings()
-{
-    readPreloadedSettings(flsvCustomSettings, customSettings);
 }
 
 void Launcher::readPreloadedSettings(FLsv& flsv, std::vector<ParticleLife::Settings>& settings)
@@ -764,4 +940,14 @@ void Launcher::readPreloadedSettings(FLsv& flsv, std::vector<ParticleLife::Setti
         }
     }
     flsv.updateContents();
+}
+
+void Launcher::validateSettings(ParticleLife::Settings& settings)
+{
+
+}
+
+void Launcher::saveSettings(ParticleLife::Settings& settings)
+{
+
 }
