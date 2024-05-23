@@ -401,15 +401,13 @@ bool Launcher::customised()
 
     // validate button
     r.x = footerRec.x + (midGap - btnWidth) / 2;
-    if (btnValidateCustomSettings.update(r)) {
-        bool validity = validateInputSettings();
-    }
+    if (btnValidateCustomSettings.update(r))
+        validateInputSettings();
 
     // save button
     r.x = footerRec.x + midGap;
-    if (btnSaveCustomSettings.update(r)) {
-        bool saved = saveCustomisedSettings();
-    }
+    if (btnSaveCustomSettings.update(r))
+        saveCustomisedSettings();
 
     // execute button, return true on valid input to execute
     r.x = footerRec.x + footerRec.width - (midGap + btnWidth) / 2;
@@ -553,7 +551,7 @@ bool Launcher::validateInputSettings()
     // validate paricles
 
     if (ibxSeed.value == -1) {
-        if (userCustomisedSettings.particles.size() != ibxCount.value)
+        if (userCustomisedSettings.particles.size() != static_cast<long long unsigned int>(ibxCount.value))
             errors.push_back("Copied particle data of length "+to_string(userCustomisedSettings.particles.size())+ " does not match count input");
     }
 
@@ -564,7 +562,7 @@ bool Launcher::validateInputSettings()
     if (errors.size() > 0) {
         for (char c : errors[0]) lsvErrors.text[i++] = c;
         if (errors.size() > 1) {
-            for (int j = 1; j < errors.size(); j++) {
+            for (int j = 1; static_cast<long long unsigned int>(j) < errors.size(); j++) {
                 lsvErrors.text[i++] = ';';
                 for (char c : errors[j])
                     lsvErrors.text[i++] = c;
