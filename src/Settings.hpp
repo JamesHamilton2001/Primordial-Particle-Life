@@ -56,6 +56,8 @@ struct Settings
     Settings();
     Settings(const filesystem::directory_entry& dirEntry);
 
+    void generateParticleData();
+
     friend ostream& operator <<(ostream& os, const Settings& settings);
 };
 

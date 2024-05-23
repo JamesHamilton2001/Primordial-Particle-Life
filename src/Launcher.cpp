@@ -119,12 +119,15 @@ bool Launcher::run()
 
 Settings& Launcher::getSettings()
 {
+    Settings& s = userCustomisedSettings;
     if (tglgrpSettingsTab.activeToggle == 0) {
         if (tglgrpSelectPreloadedSettings.activeToggle == 0)
-            return defaultSettings[flsvSelectDefaultSettings.activeIdx];
-        else return customSettings[flsvSelectCustomSettings.activeIdx];
+            s = defaultSettings[flsvSelectDefaultSettings.activeIdx];
+        else s = customSettings[flsvSelectCustomSettings.activeIdx];
     }
-    return userCustomisedSettings;
+    s = userCustomisedSettings;
+    s.generateParticleData();
+    return s;
 }
 
 void Launcher::header()

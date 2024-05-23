@@ -151,15 +151,42 @@ Settings::Settings(const filesystem::directory_entry& dirEntry)
     file.close();
 }
 
+void Settings::generateParticleData()
+{
+    // dont overwrite for preloading particles, recalculate ratio
+    if (seed == -1) {
+        typeRatio = vector<int>(types, 0);
+        for (Particle& p : particles)
+            typeRatio[p.type]++;
+        return;
+    }
+
+    SetRandomSeed(seed);
+    particles.clear();
+    int ct = 0;
+    while (ct < count) {
+        for (int t = 0; t < types; t++) {
+            for (int i = 0; i < typeRatio[t] && ct < count; i++) {
+                particles.emplace_back(Particle(
+                    t,
+                    GetRandomValue(0, static_cast<int>(2*size)) + GetRandomValue(0, 1000) / 1000.0f,
+                    GetRandomValue(0, static_cast<int>(2*size)) + GetRandomValue(0, 1000) / 1000.0f
+                ));
+                ct++;
+            }
+        }
+    }    
+}
+
 ostream& operator << (ostream& os, const Settings& settings)
 {
-    os << "| name | " << settings.name
-       << "| types | " << settings.types
-       << "| size | " << settings.size
-       << "| count | " << settings.count
-       << "| innerRadius | " << settings.innerRadius
-       << "| resistance | " << settings.resistance
-       << "| step | " << settings.step;
+    os << "| name | " << settings.name << endl
+       << "| types | " << settings.types << endl
+       << "| size | " << settings.size << endl
+       << "| count | " << settings.count << endl
+       << "| innerRadius | " << settings.innerRadius << endl
+       << "| resistance | " << settings.resistance << endl
+       << "| step | " << settings.step << endl;
 
     os << "| attractions | " << endl;
     for (int i = 0; i < settings.types; i++) {

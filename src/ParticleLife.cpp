@@ -23,12 +23,7 @@ ParticleLife::ParticleLife(Settings& settings) :
     attractions (settings.attractions),
     particles   (settings.particles),
     spatialHash (settings.size, settings.types)
-{
-    if (settings.seed != -1) {
-        SetRandomSeed(settings.seed);
-        randomisePositions();
-    }
-}
+{}
 
 void ParticleLife::update()
 {
