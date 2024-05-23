@@ -1,0 +1,113 @@
+{
+    "frameCount": 3812,
+    "launchSettings":
+    {
+        "name": "debug_preloaded",
+        "types": 3,
+        "size": 4,
+        "count": 15,
+        "innerRadius": 0.5,
+        "resistance": 0.001,
+        "step": 0.001,
+        "attractions": [
+            [0.005, 0.002, -0.002],
+            [-0.002, 0.005, 0.002],
+            [0.002, -0.002, 0.005]
+        ],
+        "seed": -1,
+        "typeRatio": [ 5, 4, 6 ],
+        "particles": [
+            {
+                "type": 2,
+                "xPos": 1.53216,
+                "yPos": 3.98131,
+                "xVel": 0,
+                "yVel": 0
+},{
+                "type": 2,
+                "xPos": 4.97687,
+                "yPos": 6.54271,
+                "xVel": 0,
+                "yVel": 0
+},{
+                "type": 2,
+                "xPos": 3.50182,
+                "yPos": 4.89689,
+                "xVel": 0,
+                "yVel": 0
+},{
+                "type": 0,
+                "xPos": 6.28287,
+                "yPos": 6.17088,
+                "xVel": 0,
+                "yVel": 0
+},{
+                "type": 0,
+                "xPos": 6.23981,
+                "yPos": 6.88536,
+                "xVel": 0,
+                "yVel": 0
+},{
+                "type": 2,
+                "xPos": 2.18074,
+                "yPos": 1.2051,
+                "xVel": 0,
+                "yVel": 0
+},{
+                "type": 1,
+                "xPos": 2.21171,
+                "yPos": 1.58815,
+                "xVel": 0,
+                "yVel": 0
+},{
+                "type": 2,
+                "xPos": 6.41498,
+                "yPos": 6.5213,
+                "xVel": 0,
+                "yVel": 0
+},{
+                "type": 0,
+                "xPos": 7.66511,
+                "yPos": 1.27052,
+                "xVel": 0,
+                "yVel": 0
+},{
+                "type": 0,
+                "xPos": 7.00746,
+                "yPos": 0.929103,
+                "xVel": 0,
+                "yVel": 0
+},{
+                "type": 0,
+                "xPos": 2.86254,
+                "yPos": 0.10326,
+                "xVel": 0,
+                "yVel": 0
+},{
+                "type": 1,
+                "xPos": 4.00796,
+                "yPos": 3.89467,
+                "xVel": 0,
+                "yVel": 0
+},{
+                "type": 1,
+                "xPos": 5.4677,
+                "yPos": 2.64812,
+                "xVel": 0,
+                "yVel": 0
+},{
+                "type": 1,
+                "xPos": 5.70162,
+                "yPos": 6.42112,
+                "xVel": 0,
+                "yVel": 0
+},{
+                "type": 2,
+                "xPos": 2.96201,
+                "yPos": 0.786016,
+                "xVel": 0,
+                "yVel": 0
+}
+        ]
+    },
+}

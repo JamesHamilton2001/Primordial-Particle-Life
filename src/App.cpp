@@ -201,10 +201,10 @@ void App::runStatistics() const
         file << settings.typeRatio[i];
         if (i < T-1) file << ", ";
     } file << " ]," << endl;
-    file <<m+m<< "\"particles\": [" << endl;
+    file <<m+m<< "\"particles\": [" << endl <<m+m+m;
     for (int i = 0; i < settings.count; i++) {
         const Particle& p = settings.particles[i];
-        file <<m+m+m<< "{\n";
+        file << "{" << endl;
         file <<m+m+m+m<< "\"type\": " << p.type << "," << endl;
         file <<m+m+m+m<< "\"xPos\": " << p.pos.x << "," << endl;
         file <<m+m+m+m<< "\"yPos\": " << p.pos.y << "," << endl;
@@ -212,8 +212,7 @@ void App::runStatistics() const
         file <<m+m+m+m<< "\"yVel\": " << p.vel.y << endl;
         file <<m+m+m<< "}";
         if (i < settings.count-1) file << ',';
-        file << endl;
-    } file <<m+m<< "]" << endl;
+    } file << endl <<m+m<< "]" << endl;
     file <<m<< "}," << endl;
 
     file << "}" << endl;
