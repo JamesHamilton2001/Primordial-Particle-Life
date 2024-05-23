@@ -4,7 +4,7 @@
 #include <iostream>
 #include <string>
 #include <regex>
-
+#include <fstream>
 #include <filesystem>
 namespace fs = std::filesystem;
 
@@ -466,7 +466,7 @@ bool Launcher::validateInputSettings()
         if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9'))
             continue;
         for (char sc : validSpecialChars)
-            if (c == sc) break;
+            if (c == sc) {break;}
     }if (i != nameLength)
         errors.push_back(field + "contains invalid characters.");
 
@@ -561,14 +561,45 @@ bool Launcher::validateInputSettings()
         } lsvErrors.text[i] = '\0';
     }
 
+    // return false if errors found
+    if (errors.size() > 0) return false;
+
+    // INSERT INPUT SETTINGS TO USER CUSTOMISED SETTINGS OBJECT
+
+    userCustomisedSettings.name = std::string(tbxName.text);
+    userCustomisedSettings.types = ibxTypes.value;
+    userCustomisedSettings.size = ibxSize.value;
+    userCustomisedSettings.count = ibxCount.value;
+    userCustomisedSettings.innerRadius = fbxInnerRadius.value;
+    userCustomisedSettings.resistance = fbxResistance.value;
+    userCustomisedSettings.step = fbxStep.value;
+
+    userCustomisedSettings.attractions.clear();
+    for (int i = 0; i < ibxTypes.value; i++) {
+        userCustomisedSettings.attractions.push_back(std::vector<float>());
+        for (int j = 0; j < ibxTypes.value; j++)
+            userCustomisedSettings.attractions[i].push_back(fbxAttractions[i][j].value);
+    }
+    // TODO: proper seed when widget implemented
+    userCustomisedSettings.seed = (userCustomisedSettings.particles.size() > 0) ? -1 : 0;
+
+    userCustomisedSettings.typeRatio.clear();
+    for (int i = 0; i < ibxTypes.value; i++)
+        userCustomisedSettings.typeRatio.push_back(fbxTypeRatios[i].value);
+    
+    // TODO: take custom input for particles once widget(s) implemented
+    if (userCustomisedSettings.seed != -1)
+        userCustomisedSettings.particles.clear();
+
+    std::cout << userCustomisedSettings << std::endl;
     // return true if no errors
-    return errors.size() == 0;
+    return true;
 }
 
 bool Launcher::saveCustomisedSettings()
 {
-    // // validate settings
-    // if (!validateInputSettings()) return false;
+    // validate settings
+    if (!validateInputSettings()) return false;
 
     return false;
 }

@@ -11,6 +11,14 @@
 #include <limits>
 
 
+/*
+TODO:
+ - add warnings widget for seed/ratio/particles shenanigans
+ - function to copy to customised settings
+ - create widget for custom seed
+ - update particle life setting object to contatin type ratios
+*/
+
 
 class Launcher
 {
@@ -111,7 +119,7 @@ class Launcher
     bool saveCustomisedSettings();
 
     void readPreloadedSettings(FLsv& flsv, std::vector<ParticleLife::Settings>& settings);
-
+    
 };
 
 

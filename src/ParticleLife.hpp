@@ -13,6 +13,8 @@
 #include <filesystem>
 namespace fs = std::filesystem;
 
+#define PARTICLELIFE_DEFAULT_SETTINGS_DIR "./settings/default/"
+#define PARTICLELIFE_CUSTOM_SETTINGS_DIR  "./settings/custom/"
 
 #define PARTICLELIFE_MIN_NAME_LENGTH     (1)
 #define PARTICLELIFE_MAX_NAME_LENGTH     (64)
@@ -22,7 +24,7 @@ namespace fs = std::filesystem;
 #define PARTICLELIFE_MAX_TYPES           (9)
 #define PARTICLELIFE_MIN_GRID_SIZE       (3)
 #define PARTICLELIFE_MAX_GRID_SIZE       (512)
-#define PARTICLELIFE_MIN_COUNT           (1)
+#define PARTICLELIFE_MIN_COUNT           (PARTICLELIFE_MIN_TYPES)
 #define PARTICLELIFE_MAX_COUNT           (65536)
 #define PARTICLELIFE_MIN_INNER_RADIUS    (PARTICLELIFE_MIN_FLOATING_POINT)
 #define PARTICLELIFE_MAX_INNER_RADIUS    (1.0f)
