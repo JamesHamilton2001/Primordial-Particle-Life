@@ -25,6 +25,7 @@ class App
     int height;
     int fpsTarget;
     long long unsigned int finalFrame;
+    int progressPercent;
 
     ParticleLife particleLife;
 

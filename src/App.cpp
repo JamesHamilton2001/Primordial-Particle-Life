@@ -19,6 +19,7 @@ App::App(int width, int height, int fpsTarget, Settings& settings, long long uns
     height(height),
     fpsTarget(fpsTarget),
     finalFrame(finalFrame),
+    progressPercent(0),
     particleLife(settings),
     paused(false),
     drawGrid(true),
@@ -48,6 +49,12 @@ bool App::update()
 
     // draw simulation
     draw();
+
+    int pp = int(100 * particleLife.getFrameCount() / finalFrame);
+    if (pp != progressPercent) {
+        progressPercent = pp;
+        cout << "Progress: " << progressPercent << "%" << endl;
+    }
 
     return (particleLife.getFrameCount() < finalFrame);
 }
