@@ -46,6 +46,7 @@ Launcher::Launcher() :
     lblInnerRadius("Inner Radius:"),    fbxInnerRadius(PARTICLELIFE_MIN_INNER_RADIUS, PARTICLELIFE_MAX_INNER_RADIUS), 
     lblResistance("Resistance:"),       fbxResistance(PARTICLELIFE_MIN_RESISTANCE, PARTICLELIFE_MAX_RESISTANCE),
     lblStep("Step:"),                   fbxStep(PARTICLELIFE_MIN_STEP, PARTICLELIFE_MAX_STEP),
+    lblSeed("Seed:"),                   ibxSeed(PARTICLELIFE_MIN_SEED, PARTICLELIFE_MAX_SEED),
     lblAttractions("Attractions"),      fbxAttractions(PARTICLELIFE_MAX_TYPES, std::vector<Fbx>(PARTICLELIFE_MAX_TYPES, Fbx(PARTICLELIFE_MIN_ATTRACTION, PARTICLELIFE_MAX_ATTRACTION))),
     lblTypeRatios("Type Ratio"),        fbxTypeRatios(PARTICLELIFE_MAX_TYPES, Ibx(PARTICLELIFE_MIN_RATIO, PARTICLELIFE_MAX_RATIO)),
 
@@ -215,7 +216,7 @@ bool Launcher::customised()
 {
     // widget related counts
     int T = std::clamp(ibxTypes.value, PARTICLELIFE_MIN_TYPES, PARTICLELIFE_MAX_TYPES);
-    int singles = 7;        // number of single settings in col1
+    int singles = 8;        // number of single settings in col1
     int multis = 2;         // number of multi settings in col2
 
     // set body position
@@ -331,6 +332,7 @@ bool Launcher::customised()
     lblInnerRadius.update(r);   r.y += M + U;
     lblResistance.update(r);    r.y += M + U;
     lblStep.update(r);          r.y += M + U;
+    lblSeed.update(r);          r.y += M + U;
 
     // col1: single setting column fields
     r = { customSettingsRec.x + 2*M + inlineLabelWidth, customSettingsRec.y + M, fieldWidth, U };
@@ -342,6 +344,7 @@ bool Launcher::customised()
     fbxInnerRadius.update(r);   r.y += M + U;
     fbxResistance.update(r);    r.y += M + U;
     fbxStep.update(r);          r.y += M + U;
+    ibxSeed.update(r);          r.y += M + U;
 
     // col2: attraction matrix
     r = { customiseColumn2.x+M, customiseColumn2.y+M, customiseColumn2.width-2*M, U };
@@ -438,6 +441,7 @@ void Launcher::readPreloadedSettings(FLsv& flsv, std::vector<ParticleLife::Setti
     }
     if (settings.empty())
         settings.push_back(ParticleLife::Settings());
+    flsv.activeIdx = 0;
     flsv.updateContents();
 }
 
@@ -521,6 +525,14 @@ bool Launcher::validateInputSettings()
     if (fbxStep.value > PARTICLELIFE_MAX_STEP)
         errors.push_back(field + "cannot exceed " + std::to_string(PARTICLELIFE_MAX_STEP) + ".");
 
+    // valiate seed
+
+    field = "Seed: ";
+    if (ibxSeed.value < PARTICLELIFE_MIN_SEED)
+        errors.push_back(field + "must exceed " + std::to_string(PARTICLELIFE_MIN_SEED) + ".");
+    if (ibxSeed.value > PARTICLELIFE_MAX_SEED)
+        errors.push_back(field + "cannot exceed " + std::to_string(PARTICLELIFE_MAX_SEED) + ".");
+
     // valiudate attractions
 
     for (int i = 0; i < ibxTypes.value; i++) {
@@ -535,6 +547,7 @@ bool Launcher::validateInputSettings()
 
     // validate type ratios
 
+    field = "Type Ratios: ";
     int ratioSum = 0;
     for (int i = 0; i < ibxTypes.value; i++) {
         field = "TypeRatio["+std::to_string(i)+"]: ";
@@ -544,7 +557,13 @@ bool Launcher::validateInputSettings()
             errors.push_back(field + "cannot exceed " + std::to_string(PARTICLELIFE_MAX_RATIO) + ".");
         ratioSum += fbxTypeRatios[i].value;
     } if (ratioSum > ibxCount.value)
-        errors.push_back("Type Ratios: sum must not exceed count.");
+        errors.push_back(field + "sum must not exceed count.");
+
+    // validate paricles
+
+    if (ibxSeed.value == -1)
+        if (userCustomisedSettings.particles.size() != ibxCount.value)
+            errors.push_back("Copied particle data of length "+std::to_string(userCustomisedSettings.particles.size())+ " does not match count input");
 
     // UPDATE ERROR DISPLAY
 
@@ -566,34 +585,36 @@ bool Launcher::validateInputSettings()
 
     // INSERT INPUT SETTINGS TO USER CUSTOMISED SETTINGS OBJECT
 
-    userCustomisedSettings.name = std::string(tbxName.text);        // name
-    userCustomisedSettings.types = ibxTypes.value;                  // types
-    userCustomisedSettings.size = ibxSize.value;                    // size
-    userCustomisedSettings.count = ibxCount.value;                  // count
-    userCustomisedSettings.innerRadius = fbxInnerRadius.value;      // inner radius
-    userCustomisedSettings.resistance = fbxResistance.value;        // resistance
-    userCustomisedSettings.step = fbxStep.value;                    // step
+    ParticleLife::Settings& s = userCustomisedSettings;
 
-    userCustomisedSettings.attractions.clear();                     // attractions
+    s.name = std::string(tbxName.text);        // name
+    s.types = ibxTypes.value;                  // types
+    s.size = ibxSize.value;                    // size
+    s.count = ibxCount.value;                  // count
+    s.innerRadius = fbxInnerRadius.value;      // inner radius
+    s.resistance = fbxResistance.value;        // resistance
+    s.step = fbxStep.value;                    // step
+
+    s.attractions.clear();                     // attractions
     for (int i = 0; i < ibxTypes.value; i++) {
-        userCustomisedSettings.attractions.push_back(std::vector<float>());
+        s.attractions.push_back(std::vector<float>());
         for (int j = 0; j < ibxTypes.value; j++)
-            userCustomisedSettings.attractions[i].push_back(fbxAttractions[i][j].value);
+            s.attractions[i].push_back(fbxAttractions[i][j].value);
     }
-    // TODO: proper seed when widget implemented                    // seed
-    userCustomisedSettings.seed = 0;
 
-    userCustomisedSettings.typeRatio.clear();                       // type ratios
+    s.seed = ibxSeed.value;                    // seed
+
+    s.typeRatio.clear();                       // type ratios
     for (int i = 0; i < ibxTypes.value; i++)
-        userCustomisedSettings.typeRatio.push_back(fbxTypeRatios[i].value);
+        s.typeRatio.push_back(fbxTypeRatios[i].value);
     
-    // TODO: take input for seed once widget(s) implemented
-    if (userCustomisedSettings.seed != -1)                          // particles
-        userCustomisedSettings.particles.clear();
+    // TODO: take input for particles once widget(s) implemented
+    if (s.seed != -1)                          // particles
+        s.particles.clear();
 
     // TODO: input for set particles once widget(s) implemented
 
-    std::cout << userCustomisedSettings << std::endl;
+    std::cout << s << std::endl;
 
     return true;  // false already returned on errors found
 }
@@ -644,5 +665,11 @@ bool Launcher::saveCustomisedSettings()
     }
 
     file.close();
+
+    // update custom settings list views
+
+    readPreloadedSettings(flsvSelectCustomSettings, customSettings);
+    readPreloadedSettings(flsvCopyCustomSettings, customSettings);
+
     return true;
 }

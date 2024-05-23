@@ -58,7 +58,6 @@ class Launcher
 
     // CUSTOMISED SETTINGS TAB WIDGETS
 
-    // NOTE: attractions and type ratios initialised to max size, use types variable. is resized before use in simulation
     Grp grpCustomisedSettings;                                         // customised settings group
     Lbl lblName;        Tbx tbxName;                                   // name text box
     Lbl lblTypes;       Ibx ibxTypes;                                  // types int box
@@ -67,6 +66,7 @@ class Launcher
     Lbl lblInnerRadius; Fbx fbxInnerRadius;                            // inner radius float box
     Lbl lblResistance;  Fbx fbxResistance;                             // resistance float box
     Lbl lblStep;        Fbx fbxStep;                                   // step float box
+    Lbl lblSeed;        Ibx ibxSeed;                                   // seed int box
     Lbl lblAttractions; std::vector<std::vector<Fbx>> fbxAttractions;  // attractions matrix float boxes
     Lbl lblTypeRatios;  std::vector<Ibx> fbxTypeRatios;                // type ratios int boxes
 
