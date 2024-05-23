@@ -359,6 +359,8 @@ void ParticleLife::debugGrid()
 
 
 
+const std::string ParticleLife::Settings::defaultSettingsDir = "./settings/default/";
+const std::string ParticleLife::Settings::customSettingsDir = "./settings/custom/";
 
 ParticleLife::Settings::Settings() :
     name("DEFAULT_HARDCODED_SETTINGS"),

@@ -566,34 +566,36 @@ bool Launcher::validateInputSettings()
 
     // INSERT INPUT SETTINGS TO USER CUSTOMISED SETTINGS OBJECT
 
-    userCustomisedSettings.name = std::string(tbxName.text);
-    userCustomisedSettings.types = ibxTypes.value;
-    userCustomisedSettings.size = ibxSize.value;
-    userCustomisedSettings.count = ibxCount.value;
-    userCustomisedSettings.innerRadius = fbxInnerRadius.value;
-    userCustomisedSettings.resistance = fbxResistance.value;
-    userCustomisedSettings.step = fbxStep.value;
+    userCustomisedSettings.name = std::string(tbxName.text);        // name
+    userCustomisedSettings.types = ibxTypes.value;                  // types
+    userCustomisedSettings.size = ibxSize.value;                    // size
+    userCustomisedSettings.count = ibxCount.value;                  // count
+    userCustomisedSettings.innerRadius = fbxInnerRadius.value;      // inner radius
+    userCustomisedSettings.resistance = fbxResistance.value;        // resistance
+    userCustomisedSettings.step = fbxStep.value;                    // step
 
-    userCustomisedSettings.attractions.clear();
+    userCustomisedSettings.attractions.clear();                     // attractions
     for (int i = 0; i < ibxTypes.value; i++) {
         userCustomisedSettings.attractions.push_back(std::vector<float>());
         for (int j = 0; j < ibxTypes.value; j++)
             userCustomisedSettings.attractions[i].push_back(fbxAttractions[i][j].value);
     }
-    // TODO: proper seed when widget implemented
-    userCustomisedSettings.seed = (userCustomisedSettings.particles.size() > 0) ? -1 : 0;
+    // TODO: proper seed when widget implemented                    // seed
+    userCustomisedSettings.seed = 0;
 
-    userCustomisedSettings.typeRatio.clear();
+    userCustomisedSettings.typeRatio.clear();                       // type ratios
     for (int i = 0; i < ibxTypes.value; i++)
         userCustomisedSettings.typeRatio.push_back(fbxTypeRatios[i].value);
     
-    // TODO: take custom input for particles once widget(s) implemented
-    if (userCustomisedSettings.seed != -1)
+    // TODO: take input for seed once widget(s) implemented
+    if (userCustomisedSettings.seed != -1)                          // particles
         userCustomisedSettings.particles.clear();
 
+    // TODO: input for set particles once widget(s) implemented
+
     std::cout << userCustomisedSettings << std::endl;
-    // return true if no errors
-    return true;
+
+    return true;  // false already returned on errors found
 }
 
 bool Launcher::saveCustomisedSettings()
@@ -601,5 +603,46 @@ bool Launcher::saveCustomisedSettings()
     // validate settings
     if (!validateInputSettings()) return false;
 
-    return false;
+    // create and/or open settings file, log error if failed
+    std::ofstream file(ParticleLife::Settings::customSettingsDir + userCustomisedSettings.name + ".txt");
+    if (!file.is_open()) {
+        std::string error = "Failed to save settings to " + userCustomisedSettings.name + ".txt";
+        strcpy(lsvErrors.text, error.c_str());
+        return false;
+    }
+
+    // write settings to file
+
+    ParticleLife::Settings& s = userCustomisedSettings;
+
+    file << std::to_string(s.types) << '\n';        // types
+    file << std::to_string(s.size) << '\n';         // size
+    file << std::to_string(s.count) << '\n';        // count
+    file << std::to_string(s.innerRadius) << '\n';  // innerRadius
+    file << std::to_string(s.resistance) << '\n';   // resistance
+    file << std::to_string(s.step) << '\n';         // step
+
+    for (int i = 0; i < s.types; i++) {             // attractions
+        file << std::to_string(s.typeRatio[i]);
+        for (int j = 1; j < s.types; j++)
+            file << ',' << std::to_string(s.typeRatio[j]);
+        file << '\n';
+    }
+
+    // TODO: save type ratio once implemented in settings object read from file
+
+    file << s.seed << '\n';                         // seed (-1 for preloaded particles)
+
+    if (s.seed != -1) {                             // particles
+        for (const Particle& p : s.particles) {
+            file << std::to_string(p.type) << ','
+                 << std::to_string(p.pos.x) << ','
+                 << std::to_string(p.pos.y) << ','
+                 << std::to_string(p.vel.x) << ','
+                 << std::to_string(p.vel.y) << '\n';
+        }
+    }
+
+    file.close();
+    return true;
 }

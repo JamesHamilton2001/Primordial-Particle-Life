@@ -13,8 +13,6 @@
 #include <filesystem>
 namespace fs = std::filesystem;
 
-#define PARTICLELIFE_DEFAULT_SETTINGS_DIR "./settings/default/"
-#define PARTICLELIFE_CUSTOM_SETTINGS_DIR  "./settings/custom/"
 
 #define PARTICLELIFE_MIN_NAME_LENGTH     (1)
 #define PARTICLELIFE_MAX_NAME_LENGTH     (64)
@@ -47,6 +45,9 @@ class ParticleLife
 
     struct Settings
     {
+        static const std::string defaultSettingsDir;
+        static const std::string customSettingsDir;
+
         std::string name;
         int types;
         int size;
