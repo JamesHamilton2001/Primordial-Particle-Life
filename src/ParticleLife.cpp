@@ -13,7 +13,7 @@ namespace fs = std::filesystem;
 
 
 ParticleLife::ParticleLife(Settings& settings) :
-    name        (settings.name),
+    settings    (settings),
     types       (settings.types),
     size        (settings.size),
     bounds      (2.0f * settings.size),
@@ -22,19 +22,14 @@ ParticleLife::ParticleLife(Settings& settings) :
     innerRadius (settings.innerRadius),
     step        (settings.step),
     attractions (settings.attractions),
-    seed        (settings.seed),
+    particles   (settings.particles),
     spatialHash (settings.size, settings.types)
 {
     posDistr = std::uniform_real_distribution<float>(0.0f, bounds);
     gen.seed(settings.seed);
-    particles.resize(count);
-
-    // load particles if no seed
-    if (seed == -1)
-        particles = settings.particles;
 
     // generate particles to given ratio is seed given
-    else {
+    if (settings.seed != -1) {
         for (int ct = 0; ct < count;) {
             for (int i = 0; i < types; i++) {
                 for (int j = 0; j < settings.typeRatio[i]; j++) {
@@ -50,10 +45,6 @@ ParticleLife::ParticleLife(Settings& settings) :
         }
     }
 }
-
-ParticleLife::~ParticleLife()
-{}
-
 
 void ParticleLife::update()
 {
@@ -214,6 +205,16 @@ void ParticleLife::drawSoftBorder() const
     rlSetTexture(0);
 }
 
+void ParticleLife::drawGrid() const
+{
+    spatialHash.drawGrid();
+}
+
+void ParticleLife::drawGhosts(unsigned int pTexID) const
+{
+    spatialHash.drawGhosts(pTexID);
+}
+
 
 void ParticleLife::saveConfig() const
 {
@@ -293,11 +294,11 @@ void ParticleLife::printCellAtPos(Vector2 pos)
 std::ostream& operator << (std::ostream& os, const ParticleLife& particleLife)
 {
     std::string initiation;
-    if (particleLife.seed == -1) initiation = "preloaded";
-    else if (particleLife.seed == 0) initiation = "pseudo random";
+    if (particleLife.settings.seed == -1) initiation = "preloaded";
+    else if (particleLife.settings.seed == 0) initiation = "pseudo random";
     else initiation = "seeded random";
     
-    os << particleLife.name << " : " <<
+    os << particleLife.settings.name << " : " <<
           initiation << std::endl <<
           "| types : " << particleLife.types << std::endl <<
           "| size : " << particleLife.size << std::endl <<

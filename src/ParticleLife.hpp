@@ -18,24 +18,17 @@ class ParticleLife
 {
   public:
 
-    ParticleLife() = default;
     ParticleLife(Settings& settings);
-    ~ParticleLife();
-    ParticleLife& operator =(const ParticleLife& other) = default;
 
-    std::string name;
-    int types;
-    int size;
-    float bounds;
-
+    const Settings settings;
 
     void update();
     void draw(unsigned int pTexID) const;
 
     void saveConfig() const;
 
-    void drawGrid() const   { spatialHash.drawGrid(); }
-    void drawGhosts(unsigned int pTexID) const { spatialHash.drawGhosts(pTexID); }
+    void drawGrid() const;
+    void drawGhosts(unsigned int pTexID) const;
     void drawSoftBorder() const;
 
     void randomisePositions();
@@ -49,15 +42,16 @@ class ParticleLife
 
   private:
 
-    int count;
-    float resistance;
-    float innerRadius;
-    float step;
-    std::vector<std::vector<float>> attractions;
+    const int types;
+    const int size;
+    const float bounds;
+    const int count;
+    const float resistance;
+    const float innerRadius;
+    const float step;
+    const std::vector<std::vector<float>> attractions;
 
     std::vector<Particle> particles;
-
-    int seed;
 
     SpatialHash spatialHash;
 
