@@ -10,6 +10,7 @@ int main()
 {
     int width = 1024;
     int height = 768;
+    long long unsigned int finalFrame = 50000;
 
     cout << endl;
     InitWindow(width, height, "Particle Life");
@@ -24,7 +25,7 @@ int main()
         }
     }
 
-    App app(width, height, 0, launcher.getSettings());
+    App app(width, height, 0, launcher.getSettings(), finalFrame);
 
     cout << endl;
     SetWindowSize(width, height);
@@ -33,10 +34,14 @@ int main()
     cout << launcher.getSettings() << endl;
     cout << endl;
     
-    while (!WindowShouldClose())
-        app.update(),
-        app.draw(),
-        app.gui();
+    while (app.update()) {
+        if (WindowShouldClose()) {
+            CloseWindow();
+            return EXIT_SUCCESS;
+        }
+    }
+
+    app.saveData();
 
     CloseWindow();
 

@@ -42,7 +42,7 @@ class ParticleLife
   private:
 
     long long unsigned int frameCount;
-
+    
     const int types;
     const int size;
     const float bounds;

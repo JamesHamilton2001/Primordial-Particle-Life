@@ -13,18 +13,18 @@ class App
 {
  public:
 
-    App(int width, int height, int fpsTarget, Settings& settings);
+    App(int width, int height, int fpsTarget, Settings& settings, long long unsigned int finalFrame);
     ~App();
 
-    void update();
-    void draw() const;
-    void gui();
+    bool update();
+    void saveData() const;
 
  private:
 
     int width;
     int height;
     int fpsTarget;
+    long long unsigned int finalFrame;
 
     ParticleLife particleLife;
 
@@ -35,7 +35,8 @@ class App
     Camera2D camera;
     Texture2D particleTexture;
 
-    void saveData() const;
+    void draw() const;
+    void ui();
 
 };
 

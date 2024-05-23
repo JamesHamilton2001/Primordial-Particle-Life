@@ -14,10 +14,11 @@
 
 
 
-App::App(int width, int height, int fpsTarget, Settings& settings) :
+App::App(int width, int height, int fpsTarget, Settings& settings, long long unsigned int finalFrame) :
     width(width),
     height(height),
     fpsTarget(fpsTarget),
+    finalFrame(finalFrame),
     particleLife(settings),
     paused(false),
     drawGrid(true),
@@ -37,69 +38,18 @@ App::~App()
     UnloadTexture(particleTexture);
 }
 
-
-void App::update()
+bool App::update()
 {
-    // camera zoom on MOUSE_WHEEL
-    float wheel = GetMouseWheelMove();
-    if (wheel != 0) {
-        camera.target = GetScreenToWorld2D(camera.offset, camera);
-        camera.zoom += (wheel * 2.0f);
-        if (camera.zoom < 2.0f)
-            camera.zoom = 2.0f;
-    }
-    // camera pan on HOLD_RIGHT_CLICK + DRAG
-    if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
-        camera.target = Vector2Add(camera.target, Vector2Scale(GetMouseDelta(), -1.0f / camera.zoom));
+    // handle user input and update gui
+    ui();
 
-    // toggle pause on PRESS_SPACE
-    if (IsKeyPressed(KEY_SPACE))
-        paused = !paused;
-
-    // toggle grid on PRESS_G
-    if (IsKeyPressed(KEY_G))
-        drawGrid = !drawGrid;
-
-    // toggle ghosts on PRESS_C
-    if (IsKeyPressed(KEY_C))
-        drawGhosts = !drawGhosts;
-    
-    // save settings and run statistics on PRESS_ENTER
-    if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_ENTER)) {
-        // particleLife.saveConfig(); // TODO: re-enable saving
-        saveData();
-    }
-    else if (paused && IsKeyPressed(KEY_ENTER))
-        saveData();
-    
     // update simulation if not paused
-    if (!paused)
-        particleLife.update();
-}
+    if (!paused) particleLife.update();
 
+    // draw simulation
+    draw();
 
-void App::draw() const
-{
-    BeginDrawing();
-        ClearBackground(BLACK);
-
-        BeginMode2D(camera);
-
-            particleLife.draw(particleTexture.id);
-            if (drawGrid)   particleLife.drawGrid();
-            if (drawGhosts) particleLife.drawGhosts(particleTexture.id);
-            particleLife.drawSoftBorder();
-
-        EndMode2D();
-
-        DrawFPS(GetScreenWidth()-100, 10);
-    EndDrawing();
-}
-
-
-void App::gui()
-{
-
+    return (particleLife.getFrameCount() < finalFrame);
 }
 
 void App::saveData() const
@@ -223,4 +173,53 @@ void App::saveData() const
 
     file << "}" << endl;
     file.close();
+}
+
+void App::draw() const
+{
+    BeginDrawing();
+        ClearBackground(BLACK);
+        BeginMode2D(camera);
+            particleLife.draw(particleTexture.id);
+            if (drawGrid)   particleLife.drawGrid();
+            if (drawGhosts) particleLife.drawGhosts(particleTexture.id);
+            particleLife.drawSoftBorder();
+        EndMode2D();
+        DrawFPS(GetScreenWidth()-100, 10);
+    EndDrawing();
+}
+
+void App::ui()
+{
+    // camera zoom on MOUSE_WHEEL
+    float wheel = GetMouseWheelMove();
+    if (wheel != 0) {
+        camera.target = GetScreenToWorld2D(camera.offset, camera);
+        camera.zoom += (wheel * 2.0f);
+        if (camera.zoom < 2.0f)
+            camera.zoom = 2.0f;
+    }
+    // camera pan on HOLD_RIGHT_CLICK + DRAG
+    if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
+        camera.target = Vector2Add(camera.target, Vector2Scale(GetMouseDelta(), -1.0f / camera.zoom));
+
+    // toggle pause on PRESS_SPACE
+    if (IsKeyPressed(KEY_SPACE))
+        paused = !paused;
+
+    // toggle grid on PRESS_G
+    if (IsKeyPressed(KEY_G))
+        drawGrid = !drawGrid;
+
+    // toggle ghosts on PRESS_C
+    if (IsKeyPressed(KEY_C))
+        drawGhosts = !drawGhosts;
+    
+    // save settings and run statistics on PRESS_ENTER
+    if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_ENTER)) {
+        // particleLife.saveConfig(); // TODO: re-enable saving
+        saveData();
+    }
+    else if (IsKeyPressed(KEY_ENTER))
+        saveData();
 }
