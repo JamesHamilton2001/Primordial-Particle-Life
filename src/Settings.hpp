@@ -37,6 +37,7 @@ struct Settings
 {
     static const std::string defaultSettingsDir;
     static const std::string customSettingsDir;
+    static const std::string statisticsDir;
 
     std::string name;
     int types;

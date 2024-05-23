@@ -35,6 +35,8 @@ class App
     Camera2D camera;
     Texture2D particleTexture;
 
+    void runStatistics() const;
+
 };
 
 

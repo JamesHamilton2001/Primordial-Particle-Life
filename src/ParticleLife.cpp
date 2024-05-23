@@ -204,8 +204,8 @@ void ParticleLife::drawGhosts(unsigned int pTexID) const
 
 void ParticleLife::saveConfig() const
 {
-    // open and clear temp config file
-    std::ofstream file("settings/custom/temp.txt", std::ofstream::out);
+    // open settings file
+    std::ofstream file(settings.customSettingsDir + settings.name +"("+ std::to_string(frameCount) +").txt", std::ofstream::out);
     if (!file.is_open()) {
         throw std::runtime_error("Failed to open temp config file");
     }
@@ -287,10 +287,10 @@ void ParticleLife::printCellAtPos(Vector2 pos)
     printCell(spatialHash.hash(pos.y), spatialHash.hash(pos.x));
 }
 
-void ParticleLife::getComparisonData(Settings& initiatingSettings, std::vector<Particle>& particleData, long long unsigned int* frameCount) const
+void ParticleLife::getComparisonData(Settings& settings, std::vector<Particle>& particles, long long unsigned int* frameCount) const
 {
-    initiatingSettings = settings;
-    particleData = particles;
+    settings = this->settings;
+    particles = this->particles;
     *frameCount = this->frameCount;
 }
 

@@ -7,6 +7,7 @@
 
 const std::string Settings::defaultSettingsDir = "./settings/default/";
 const std::string Settings::customSettingsDir = "./settings/custom/";
+const std::string Settings::statisticsDir = "./statistics/";
 
 Settings::Settings() :
     name("DEFAULT_HARDCODED_SETTINGS"),
@@ -152,14 +153,13 @@ Settings::Settings(const std::filesystem::directory_entry& dirEntry)
 
 std::ostream& operator << (std::ostream& os, const Settings& settings)
 {
-    os << "ParticleLife::Settings" << std::endl <<
-          "| name | " << settings.name << std::endl <<
-          "| types | " << settings.types << std::endl <<
-          "| size | " << settings.size << std::endl <<
-          "| count | " << settings.count << std::endl <<
-          "| innerRadius | " << settings.innerRadius << std::endl <<
-          "| resistance | " << settings.resistance << std::endl <<
-          "| step | " << settings.step << std::endl;
+    os << "| name | " << settings.name << std::endl
+       << "| types | " << settings.types << std::endl
+       << "| size | " << settings.size << std::endl
+       << "| count | " << settings.count << std::endl
+       << "| innerRadius | " << settings.innerRadius << std::endl
+       << "| resistance | " << settings.resistance << std::endl
+       << "| step | " << settings.step << std::endl;
 
     os << "| attractions | " << std::endl;
     for (int i = 0; i < settings.types; i++) {
@@ -186,13 +186,6 @@ std::ostream& operator << (std::ostream& os, const Settings& settings)
         for (const Particle& p : settings.particles)
             os << "| | " << p << std::endl;
     else os << "| | lots..." << std::endl;
-
-    // if (settings.particles.size() < 32) {
-    //     os << "| particles: " << settings.particles.size() << std::endl;
-    //     for (const Particle& p : settings.particles)
-    //         os << "| | " << p << std::endl;
-    // }
-    // else os << "| " << settings.particles.size() << " particles" << std::endl;
 
     return os;
 }

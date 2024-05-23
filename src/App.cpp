@@ -8,11 +8,9 @@
 #include <iostream>
 #include <vector>
 #include <string>
-#include <fstream>
-#include <sstream>
-#include <filesystem>
 #include <algorithm>
-namespace fs = std::filesystem;
+#include <fstream>
+#include <filesystem>
 
 
 
@@ -72,9 +70,13 @@ void App::update()
     if (IsKeyPressed(KEY_C))
         drawGhosts = !drawGhosts;
     
-    // save settings to temp conifg on PRESS_ENTER
-    if (paused && IsKeyPressed(KEY_ENTER))
+    // save settings and run statistics on PRESS_ENTER
+    if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_ENTER)) {
         particleLife.saveConfig();
+        runStatistics();
+    }
+    else if (paused && IsKeyPressed(KEY_ENTER))
+        runStatistics();
     
     // update simulation if not paused
     if (!paused)
@@ -104,4 +106,30 @@ void App::draw() const
 void App::gui()
 {
 
+}
+
+void App::runStatistics() const
+{
+    Settings initialSettings;
+    std::vector<Particle> particles;
+    long long unsigned int frameCount;
+    particleLife.getComparisonData(initialSettings, particles, &frameCount);
+
+    std::cout << "Statistics:" << std::endl;
+    std::cout << "| Frame Count: " << frameCount << std::endl; 
+    std::cout << "| Resulting Particle Data:" << std::endl;
+    for (const Particle& p : particles)
+        std::cout << "| | " << p << std::endl;
+
+    // TODO: calculate statistics
+
+    std::ofstream file(particleLife.settings.statisticsDir + particleLife.settings.name +"("+std::to_string(frameCount)+")" + ".json");
+    if (!file.is_open()) {
+        std::cerr << "Failed to open file for writing statistics." << std::endl;
+        return;
+    }
+
+    // TODO: write statistics to file
+
+    file.close();
 }

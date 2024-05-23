@@ -29,6 +29,7 @@ int main()
     std::cout << std::endl;
     SetWindowSize(width, height);
     SetTargetFPS(0);
+    std::cout << "INITIATION SETTINGS:" << std::endl;
     std::cout << launcher.getSettings() << std::endl;
     std::cout << std::endl;
     
