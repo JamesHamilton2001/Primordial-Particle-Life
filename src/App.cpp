@@ -49,14 +49,8 @@ void App::update()
             camera.zoom = 2.0f;
     }
     // camera pan on HOLD_RIGHT_CLICK + DRAG
-    if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT))
+    if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
         camera.target = Vector2Add(camera.target, Vector2Scale(GetMouseDelta(), -1.0f / camera.zoom));
-    
-    // print cell contents on PRESS_LEFT_CLICK
-    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-        Vector2 mouseWorldPos = GetScreenToWorld2D(GetMousePosition(), camera);
-        particleLife.printCellAtPos(mouseWorldPos);
-    }
 
     // toggle pause on PRESS_SPACE
     if (IsKeyPressed(KEY_SPACE))

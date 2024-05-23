@@ -105,14 +105,6 @@ vector<Particle*>& SpatialHash::getCell(int row, int col)
     return grid[row][col];
 }
 
-vector<int> SpatialHash::countTypesInCell(int row, int col) const
-{
-    vector<int> counts(types, 0);
-    for (Particle* p : grid[row][col])
-        counts[p->type]++;
-    return counts;
-}
-
 void SpatialHash::drawGrid() const
 {
     rlBegin(RL_LINES);

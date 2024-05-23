@@ -19,7 +19,6 @@ class SpatialHash
     void map(vector<Particle>& particles);         // map particles to grid & overlaps
 
     vector<Particle*>& getCell(int row, int col);
-    vector<int> countTypesInCell(int row, int col) const;
 
     void drawGrid() const;
     void drawGhosts(unsigned int texID) const;

@@ -34,12 +34,9 @@ class ParticleLife
 
     vector<int> countTypes() const;
 
-    void printCell(int row, int col);
-    void printCellAtPos(Vector2 pos);
-
     void getComparisonData(Settings& settings, vector<Particle>& particles, vector<Particle> ghosts, long long unsigned int* frameCount) const;
 
-    friend ostream& operator << (ostream& os, const ParticleLife& particleLife);
+    friend ostream& operator <<(ostream& os, const ParticleLife& particleLife);
 
   private:
 

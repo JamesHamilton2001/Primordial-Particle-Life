@@ -263,29 +263,6 @@ vector<int> ParticleLife::countTypes() const
     return typeCounts;
 }
 
-void ParticleLife::printCell(int row, int col)
-{
-    // get the cell and the type counts
-    vector<Particle*>& cell = spatialHash.getCell(row, col);
-    vector<int> typeCounts = spatialHash.countTypesInCell(row, col);
-
-    // print cell index, type count ratio, count and capacity
-    cout << "Cell["<< row <<"]["<< col <<"] " << typeCounts[0];
-    for (int i = 1; i < types; i++)
-        cout << ":" << typeCounts[i];
-    cout <<" "<< cell.size() <<"/"<< cell.capacity() << endl; 
-
-    // print the particles in the cell
-    for (Particle* pPtr : cell)
-        cout << *pPtr << endl;
-    cout << endl;
-}
-
-void ParticleLife::printCellAtPos(Vector2 pos)
-{
-    printCell(spatialHash.hash(pos.y), spatialHash.hash(pos.x));
-}
-
 void ParticleLife::getComparisonData(Settings& settings, vector<Particle>& particles, vector<Particle> ghosts, long long unsigned int* frameCount) const
 {
     settings = this->settings;
