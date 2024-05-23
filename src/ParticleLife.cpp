@@ -258,7 +258,7 @@ vector<int> ParticleLife::countTypes() const
     return typeCounts;
 }
 
-void ParticleLife::getComparisonData(Settings& settings, vector<Particle>& particles, vector<Particle> ghosts, long long unsigned int* frameCount) const
+void ParticleLife::getComparisonData(Settings& settings, vector<Particle>& particles, long long unsigned int* frameCount) const
 {
     settings = this->settings;
     particles = this->particles;

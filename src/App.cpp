@@ -106,9 +106,8 @@ void App::runStatistics() const
 {
     Settings settings;
     vector<Particle> particles;
-    vector<Particle> ghosts;
     long long unsigned int frameCount;
-    particleLife.getComparisonData(settings, particles, ghosts, &frameCount);
+    particleLife.getComparisonData(settings, particles, &frameCount);
 
     const int T = settings.types;
 
@@ -138,11 +137,6 @@ void App::runStatistics() const
             if (dist <= 2.0f)
                 t2tInterDists[p1.type][p2.type].emplace_back(Vector2Distance(p1.pos, p2.pos));
         }
-        for (const Particle& g : ghosts) {
-            float dist = Vector2Distance(p1.pos, g.pos);
-            if (dist <= 2.0f)
-                t2tInterDists[p1.type][g.type].emplace_back(Vector2Distance(p1.pos, g.pos));
-        }
     } for (int i = 0; i < T; i++) {
         for (int j = 0; j < T; j++) {
             for (float dist : t2tInterDists[i][j])
@@ -152,19 +146,16 @@ void App::runStatistics() const
     }
 
     // PRINT STATISTICS
-
     cout << "Statistics: Frame: " << frameCount << endl; 
-
     cout << "| Mean Type Speeds: " << endl;
     for (int i = 0; i < T; i++)
         cout << "| | ["<<i<<"]: " << meanTypeSpeeds[i] << endl;
-
     cout << "| Type Interactions: (count, mean)" << endl;
     for (int i = 0; i < T; i++)
         for (int j = 0; j < T; j++)
             cout <<"| | ["<<i<<"]["<<j<<"]: " << t2tInterDists[i][j].size() <<", "<< t2tInterDistMeans[i][j] << endl;
 
-    // WRITE STATISTICS TO FILE
+    // WRITE INFORMATION TO FILE
 
     ofstream file(settings.statisticsDir + settings.name +"("+to_string(frameCount)+")" + ".json");
     if (!file.is_open()) {
@@ -214,6 +205,20 @@ void App::runStatistics() const
         if (i < settings.count-1) file << ',';
     } file << endl <<m+m<< "]" << endl;
     file <<m<< "}," << endl;
+
+    // resulting particle data
+    file <<m<< "\"realParticleData\": [" << endl <<m+m;
+    for (int i = 0; i < settings.count; i++) {
+        const Particle& p = particles[i];
+        file << "{" << endl;
+        file <<m+m+m<< "\"type\": " << p.type << "," << endl;
+        file <<m+m+m<< "\"xPos\": " << p.pos.x << "," << endl;
+        file <<m+m+m<< "\"yPos\": " << p.pos.y << "," << endl;
+        file <<m+m+m<< "\"xVel\": " << p.vel.x << "," << endl;
+        file <<m+m+m<< "\"yVel\": " << p.vel.y << endl;
+        file <<m+m<< "}";
+        if (i < settings.count-1) file << ',';
+    } file << endl <<m<< "]," << endl;
 
     file << "}" << endl;
     file.close();

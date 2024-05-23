@@ -34,7 +34,7 @@ class ParticleLife
 
     vector<int> countTypes() const;
 
-    void getComparisonData(Settings& settings, vector<Particle>& particles, vector<Particle> ghosts, long long unsigned int* frameCount) const;
+    void getComparisonData(Settings& settings, vector<Particle>& particles, long long unsigned int* frameCount) const;
 
     friend ostream& operator <<(ostream& os, const ParticleLife& particleLife);
 
