@@ -37,6 +37,8 @@ class ParticleLife
     void printCell(int row, int col);
     void printCellAtPos(Vector2 pos);
 
+    void ParticleLife::getComparisonData(Settings& initiatingSettings, std::vector<Particle>& particleData, long long unsigned int* frameCount) const;
+
     friend std::ostream& operator << (std::ostream& os, const ParticleLife& particleLife);
 
   private:

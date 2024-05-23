@@ -34,7 +34,7 @@ ParticleLife::ParticleLife(Settings& settings) :
 void ParticleLife::update()
 {
     frameCount++;
-    
+
     spatialHash.map(particles);
 
     // for each cell...
@@ -285,6 +285,13 @@ void ParticleLife::printCell(int row, int col)
 void ParticleLife::printCellAtPos(Vector2 pos)
 {
     printCell(spatialHash.hash(pos.y), spatialHash.hash(pos.x));
+}
+
+void ParticleLife::getComparisonData(Settings& initiatingSettings, std::vector<Particle>& particleData, long long unsigned int* frameCount) const
+{
+    initiatingSettings = settings;
+    particleData = particles;
+    *frameCount = this->frameCount;
 }
 
 std::ostream& operator << (std::ostream& os, const ParticleLife& particleLife)
