@@ -15,10 +15,10 @@ Launcher::Launcher() :
     // PARTICLE LIFE SETTINGS DATA
 
     // add defaulted settings to first settings entries
-    defaultSettings(std::vector<ParticleLife::Settings>(1, ParticleLife::Settings())),
-    customSettings (std::vector<ParticleLife::Settings>(1, ParticleLife::Settings())),
+    defaultSettings(std::vector<Settings>(1, Settings())),
+    customSettings (std::vector<Settings>(1, Settings())),
 
-    userCustomisedSettings(ParticleLife::Settings()),  // defaults to default
+    userCustomisedSettings(Settings()),  // defaults to default
 
     // HEADER WIDGETS
 
@@ -118,7 +118,7 @@ bool Launcher::run()
     return !submitted;
 }
 
-ParticleLife::Settings& Launcher::getSettings()
+Settings& Launcher::getSettings()
 {
     if (tglgrpSettingsTab.activeToggle == 0) {
         if (tglgrpSelectPreloadedSettings.activeToggle == 0)
@@ -421,18 +421,18 @@ bool Launcher::customised()
     return false;
 }
 
-void Launcher::readPreloadedSettings(FLsv& flsv, std::vector<ParticleLife::Settings>& settings)
+void Launcher::readPreloadedSettings(FLsv& flsv, std::vector<Settings>& settings)
 {
     settings.clear();
     for (const auto& dirEntry : fs::directory_iterator(flsv.dirPath)) {
         try {
-            settings.push_back(ParticleLife::Settings(dirEntry));
+            settings.push_back(Settings(dirEntry));
         } catch (std::exception& e) { 
             std::cout << "Failed to load settings from " << dirEntry.path() << ": " << e.what() << std::endl;
         }
     }
     if (settings.empty())
-        settings.push_back(ParticleLife::Settings());
+        settings.push_back(Settings());
     flsv.activeIdx = 0;
     flsv.updateContents();
 }
@@ -578,7 +578,7 @@ bool Launcher::validateInputSettings()
 
     // INSERT INPUT SETTINGS TO USER CUSTOMISED SETTINGS OBJECT
 
-    ParticleLife::Settings& s = userCustomisedSettings;
+    Settings& s = userCustomisedSettings;
 
     s.name = std::string(tbxName.text);        // name
     s.types = ibxTypes.value;                  // types
@@ -614,7 +614,7 @@ bool Launcher::saveCustomisedSettings()
     if (!validateInputSettings()) return false;
 
     // create and/or open settings file, log error if failed
-    std::ofstream file(ParticleLife::Settings::customSettingsDir + userCustomisedSettings.name + ".txt");
+    std::ofstream file(Settings::customSettingsDir + userCustomisedSettings.name + ".txt");
     if (!file.is_open()) {
         std::string error = "Failed to save settings to " + userCustomisedSettings.name + ".txt";
         strcpy(lsvErrors.text, error.c_str());
@@ -623,7 +623,7 @@ bool Launcher::saveCustomisedSettings()
 
     // write settings to file
 
-    ParticleLife::Settings& s = userCustomisedSettings;
+    Settings& s = userCustomisedSettings;
 
     file << std::to_string(s.types) << '\n';        // types
     file << std::to_string(s.size) << '\n';         // size
@@ -667,7 +667,7 @@ bool Launcher::saveCustomisedSettings()
     return true;
 }
 
-void Launcher::copyToCustomisedSettings(const ParticleLife::Settings& settings)
+void Launcher::copyToCustomisedSettings(const Settings& settings)
 {
     // copy the actual settings object over
     userCustomisedSettings = settings;

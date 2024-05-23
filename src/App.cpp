@@ -16,7 +16,7 @@ namespace fs = std::filesystem;
 
 
 
-App::App(int width, int height, int fpsTarget, ParticleLife::Settings& settings) :
+App::App(int width, int height, int fpsTarget, Settings& settings) :
     width(width),
     height(height),
     fpsTarget(fpsTarget),

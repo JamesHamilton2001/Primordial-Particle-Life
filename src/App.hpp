@@ -13,7 +13,7 @@ class App
 {
  public:
 
-    App(int width, int height, int fpsTarget, ParticleLife::Settings& settings);
+    App(int width, int height, int fpsTarget, Settings& settings);
     ~App();
 
     void update();

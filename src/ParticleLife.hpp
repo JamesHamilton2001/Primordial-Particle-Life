@@ -38,33 +38,32 @@ namespace fs = std::filesystem;
 #define PARTICLELIFE_MAX_RATIO           (PARTICLELIFE_MAX_COUNT)
 
 
+struct Settings
+{
+    static const std::string defaultSettingsDir;
+    static const std::string customSettingsDir;
+
+    std::string name;
+    int types;
+    int size;
+    int count;
+    float innerRadius;
+    float resistance;
+    float step;
+    std::vector<std::vector<float>> attractions;
+    int seed;
+    std::vector<int> typeRatio;
+    std::vector<Particle> particles;
+    
+    Settings();
+    Settings(const std::filesystem::directory_entry& dirEntry);
+
+    friend std::ostream& operator <<(std::ostream& os, const Settings& settings);
+};
 
 class ParticleLife
 {
- public:
-
-    struct Settings
-    {
-        static const std::string defaultSettingsDir;
-        static const std::string customSettingsDir;
-
-        std::string name;
-        int types;
-        int size;
-        int count;
-        float innerRadius;
-        float resistance;
-        float step;
-        std::vector<std::vector<float>> attractions;
-        int seed;
-        std::vector<int> typeRatio;
-        std::vector<Particle> particles;
-        
-        Settings();
-        Settings(const std::filesystem::directory_entry& dirEntry);
-
-        friend std::ostream& operator <<(std::ostream& os, const Settings& settings);
-    };
+  public:
 
     ParticleLife() = default;
     ParticleLife(Settings& settings);
@@ -95,7 +94,7 @@ class ParticleLife
 
     friend std::ostream& operator << (std::ostream& os, const ParticleLife& particleLife);
 
- private:
+  private:
 
     int count;
     float resistance;

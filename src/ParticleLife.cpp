@@ -359,10 +359,10 @@ void ParticleLife::debugGrid()
 
 
 
-const std::string ParticleLife::Settings::defaultSettingsDir = "./settings/default/";
-const std::string ParticleLife::Settings::customSettingsDir = "./settings/custom/";
+const std::string Settings::defaultSettingsDir = "./settings/default/";
+const std::string Settings::customSettingsDir = "./settings/custom/";
 
-ParticleLife::Settings::Settings() :
+Settings::Settings() :
     name("DEFAULT_HARDCODED_SETTINGS"),
     types(PARTICLELIFE_MIN_TYPES),
     size(PARTICLELIFE_MIN_GRID_SIZE),
@@ -382,7 +382,7 @@ ParticleLife::Settings::Settings() :
                                        Particle(0, 6, 7), Particle(1, 7, 1), Particle(2, 3, 1), } ))
 {}
 
-ParticleLife::Settings::Settings(const std::filesystem::directory_entry& dirEntry)
+Settings::Settings(const std::filesystem::directory_entry& dirEntry)
 {
     std::ifstream file(dirEntry.path());
     std::string line;
@@ -504,7 +504,7 @@ ParticleLife::Settings::Settings(const std::filesystem::directory_entry& dirEntr
     file.close();
 }
 
-std::ostream& operator << (std::ostream& os, const ParticleLife::Settings& settings)
+std::ostream& operator << (std::ostream& os, const Settings& settings)
 {
     os << "ParticleLife::Settings" << std::endl <<
           "| name | " << settings.name << std::endl <<

@@ -30,16 +30,16 @@ class Launcher
     bool run();
 
     // used to access the decided settings after the launcher has run
-    ParticleLife::Settings& getSettings();
+    Settings& getSettings();
 
   private:
 
     // PARTICLE LIFE SETTINGS DATA
 
-    std::vector<ParticleLife::Settings> defaultSettings;    // hard copy of all default settings
-    std::vector<ParticleLife::Settings> customSettings;     // hard copy of all custom settings
+    std::vector<Settings> defaultSettings;    // hard copy of all default settings
+    std::vector<Settings> customSettings;     // hard copy of all custom settings
 
-    ParticleLife::Settings userCustomisedSettings;  // user customised settings
+    Settings userCustomisedSettings;  // user customised settings
 
     // HEADER WIDGETS
 
@@ -113,11 +113,11 @@ class Launcher
 
     // UTIL METHODS
 
-    void readPreloadedSettings(FLsv& flsv, std::vector<ParticleLife::Settings>& settings);
+    void readPreloadedSettings(FLsv& flsv, std::vector<Settings>& settings);
 
     bool validateInputSettings();
     bool saveCustomisedSettings();
-    void copyToCustomisedSettings(const ParticleLife::Settings& settings);
+    void copyToCustomisedSettings(const Settings& settings);
     
 };
 
