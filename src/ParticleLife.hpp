@@ -32,14 +32,14 @@ class ParticleLife
 
     void randomisePositions();
 
-    std::vector<int> countTypes() const;
+    vector<int> countTypes() const;
 
     void printCell(int row, int col);
     void printCellAtPos(Vector2 pos);
 
-    void getComparisonData(Settings& settings, std::vector<Particle>& particles, std::vector<Particle> ghosts, long long unsigned int* frameCount) const;
+    void getComparisonData(Settings& settings, vector<Particle>& particles, vector<Particle> ghosts, long long unsigned int* frameCount) const;
 
-    friend std::ostream& operator << (std::ostream& os, const ParticleLife& particleLife);
+    friend ostream& operator << (ostream& os, const ParticleLife& particleLife);
 
   private:
 
@@ -52,9 +52,9 @@ class ParticleLife
     const float resistance;
     const float innerRadius;
     const float step;
-    const std::vector<std::vector<float>> attractions;
+    const vector<vector<float>> attractions;
 
-    std::vector<Particle> particles;
+    vector<Particle> particles;
 
     SpatialHash spatialHash;
 

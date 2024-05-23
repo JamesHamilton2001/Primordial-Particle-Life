@@ -6,6 +6,8 @@
 #include <iostream>
 #include <string>
 
+using namespace std;
+
 
 class Particle
 {
@@ -34,7 +36,7 @@ class Particle
         rlTexCoord2f(1.0f, 0.0f); rlVertex2f(pos.x+0.05f, pos.y-0.05f); // top right
     }
 
-    friend std::ostream& operator <<(std::ostream& os, const Particle& p);
+    friend ostream& operator <<(ostream& os, const Particle& p);
 
 };
 

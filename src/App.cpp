@@ -12,8 +12,6 @@
 #include <fstream>
 #include <filesystem>
 
-using namespace std;
-
 
 
 App::App(int width, int height, int fpsTarget, Settings& settings) :
@@ -171,9 +169,9 @@ void App::runStatistics() const
             cout <<"| | ["<<i<<"]["<<j<<"]: " << t2tInterDists[i][j].size() <<", "<< t2tInterDistMeans[i][j] << endl;
 
     // // TODO: write statistics to file
-    // std::ofstream file(particleLife.settings.statisticsDir + particleLife.settings.name +"("+std::to_string(frameCount)+")" + ".json");
+    // ofstream file(particleLife.settings.statisticsDir + particleLife.settings.name +"("+to_string(frameCount)+")" + ".json");
     // if (!file.is_open()) {
-    //     std::cerr << "Failed to open file for writing statistics." << std::endl;
+    //     cerr << "Failed to open file for writing statistics." << endl;
     //     return;
     // }
     // file.close();

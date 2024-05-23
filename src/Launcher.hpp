@@ -36,8 +36,8 @@ class Launcher
 
     // PARTICLE LIFE SETTINGS DATA
 
-    std::vector<Settings> defaultSettings;    // hard copy of all default settings
-    std::vector<Settings> customSettings;     // hard copy of all custom settings
+    vector<Settings> defaultSettings;    // hard copy of all default settings
+    vector<Settings> customSettings;     // hard copy of all custom settings
 
     Settings userCustomisedSettings;  // user customised settings
 
@@ -65,8 +65,8 @@ class Launcher
     Lbl lblResistance;  Fbx fbxResistance;                             // resistance float box
     Lbl lblStep;        Fbx fbxStep;                                   // step float box
     Lbl lblSeed;        Ibx ibxSeed;                                   // seed int box
-    Lbl lblAttractions; std::vector<std::vector<Fbx>> fbxAttractions;  // attractions matrix float boxes
-    Lbl lblTypeRatios;  std::vector<Ibx> fbxTypeRatios;                // type ratios int boxes
+    Lbl lblAttractions; vector<vector<Fbx>> fbxAttractions;  // attractions matrix float boxes
+    Lbl lblTypeRatios;  vector<Ibx> fbxTypeRatios;                // type ratios int boxes
 
     Grp grpCopyPreloadedSettings;       // copy preloaded settings group
     TglGrp tglgrpCopyPreloadedSettings; // toggle default/custom settings to copy
@@ -113,7 +113,7 @@ class Launcher
 
     // UTIL METHODS
 
-    void readPreloadedSettings(FLsv& flsv, std::vector<Settings>& settings);
+    void readPreloadedSettings(FLsv& flsv, vector<Settings>& settings);
 
     bool validateInputSettings();
     bool saveCustomisedSettings();

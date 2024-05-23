@@ -10,10 +10,13 @@
 #include <limits>
 
 #include <raylib.h>
-// #include "raygui.h"
+
+using namespace std;
+
 
 
 Color getGuiBackgroundColor();
+
 
 
 class Wdgt
@@ -43,7 +46,7 @@ class Wdgt
         textBufferSize(other.textBufferSize),
         textSize(other.textSize),
         text(new char[textBufferSize+1]) {
-            std::strcpy(text, other.text);
+            strcpy(text, other.text);
     }
 
     Wdgt& operator =(const Wdgt& other) {
@@ -51,7 +54,7 @@ class Wdgt
             active = other.active;
             textBufferSize = other.textBufferSize;
             textSize = other.textSize;
-            std::strcpy(text, other.text);
+            strcpy(text, other.text);
         }
         return *this;
     }
@@ -60,7 +63,7 @@ class Wdgt
 
     void setText(const char* cstr);
 
-    friend std::ostream& operator <<(std::ostream& os, const Wdgt& w);
+    friend ostream& operator <<(ostream& os, const Wdgt& w);
 
 };
 
@@ -120,7 +123,7 @@ class Ibx : public Wdgt
 
     bool update(Rectangle& rect) override;
 
-    friend std::ostream& operator <<(std::ostream& os, const Ibx& ibx);
+    friend ostream& operator <<(ostream& os, const Ibx& ibx);
         
 };
 
@@ -135,15 +138,15 @@ class Fbx : public Tbx
     char* oldText;
 
     Fbx(float value, float minValue, float maxValue) :
-        Tbx(std::to_string(value).c_str()),
+        Tbx(to_string(value).c_str()),
         value(value),
         minValue(minValue),
         maxValue(maxValue),
         oldText(new char[textBufferSize+1]) {
-            std::strcpy(oldText, text);
+            strcpy(oldText, text);
         };
     Fbx(float minValue, float maxValue) : Fbx(0.0f, minValue, maxValue) {};
-    Fbx() : Fbx(std::numeric_limits<float>::min(), std::numeric_limits<float>::max()) {};
+    Fbx() : Fbx(numeric_limits<float>::min(), numeric_limits<float>::max()) {};
     ~Fbx() { delete[] oldText; }
 
     Fbx(const Fbx& other) :
@@ -152,7 +155,7 @@ class Fbx : public Tbx
         minValue(other.minValue),
         maxValue(other.maxValue),
         oldText(new char[textBufferSize+1]) {
-            std::strcpy(oldText, other.oldText);
+            strcpy(oldText, other.oldText);
         }
 
     Fbx& operator =(const Fbx& other) {
@@ -161,14 +164,14 @@ class Fbx : public Tbx
             value = other.value;
             minValue = other.minValue;
             maxValue = other.maxValue;
-            std::strcpy(oldText, other.oldText);
+            strcpy(oldText, other.oldText);
         }
         return *this;
     }
 
     bool update(Rectangle& rect) override;
 
-    friend std::ostream& operator <<(std::ostream& os, const Fbx& fbx);
+    friend ostream& operator <<(ostream& os, const Fbx& fbx);
 };
 
 class Lsv : public Wdgt
@@ -186,7 +189,7 @@ class Lsv : public Wdgt
 
     bool update(Rectangle& rect) override;
 
-    friend std::ostream& operator <<(std::ostream& os, const Lsv& lsv);
+    friend ostream& operator <<(ostream& os, const Lsv& lsv);
 };
 
 class FLsv : public Lsv
@@ -216,7 +219,7 @@ class TglGrp : public Wdgt
     
     bool update(Rectangle& rect) override;
 
-    friend std::ostream& operator <<(std::ostream& os, const TglGrp& tglGrp);
+    friend ostream& operator <<(ostream& os, const TglGrp& tglGrp);
 };
 
 

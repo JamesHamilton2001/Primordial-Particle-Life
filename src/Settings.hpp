@@ -1,11 +1,13 @@
 #ifndef SETTINGS_HPP
 #define SETTINGS_HPP
 
+#include "Particle.hpp"
 #include <string>
 #include <vector>
 #include <filesystem>
 
-#include "Particle.hpp"
+using namespace std;
+
 
 
 #define PARTICLELIFE_MIN_NAME_LENGTH     (1)
@@ -35,26 +37,26 @@
 
 struct Settings
 {
-    static const std::string defaultSettingsDir;
-    static const std::string customSettingsDir;
-    static const std::string statisticsDir;
+    static const string defaultSettingsDir;
+    static const string customSettingsDir;
+    static const string statisticsDir;
 
-    std::string name;
+    string name;
     int types;
     int size;
     int count;
     float innerRadius;
     float resistance;
     float step;
-    std::vector<std::vector<float>> attractions;
+    vector<vector<float>> attractions;
     int seed;
-    std::vector<int> typeRatio;
-    std::vector<Particle> particles;
+    vector<int> typeRatio;
+    vector<Particle> particles;
     
     Settings();
-    Settings(const std::filesystem::directory_entry& dirEntry);
+    Settings(const filesystem::directory_entry& dirEntry);
 
-    friend std::ostream& operator <<(std::ostream& os, const Settings& settings);
+    friend ostream& operator <<(ostream& os, const Settings& settings);
 };
 
 

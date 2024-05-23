@@ -8,7 +8,6 @@
 #include <string>
 #include <fstream>
 #include <filesystem>
-namespace fs = std::filesystem;
 
 
 ParticleLife::ParticleLife(Settings& settings) :
@@ -205,33 +204,33 @@ void ParticleLife::drawGhosts(unsigned int pTexID) const
 void ParticleLife::saveConfig() const
 {
     // open settings file
-    std::ofstream file(settings.customSettingsDir + settings.name +"("+ std::to_string(frameCount) +").txt", std::ofstream::out);
+    ofstream file(settings.customSettingsDir + settings.name +"("+ to_string(frameCount) +").txt", ofstream::out);
     if (!file.is_open()) {
-        throw std::runtime_error("Failed to open temp config file");
+        throw runtime_error("Failed to open temp config file");
     }
 
     // write settings to file
 
-    file << std::to_string(types) << '\n';       // types
-    file << std::to_string(size) << '\n';        // size
-    file << std::to_string(count) << '\n';       // count
-    file << std::to_string(innerRadius) << '\n'; // innerRadius
-    file << std::to_string(resistance) << '\n';  // resistance
-    file << std::to_string(step) << '\n';        // step
+    file << to_string(types) << '\n';       // types
+    file << to_string(size) << '\n';        // size
+    file << to_string(count) << '\n';       // count
+    file << to_string(innerRadius) << '\n'; // innerRadius
+    file << to_string(resistance) << '\n';  // resistance
+    file << to_string(step) << '\n';        // step
 
     for (int i = 0; i < types; i++) {           // attractions
-        file << std::to_string(attractions[i][0]);
+        file << to_string(attractions[i][0]);
         for (int j = 1; j < types; j++)
-            file << ',' << std::to_string(attractions[i][j]);
+            file << ',' << to_string(attractions[i][j]);
         file << '\n';
     }
 
     file << "-1" << '\n';                       // seed (-1 for preloaded)
 
     for (const Particle& p : particles)         // particles
-        file << std::to_string(p.type)  << ',' <<
-                std::to_string(p.pos.x) << ',' << std::to_string(p.pos.y) << ',' <<
-                std::to_string(p.vel.x) << ',' << std::to_string(p.vel.y) << '\n';
+        file << to_string(p.type)  << ',' <<
+                to_string(p.pos.x) << ',' << to_string(p.pos.y) << ',' <<
+                to_string(p.vel.x) << ',' << to_string(p.vel.y) << '\n';
     
     file.close();
 }
@@ -256,9 +255,9 @@ void ParticleLife::randomisePositions()
     }
 }
 
-std::vector<int> ParticleLife::countTypes() const
+vector<int> ParticleLife::countTypes() const
 {
-    std::vector<int> typeCounts(types, 0);
+    vector<int> typeCounts(types, 0);
     for (const Particle& p : particles)
         typeCounts[p.type]++;
     return typeCounts;
@@ -267,19 +266,19 @@ std::vector<int> ParticleLife::countTypes() const
 void ParticleLife::printCell(int row, int col)
 {
     // get the cell and the type counts
-    std::vector<Particle*>& cell = spatialHash.getCell(row, col);
-    std::vector<int> typeCounts = spatialHash.countTypesInCell(row, col);
+    vector<Particle*>& cell = spatialHash.getCell(row, col);
+    vector<int> typeCounts = spatialHash.countTypesInCell(row, col);
 
     // print cell index, type count ratio, count and capacity
-    std::cout << "Cell["<< row <<"]["<< col <<"] " << typeCounts[0];
+    cout << "Cell["<< row <<"]["<< col <<"] " << typeCounts[0];
     for (int i = 1; i < types; i++)
-        std::cout << ":" << typeCounts[i];
-    std::cout <<" "<< cell.size() <<"/"<< cell.capacity() << std::endl; 
+        cout << ":" << typeCounts[i];
+    cout <<" "<< cell.size() <<"/"<< cell.capacity() << endl; 
 
     // print the particles in the cell
     for (Particle* pPtr : cell)
-        std::cout << *pPtr << std::endl;
-    std::cout << std::endl;
+        cout << *pPtr << endl;
+    cout << endl;
 }
 
 void ParticleLife::printCellAtPos(Vector2 pos)
@@ -287,46 +286,46 @@ void ParticleLife::printCellAtPos(Vector2 pos)
     printCell(spatialHash.hash(pos.y), spatialHash.hash(pos.x));
 }
 
-void ParticleLife::getComparisonData(Settings& settings, std::vector<Particle>& particles, std::vector<Particle> ghosts, long long unsigned int* frameCount) const
+void ParticleLife::getComparisonData(Settings& settings, vector<Particle>& particles, vector<Particle> ghosts, long long unsigned int* frameCount) const
 {
     settings = this->settings;
     particles = this->particles;
     *frameCount = this->frameCount;
 }
 
-std::ostream& operator << (std::ostream& os, const ParticleLife& particleLife)
+ostream& operator << (ostream& os, const ParticleLife& particleLife)
 {
-    std::string initiation;
+    string initiation;
     if (particleLife.settings.seed == -1) initiation = "preloaded";
     else if (particleLife.settings.seed == 0) initiation = "pseudo random";
     else initiation = "seeded random";
     
     os << particleLife.settings.name << " : " <<
-          initiation << std::endl <<
-          "| types : " << particleLife.types << std::endl <<
-          "| size : " << particleLife.size << std::endl <<
-          "| count : " << particleLife.count << std::endl <<
-          "| innerRadius : " << particleLife.innerRadius << std::endl <<
-          "| resistance : " << particleLife.resistance << std::endl <<
-          "| step : " << particleLife.step << std::endl;
+          initiation << endl <<
+          "| types : " << particleLife.types <<
+          "| size : " << particleLife.size <<
+          "| count : " << particleLife.count <<
+          "| innerRadius : " << particleLife.innerRadius <<
+          "| resistance : " << particleLife.resistance <<
+          "| step : " << particleLife.step << endl;
     
-    os << "| attractions : " << std::endl;
+    os << "| attractions : " << endl;
     for (int i = 0; i < particleLife.types; i++) {
         os << "| | " << particleLife.attractions[i][0];
         for (int j = 1; j < particleLife.types; j++)
             os << ", " << particleLife.attractions[i][j];
-        os << std::endl;
+        os << endl;
     }
 
-    std::vector<int> typeCounts = particleLife.countTypes();
+    vector<int> typeCounts = particleLife.countTypes();
     os << "| particles : " << particleLife.particles.size() << "(" << typeCounts[0];
     for (int i = 1; i < particleLife.types; i++)
         os << ":" << typeCounts[i];
-    os << ")" << std::endl;
+    os << ")" << endl;
     if (particleLife.particles.size() < 128)
         for (const Particle& p : particleLife.particles)
-            os << "| | " << p << std::endl;
-    else os << "| | lots..." << std::endl;
+            os << "| | " << p << endl;
+    else os << "| | lots..." << endl;
 
     return os;
 }

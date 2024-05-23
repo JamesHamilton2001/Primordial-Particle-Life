@@ -12,17 +12,14 @@ class SpatialHash
 {
  public:
 
-    SpatialHash() = default;
     SpatialHash(int size, int types);
-
-    SpatialHash& operator =(const SpatialHash& other) = default;
 
     int hash(float coord) const;                        // hash y for row, x for col
 
-    void map(std::vector<Particle>& particles);         // map particles to grid & overlaps
+    void map(vector<Particle>& particles);         // map particles to grid & overlaps
 
-    std::vector<Particle*>& getCell(int row, int col);
-    std::vector<int> countTypesInCell(int row, int col) const;
+    vector<Particle*>& getCell(int row, int col);
+    vector<int> countTypesInCell(int row, int col) const;
 
     void drawGrid() const;
     void drawGhosts(unsigned int texID) const;
@@ -34,13 +31,13 @@ class SpatialHash
     float bounds; // in world grid bounds
 
     // [size+2][size+2], corner and edge wraps
-    std::vector<std::vector<std::vector<Particle*>>> grid;
+    vector<vector<vector<Particle*>>> grid;
     
     // TL, TR, BR, BL
-    std::vector<std::vector<Particle>> cornerWraps;
+    vector<vector<Particle>> cornerWraps;
 
     // T[size],  R[size],  B[size],  L[size]
-    std::vector<std::vector<std::vector<Particle>>> edgeWraps;
+    vector<vector<vector<Particle>>> edgeWraps;
     
 };
 

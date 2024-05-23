@@ -6,7 +6,6 @@
 #include <regex>
 #include <fstream>
 #include <filesystem>
-namespace fs = std::filesystem;
 
 
 
@@ -15,8 +14,8 @@ Launcher::Launcher() :
     // PARTICLE LIFE SETTINGS DATA
 
     // add defaulted settings to first settings entries
-    defaultSettings(std::vector<Settings>(1, Settings())),
-    customSettings (std::vector<Settings>(1, Settings())),
+    defaultSettings(vector<Settings>(1, Settings())),
+    customSettings (vector<Settings>(1, Settings())),
 
     userCustomisedSettings(Settings()),  // defaults to default
 
@@ -46,7 +45,7 @@ Launcher::Launcher() :
     lblResistance("Resistance:"),       fbxResistance(PARTICLELIFE_MIN_RESISTANCE, PARTICLELIFE_MAX_RESISTANCE),
     lblStep("Step:"),                   fbxStep(PARTICLELIFE_MIN_STEP, PARTICLELIFE_MAX_STEP),
     lblSeed("Seed:"),                   ibxSeed(PARTICLELIFE_MIN_SEED, PARTICLELIFE_MAX_SEED),
-    lblAttractions("Attractions"),      fbxAttractions(PARTICLELIFE_MAX_TYPES, std::vector<Fbx>(PARTICLELIFE_MAX_TYPES, Fbx(PARTICLELIFE_MIN_ATTRACTION, PARTICLELIFE_MAX_ATTRACTION))),
+    lblAttractions("Attractions"),      fbxAttractions(PARTICLELIFE_MAX_TYPES, vector<Fbx>(PARTICLELIFE_MAX_TYPES, Fbx(PARTICLELIFE_MIN_ATTRACTION, PARTICLELIFE_MAX_ATTRACTION))),
     lblTypeRatios("Type Ratio"),        fbxTypeRatios(PARTICLELIFE_MAX_TYPES, Ibx(PARTICLELIFE_MIN_RATIO, PARTICLELIFE_MAX_RATIO)),
 
     grpCopyPreloadedSettings("Copy Settings"),
@@ -206,7 +205,7 @@ bool Launcher::preloaded()
 bool Launcher::customised()
 {
     // widget related counts
-    int T = std::clamp(ibxTypes.value, PARTICLELIFE_MIN_TYPES, PARTICLELIFE_MAX_TYPES);
+    int T = clamp(ibxTypes.value, PARTICLELIFE_MIN_TYPES, PARTICLELIFE_MAX_TYPES);
     int singles = 8;        // number of single settings in col1
     int multis = 2;         // number of multi settings in col2
 
@@ -229,7 +228,7 @@ bool Launcher::customised()
     };
 
     // update body height
-    bodyRec.height = std::max(customiseColumn1.height, customiseColumn2.height);
+    bodyRec.height = max(customiseColumn1.height, customiseColumn2.height);
 
     // set copy settings rows
     Rectangle copyRow1 = {
@@ -421,14 +420,14 @@ bool Launcher::customised()
     return false;
 }
 
-void Launcher::readPreloadedSettings(FLsv& flsv, std::vector<Settings>& settings)
+void Launcher::readPreloadedSettings(FLsv& flsv, vector<Settings>& settings)
 {
     settings.clear();
-    for (const auto& dirEntry : fs::directory_iterator(flsv.dirPath)) {
+    for (const auto& dirEntry : filesystem::directory_iterator(flsv.dirPath)) {
         try {
             settings.push_back(Settings(dirEntry));
-        } catch (std::exception& e) { 
-            std::cout << "Failed to load settings from " << dirEntry.path() << ": " << e.what() << std::endl;
+        } catch (exception& e) { 
+            cout << "Failed to load settings from " << dirEntry.path() << ": " << e.what() << endl;
         }
     }
     if (settings.empty())
@@ -440,22 +439,22 @@ void Launcher::readPreloadedSettings(FLsv& flsv, std::vector<Settings>& settings
 bool Launcher::validateInputSettings()
 {
     // current input errors
-    std::vector<std::string> errors;
+    vector<string> errors;
 
     // field buffer to used to format error messages
-    std::string field;
+    string field;
 
     // VALIDATE SETTINGS INPUTS
 
     // validate name
 
     field = "Name: ";
-    std::vector<char> validSpecialChars = { '-', '_', '(', ')' };
+    vector<char> validSpecialChars = { '-', '_', '(', ')' };
     int nameLength = strlen(tbxName.text);
     if (nameLength == 0)
         errors.push_back(field + "cannot be empty.");
     if (nameLength > PARTICLELIFE_MAX_NAME_LENGTH)
-        errors.push_back(field + "must have less than " + std::to_string(PARTICLELIFE_MAX_NAME_LENGTH) + " characters.");
+        errors.push_back(field + "must have less than " + to_string(PARTICLELIFE_MAX_NAME_LENGTH) + " characters.");
     int i = 0;
     for (; i < nameLength; i++) {
         char c = tbxName.text[i];
@@ -470,17 +469,17 @@ bool Launcher::validateInputSettings()
 
     field = "Types: ";
     if (ibxTypes.value < PARTICLELIFE_MIN_TYPES)
-        errors.push_back(field + "must exceed " + std::to_string(PARTICLELIFE_MIN_TYPES) + ".");
+        errors.push_back(field + "must exceed " + to_string(PARTICLELIFE_MIN_TYPES) + ".");
     if (ibxTypes.value > PARTICLELIFE_MAX_TYPES)
-        errors.push_back(field + "cannot exceed " + std::to_string(PARTICLELIFE_MAX_TYPES) + ".");
+        errors.push_back(field + "cannot exceed " + to_string(PARTICLELIFE_MAX_TYPES) + ".");
 
     // validate size
 
     field = "Size: ";
     if (ibxSize.value < PARTICLELIFE_MIN_GRID_SIZE)
-        errors.push_back(field + "must exceed " + std::to_string(PARTICLELIFE_MIN_GRID_SIZE) + ".");
+        errors.push_back(field + "must exceed " + to_string(PARTICLELIFE_MIN_GRID_SIZE) + ".");
     if (ibxSize.value > PARTICLELIFE_MAX_GRID_SIZE)
-        errors.push_back(field + "cannot exceed " + std::to_string(PARTICLELIFE_MAX_GRID_SIZE) + ".");
+        errors.push_back(field + "cannot exceed " + to_string(PARTICLELIFE_MAX_GRID_SIZE) + ".");
 
     // validate count
 
@@ -488,52 +487,52 @@ bool Launcher::validateInputSettings()
     if (ibxCount.value < ibxTypes.value)
         errors.push_back(field + "must be greater than or equal to types.");
     if (ibxCount.value < PARTICLELIFE_MIN_COUNT)
-        errors.push_back(field + "must exceed " + std::to_string(PARTICLELIFE_MIN_COUNT) + ".");
+        errors.push_back(field + "must exceed " + to_string(PARTICLELIFE_MIN_COUNT) + ".");
     if (ibxCount.value > PARTICLELIFE_MAX_COUNT)
-        errors.push_back(field + "cannot exceed " + std::to_string(PARTICLELIFE_MAX_COUNT) + ".");
+        errors.push_back(field + "cannot exceed " + to_string(PARTICLELIFE_MAX_COUNT) + ".");
 
 
     // validate inner radius
 
     field = "Inner Radius: ";
     if (fbxInnerRadius.value < PARTICLELIFE_MIN_INNER_RADIUS)
-        errors.push_back(field + "must exceed " + std::to_string(PARTICLELIFE_MIN_INNER_RADIUS) + ".");
+        errors.push_back(field + "must exceed " + to_string(PARTICLELIFE_MIN_INNER_RADIUS) + ".");
     if (fbxInnerRadius.value > PARTICLELIFE_MAX_INNER_RADIUS)
-        errors.push_back(field + "cannot exceed " + std::to_string(PARTICLELIFE_MAX_INNER_RADIUS) + ".");
+        errors.push_back(field + "cannot exceed " + to_string(PARTICLELIFE_MAX_INNER_RADIUS) + ".");
     
     // validate resistance
 
     field = "Resistance: ";
     if (fbxResistance.value < PARTICLELIFE_MIN_RESISTANCE)
-        errors.push_back(field + "must exceed " + std::to_string(PARTICLELIFE_MIN_RESISTANCE) + ".");
+        errors.push_back(field + "must exceed " + to_string(PARTICLELIFE_MIN_RESISTANCE) + ".");
     if (fbxResistance.value > PARTICLELIFE_MAX_RESISTANCE)
-        errors.push_back(field + "cannot exceed " + std::to_string(PARTICLELIFE_MAX_RESISTANCE) + ".");
+        errors.push_back(field + "cannot exceed " + to_string(PARTICLELIFE_MAX_RESISTANCE) + ".");
 
     // validate step
 
     field = "Step: ";
     if (fbxStep.value < PARTICLELIFE_MIN_STEP)
-        errors.push_back(field + "must exceed " + std::to_string(PARTICLELIFE_MIN_STEP) + ".");
+        errors.push_back(field + "must exceed " + to_string(PARTICLELIFE_MIN_STEP) + ".");
     if (fbxStep.value > PARTICLELIFE_MAX_STEP)
-        errors.push_back(field + "cannot exceed " + std::to_string(PARTICLELIFE_MAX_STEP) + ".");
+        errors.push_back(field + "cannot exceed " + to_string(PARTICLELIFE_MAX_STEP) + ".");
 
     // valiate seed
 
     field = "Seed: ";
     if (ibxSeed.value < PARTICLELIFE_MIN_SEED)
-        errors.push_back(field + "must exceed " + std::to_string(PARTICLELIFE_MIN_SEED) + ".");
+        errors.push_back(field + "must exceed " + to_string(PARTICLELIFE_MIN_SEED) + ".");
     if (ibxSeed.value > PARTICLELIFE_MAX_SEED)
-        errors.push_back(field + "cannot exceed " + std::to_string(PARTICLELIFE_MAX_SEED) + ".");
+        errors.push_back(field + "cannot exceed " + to_string(PARTICLELIFE_MAX_SEED) + ".");
 
     // valiudate attractions
 
     for (int i = 0; i < ibxTypes.value; i++) {
         for (int j = 0; j < ibxTypes.value; j++) {
-            field = "Attraction["+std::to_string(i)+"]["+std::to_string(j)+"]: ";
+            field = "Attraction["+to_string(i)+"]["+to_string(j)+"]: ";
             if (fbxAttractions[i][j].value < PARTICLELIFE_MIN_ATTRACTION)
-                errors.push_back(field + "must exceed " + std::to_string(PARTICLELIFE_MIN_ATTRACTION) + ".");
+                errors.push_back(field + "must exceed " + to_string(PARTICLELIFE_MIN_ATTRACTION) + ".");
             if (fbxAttractions[i][j].value > PARTICLELIFE_MAX_ATTRACTION)
-                errors.push_back(field + "must exceed " + std::to_string(PARTICLELIFE_MAX_ATTRACTION) + ".");
+                errors.push_back(field + "must exceed " + to_string(PARTICLELIFE_MAX_ATTRACTION) + ".");
         }
     }
 
@@ -542,11 +541,11 @@ bool Launcher::validateInputSettings()
     field = "Type Ratios: ";
     int ratioSum = 0;
     for (int i = 0; i < ibxTypes.value; i++) {
-        field = "TypeRatio["+std::to_string(i)+"]: ";
+        field = "TypeRatio["+to_string(i)+"]: ";
         if (fbxTypeRatios[i].value < PARTICLELIFE_MIN_RATIO)
-            errors.push_back(field + "must exceed " + std::to_string(PARTICLELIFE_MIN_RATIO) + ".");
+            errors.push_back(field + "must exceed " + to_string(PARTICLELIFE_MIN_RATIO) + ".");
         if (fbxTypeRatios[i].value > PARTICLELIFE_MAX_RATIO)
-            errors.push_back(field + "cannot exceed " + std::to_string(PARTICLELIFE_MAX_RATIO) + ".");
+            errors.push_back(field + "cannot exceed " + to_string(PARTICLELIFE_MAX_RATIO) + ".");
         ratioSum += fbxTypeRatios[i].value;
     } if (ratioSum > ibxCount.value)
         errors.push_back(field + "sum must not exceed count.");
@@ -555,7 +554,7 @@ bool Launcher::validateInputSettings()
 
     if (ibxSeed.value == -1) {
         if (userCustomisedSettings.particles.size() != ibxCount.value)
-            errors.push_back("Copied particle data of length "+std::to_string(userCustomisedSettings.particles.size())+ " does not match count input");
+            errors.push_back("Copied particle data of length "+to_string(userCustomisedSettings.particles.size())+ " does not match count input");
     }
 
     // UPDATE ERROR DISPLAY
@@ -580,7 +579,7 @@ bool Launcher::validateInputSettings()
 
     Settings& s = userCustomisedSettings;
 
-    s.name = std::string(tbxName.text);        // name
+    s.name = string(tbxName.text);             // name
     s.types = ibxTypes.value;                  // types
     s.size = ibxSize.value;                    // size
     s.count = ibxCount.value;                  // count
@@ -590,7 +589,7 @@ bool Launcher::validateInputSettings()
 
     s.attractions.clear();                     // attractions
     for (int i = 0; i < ibxTypes.value; i++) {
-        s.attractions.push_back(std::vector<float>());
+        s.attractions.push_back(vector<float>());
         for (int j = 0; j < ibxTypes.value; j++)
             s.attractions[i].push_back(fbxAttractions[i][j].value);
     }
@@ -614,9 +613,9 @@ bool Launcher::saveCustomisedSettings()
     if (!validateInputSettings()) return false;
 
     // create and/or open settings file, log error if failed
-    std::ofstream file(Settings::customSettingsDir + userCustomisedSettings.name + ".txt");
+    ofstream file(Settings::customSettingsDir + userCustomisedSettings.name + ".txt");
     if (!file.is_open()) {
-        std::string error = "Failed to save settings to " + userCustomisedSettings.name + ".txt";
+        string error = "Failed to save settings to " + userCustomisedSettings.name + ".txt";
         strcpy(lsvErrors.text, error.c_str());
         return false;
     }
@@ -625,17 +624,17 @@ bool Launcher::saveCustomisedSettings()
 
     Settings& s = userCustomisedSettings;
 
-    file << std::to_string(s.types) << '\n';        // types
-    file << std::to_string(s.size) << '\n';         // size
-    file << std::to_string(s.count) << '\n';        // count
-    file << std::to_string(s.innerRadius) << '\n';  // innerRadius
-    file << std::to_string(s.resistance) << '\n';   // resistance
-    file << std::to_string(s.step) << '\n';         // step
+    file << to_string(s.types) << '\n';        // types
+    file << to_string(s.size) << '\n';         // size
+    file << to_string(s.count) << '\n';        // count
+    file << to_string(s.innerRadius) << '\n';  // innerRadius
+    file << to_string(s.resistance) << '\n';   // resistance
+    file << to_string(s.step) << '\n';         // step
 
     for (int i = 0; i < s.types; i++) {             // attractions
-        file << std::to_string(s.typeRatio[i]);
+        file << to_string(s.typeRatio[i]);
         for (int j = 1; j < s.types; j++)
-            file << ',' << std::to_string(s.typeRatio[j]);
+            file << ',' << to_string(s.typeRatio[j]);
         file << '\n';
     }
 
@@ -643,17 +642,17 @@ bool Launcher::saveCustomisedSettings()
 
     if (s.seed != -1) {                             // type ratios
         for (int i = 0; i < s.types; i++)
-            file << std::to_string(s.typeRatio[i]) << ',';
+            file << to_string(s.typeRatio[i]) << ',';
         file << '\n';
     }
 
     else {
         for (int i = 0; i < s.count; i++) {         // particles
-            file << std::to_string(s.particles[i].type) << ','
-                 << std::to_string(s.particles[i].pos.x) << ','
-                 << std::to_string(s.particles[i].pos.y) << ','
-                 << std::to_string(s.particles[i].vel.x) << ','
-                 << std::to_string(s.particles[i].vel.y) << '\n';
+            file << to_string(s.particles[i].type) << ','
+                 << to_string(s.particles[i].pos.x) << ','
+                 << to_string(s.particles[i].pos.y) << ','
+                 << to_string(s.particles[i].vel.x) << ','
+                 << to_string(s.particles[i].vel.y) << '\n';
         }
     }
 

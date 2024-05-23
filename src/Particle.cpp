@@ -5,6 +5,7 @@
 #include <iomanip>
 
 
+
 // RED, BLUE, YELLOW, PURPLE, GREEN, ORANGE, PINK, BEIGE, RAYWHITE
 const unsigned char Particle::R[9] = { 255, 50,  255, 255, 0,   255, 255, 210, 255 };
 const unsigned char Particle::G[9] = { 50,  100, 255, 127, 255, 127, 200, 170, 255 };
@@ -45,7 +46,7 @@ Particle::Particle(const Particle& p) :
 {}
 
 
-std::ostream& operator<<(std::ostream& os, const Particle& p)
+ostream& operator<<(ostream& os, const Particle& p)
 {
     return os << p.type <<", ("<< p.pos.x <<", "<< p.pos.y <<"), ("<< p.vel.x <<", "<< p.vel.y <<")";
 }

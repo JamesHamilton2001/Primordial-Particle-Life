@@ -10,6 +10,7 @@
 #define RAYGUI_IMPLEMENTATION
 #include "raygui.h"
 
+
 /*
 TODO:
  - remove trailing zeros after last digit after point from float box
@@ -33,7 +34,7 @@ void Wdgt::setText(const char* cstr)
     } text[textSize] = '\0';
 }
 
-std::ostream& operator <<(std::ostream& os, const Wdgt& w)
+ostream& operator <<(ostream& os, const Wdgt& w)
 {
     return os << w.active << ", " << w.textSize <<"/"<< w.textBufferSize << ", \"" << w.text << "\"";
 }
@@ -77,7 +78,7 @@ bool Ibx::update(Rectangle& rect)
     } return false;
 }
 
-std::ostream& operator <<(std::ostream& os, const Ibx& ibx)
+ostream& operator <<(ostream& os, const Ibx& ibx)
 {
     return os << ibx.minValue << " <= " << ibx.value << " <= " << ibx.maxValue;
 }
@@ -151,7 +152,7 @@ bool Fbx::update(Rectangle& rect)
     return false; // return false if contents not updated by user
 }
 
-std::ostream& operator <<(std::ostream& os, const Fbx& fbx)
+ostream& operator <<(ostream& os, const Fbx& fbx)
 {
     return os << static_cast<const Tbx&>(fbx) << ", " << fbx.value;
 }
@@ -163,7 +164,7 @@ bool Lsv::update(Rectangle& rect)
     return false;
 }
 
-std::ostream& operator <<(std::ostream& os, const Lsv& lsv)
+ostream& operator <<(ostream& os, const Lsv& lsv)
 {
     return os << lsv.scrollIdx << ", " << lsv.activeIdx << ", " << lsv.text;
 }
@@ -197,7 +198,7 @@ bool TglGrp::update(Rectangle& rect)
     return false;
 }
 
-std::ostream& operator <<(std::ostream& os, const TglGrp& tglGrp)
+ostream& operator <<(ostream& os, const TglGrp& tglGrp)
 {
     return os << tglGrp.activeToggle << ", " << tglGrp.text;
 }

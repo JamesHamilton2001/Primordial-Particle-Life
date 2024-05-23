@@ -11,10 +11,10 @@ int main()
     int width = 1024;
     int height = 768;
 
-    std::cout << std::endl;
+    cout << endl;
     InitWindow(width, height, "Particle Life");
     SetTargetFPS(30);
-    std::cout << std::endl;
+    cout << endl;
 
     Launcher launcher;
     while (launcher.run()) {
@@ -26,12 +26,12 @@ int main()
 
     App app(width, height, 0, launcher.getSettings());
 
-    std::cout << std::endl;
+    cout << endl;
     SetWindowSize(width, height);
     SetTargetFPS(0);
-    std::cout << "INITIATION SETTINGS:" << std::endl;
-    std::cout << launcher.getSettings() << std::endl;
-    std::cout << std::endl;
+    cout << "INITIATION SETTINGS:" << endl;
+    cout << launcher.getSettings() << endl;
+    cout << endl;
     
     while (!WindowShouldClose())
         app.update(),

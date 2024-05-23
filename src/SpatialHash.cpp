@@ -11,9 +11,9 @@ SpatialHash::SpatialHash(int size, int types) :
     types(types),
     size(size),
     bounds(2.0f * size),
-    grid(size+2, std::vector<std::vector<Particle*>>(size+2, std::vector<Particle*>())),
-    cornerWraps(4, std::vector<Particle>()),
-    edgeWraps(4, std::vector<std::vector<Particle>>(size))
+    grid(size+2, vector<vector<Particle*>>(size+2, vector<Particle*>())),
+    cornerWraps(4, vector<Particle>()),
+    edgeWraps(4, vector<vector<Particle>>(size))
 {}
 
 
@@ -22,7 +22,7 @@ int SpatialHash::hash(float coord) const
     return coord/2 + 1;
 }
 
-void SpatialHash::map(std::vector<Particle>& particles)
+void SpatialHash::map(vector<Particle>& particles)
 {
     // clear cells in grid, cornerWraps, and edgeWraps
     for (auto& row : grid) for (auto& cell : row) cell.clear();
@@ -100,14 +100,14 @@ void SpatialHash::map(std::vector<Particle>& particles)
         for (Particle& p : edgeWraps[3][r-1]) grid[r][0].emplace_back(&p);
 }
 
-std::vector<Particle*>& SpatialHash::getCell(int row, int col)
+vector<Particle*>& SpatialHash::getCell(int row, int col)
 {
     return grid[row][col];
 }
 
-std::vector<int> SpatialHash::countTypesInCell(int row, int col) const
+vector<int> SpatialHash::countTypesInCell(int row, int col) const
 {
-    std::vector<int> counts(types, 0);
+    vector<int> counts(types, 0);
     for (Particle* p : grid[row][col])
         counts[p->type]++;
     return counts;
