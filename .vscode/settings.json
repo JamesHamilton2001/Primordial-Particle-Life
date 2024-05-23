@@ -68,6 +68,8 @@
         "codecvt": "cpp",
         "fstream": "cpp",
         "filesystem": "cpp",
-        "cstring": "cpp"
+        "cstring": "cpp",
+        "bitset": "cpp",
+        "regex": "cpp"
     }
 }

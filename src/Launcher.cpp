@@ -287,17 +287,11 @@ bool Launcher::run()
     if (windowWidth != GetScreenWidth() || windowHeight != GetScreenHeight())
         SetWindowSize(windowWidth, windowHeight);
 
-    auto previousSettings = currentSettingsPtr;
-
     if (tglgrpSettingsTab.activeToggle == 0)
         currentSettingsPtr = (tglgrpSelectPreloadedSettings.activeToggle == 0)
           ? &defaultSettings[flsvSelectDefaultSettings.activeIdx]
           : &customSettings[flsvSelectCustomSettings.activeIdx];
     else currentSettingsPtr = &userCustomisedSettings;
-
-    if (previousSettings != currentSettingsPtr)
-        std::cout << (currentSettingsPtr == &userCustomisedSettings ? "customise" : "load") << " settings " << std::endl << std::endl,
-        std::cout << *currentSettingsPtr << std::endl;
     
     BeginDrawing();
     ClearBackground(GetColor(GuiGetStyle(DEFAULT, BACKGROUND_COLOR)));
@@ -404,12 +398,10 @@ bool Launcher::preloaded()
 
 bool Launcher::customised()
 {
-
-    
     // widget related counts
-    int T = 9;       // number of types     TODO: get from customisedSettings
-    int singles = 7; // number of single settings in col1
-    int multis = 2;  // number of multi settings in col2
+    int T = std::clamp(ibxTypes.value, PARTICLE_LIFE_MIN_TYPES, PARTICLE_LIFE_MAX_TYPES);
+    int singles = 7;        // number of single settings in col1
+    int multis = 2;         // number of multi settings in col2
 
     // set body position
     bodyRec.x = headerRec.x;
@@ -583,8 +575,9 @@ bool Launcher::customised()
 
     // ERRORS
 
-    grpErrors.update(errorsRec);
-    lsvErrors.update(lsvErrorsRec);
+    if (lsvErrors.text[0] != '\0')
+        grpErrors.update(errorsRec),
+        lsvErrors.update(lsvErrorsRec);
 
     // FOOTER
 
@@ -681,10 +674,13 @@ bool Launcher::validateInputSettings()
     // validate count
 
     field = "Count: ";
+    if (ibxCount.value < ibxTypes.value)
+        errors.push_back(field + "must be greater than or equal to types.");
     if (ibxCount.value < PARTICLE_LIFE_MIN_COUNT)
         errors.push_back(field + "must exceed " + std::to_string(PARTICLE_LIFE_MIN_COUNT) + ".");
     if (ibxCount.value > PARTICLE_LIFE_MAX_COUNT)
         errors.push_back(field + "cannot exceed " + std::to_string(PARTICLE_LIFE_MAX_COUNT) + ".");
+
 
     // validate inner radius
 
