@@ -1,9 +1,10 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+import json
 
 dirName = "./data/"
-fileName = "big_boy_seeded(50000).json"
+fileName = "debug_seeded(10000).json"
 
-# Read the data
-df = pd.read_json(dirName + fileName)
-print(df.head())
+data = pd.read_json(dirName + fileName)
+first_attribute = data.columns[0]
+print(first_attribute)

@@ -122,6 +122,8 @@ void App::saveData() const
     const Settings& s = particleLife.settings;
     const string m = "    ";
     file << "{" << endl;
+    file << "\"simulation\":" << endl;
+    file << "{" << endl;
 
     // frame count and launch settings
     file <<m<< "\"frameCount\": " << frameCount << "," << endl;
@@ -178,6 +180,7 @@ void App::saveData() const
         if (i < s.count-1) file << ',';
     } file << endl <<m<< "]" << endl;
 
+    file << "}" << endl;
     file << "}" << endl;
     file.close();
 }

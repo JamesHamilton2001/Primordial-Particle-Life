@@ -1,4 +1,6 @@
 {
+"simulation":
+{
     "frameCount": 10000,
     "launchSettings":
     {
@@ -131,4 +133,5 @@
             "yVel": 0.327741
         }
     ]
+}
 }
