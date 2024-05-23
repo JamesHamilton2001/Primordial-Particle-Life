@@ -175,17 +175,17 @@ void App::runStatistics() const
     file << "{" << endl;
 
     // frame count and launch settings
-    file <<m<< "\"frameCount\": " << frameCount << ",\n";
-    file <<m<< "\"launchSettings\": \n";
-    file <<m<< "{\n";
-    file <<m+m<< "\"name\": \"" << settings.name << "\",\n";
-    file <<m+m<< "\"types\": " << settings.types << ",\n";
-    file <<m+m<< "\"size\": " << settings.size << ",\n";
-    file <<m+m<< "\"count\": " << settings.count << ",\n";
-    file <<m+m<< "\"innerRadius\": " << settings.innerRadius << ",\n";
-    file <<m+m<< "\"resistance\": " << settings.resistance << ",\n";
-    file <<m+m<< "\"step\": " << settings.step << ",\n";
-    file <<m+m<< "\"attractions\": [\n";
+    file <<m<< "\"frameCount\": " << frameCount << "," << endl;
+    file <<m<< "\"launchSettings\":" << endl;
+    file <<m<< "{" << endl;
+    file <<m+m<< "\"name\": \"" << settings.name << "\"," << endl;
+    file <<m+m<< "\"types\": " << settings.types << "," << endl;
+    file <<m+m<< "\"size\": " << settings.size << "," << endl;
+    file <<m+m<< "\"count\": " << settings.count << "," << endl;
+    file <<m+m<< "\"innerRadius\": " << settings.innerRadius << "," << endl;
+    file <<m+m<< "\"resistance\": " << settings.resistance << "," << endl;
+    file <<m+m<< "\"step\": " << settings.step << "," << endl;
+    file <<m+m<< "\"attractions\": [" << endl;
     for (int i = 0; i < T; i++) {
         file <<m+m+m<< '[';
         for (int j = 0; j < T; j++) {
@@ -193,28 +193,28 @@ void App::runStatistics() const
             if (j < T-1) file << ", ";
         } file << ']';
         if (i < T-1) file << ',';
-        file << '\n';
-    } file <<m+m<< "],\n";
-    file <<m+m<< "\"seed\": " << settings.seed << ",\n";
+        file << endl;
+    } file <<m+m<< "]," << endl;
+    file <<m+m<< "\"seed\": " << settings.seed << "," << endl;
     file <<m+m<< "\"typeRatio\": [ ";
     for (int i = 0; i < T; i++) {
         file << settings.typeRatio[i];
         if (i < T-1) file << ", ";
-    } file << " ],\n";
-    file <<m+m<< "\"particles\": [\n";
+    } file << " ]," << endl;
+    file <<m+m<< "\"particles\": [" << endl;
     for (int i = 0; i < settings.count; i++) {
         const Particle& p = settings.particles[i];
         file <<m+m+m<< "{\n";
-        file <<m+m+m+m<< "\"type\": " << p.type << ",\n";
-        file <<m+m+m+m<< "\"xPos\": " << p.pos.x << ",\n";
-        file <<m+m+m+m<< "\"yPos\": " << p.pos.y << ",\n";
-        file <<m+m+m+m<< "\"xVel\": " << p.vel.x << ",\n";
-        file <<m+m+m+m<< "\"yVel\": " << p.vel.y << "\n";
+        file <<m+m+m+m<< "\"type\": " << p.type << "," << endl;
+        file <<m+m+m+m<< "\"xPos\": " << p.pos.x << "," << endl;
+        file <<m+m+m+m<< "\"yPos\": " << p.pos.y << "," << endl;
+        file <<m+m+m+m<< "\"xVel\": " << p.vel.x << "," << endl;
+        file <<m+m+m+m<< "\"yVel\": " << p.vel.y << endl;
         file <<m+m+m<< "}";
         if (i < settings.count-1) file << ',';
-        file << '\n';
-    } file <<m+m<< "]\n";
-    file <<m<< "},\n";
+        file << endl;
+    } file <<m+m<< "]" << endl;
+    file <<m<< "}," << endl;
 
     file << "}" << endl;
     file.close();
