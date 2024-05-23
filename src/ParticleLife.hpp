@@ -9,7 +9,6 @@
 #include <rlgl.h>
 #include <vector>
 #include <iostream>
-#include <random>
 #include <string>
 
 
@@ -54,9 +53,6 @@ class ParticleLife
     std::vector<Particle> particles;
 
     SpatialHash spatialHash;
-
-    std::mt19937 gen;
-    std::uniform_real_distribution<float> posDistr;
 
     void particleInteraction(Particle& p1, Particle& p2);
 

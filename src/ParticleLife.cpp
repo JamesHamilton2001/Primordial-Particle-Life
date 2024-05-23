@@ -4,7 +4,6 @@
 #include <rlgl.h>
 #include <vector>
 #include <cmath>
-#include <random>
 #include <iostream>
 #include <string>
 #include <fstream>
@@ -25,24 +24,9 @@ ParticleLife::ParticleLife(Settings& settings) :
     particles   (settings.particles),
     spatialHash (settings.size, settings.types)
 {
-    posDistr = std::uniform_real_distribution<float>(0.0f, bounds);
-    gen.seed(settings.seed);
-
-    // generate particles to given ratio is seed given
     if (settings.seed != -1) {
-        for (int ct = 0; ct < count;) {
-            for (int i = 0; i < types; i++) {
-                for (int j = 0; j < settings.typeRatio[i]; j++) {
-                    if (ct < count) {
-                        particles[ct].type = i;
-                        particles[ct].pos = Vector2 { posDistr(gen), posDistr(gen) };
-                        particles[ct].vel = Vector2 { 0.0f, 0.0f };
-                        ct++;
-                    }
-                    else break;
-                }
-            }
-        }
+        SetRandomSeed(settings.seed);
+        randomisePositions();
     }
 }
 
@@ -253,10 +237,20 @@ void ParticleLife::saveConfig() const
 
 void ParticleLife::randomisePositions()
 {
-    for (Particle& p : particles) {
-        p.type = GetRandomValue(0, types-1);
-        p.pos = Vector2 { posDistr(gen), posDistr(gen) };
-        p.vel = Vector2 { 0.0f, 0.0f };
+    int ct = 0;
+    while (ct < count) {
+        for (int t = 0; t < types; t++) {
+            for (int j = 0; j < settings.typeRatio[t] && ct < count; j++) {
+                particles[ct++] = Particle(
+                    t,
+                    Vector2 {
+                        GetRandomValue(0, static_cast<int>(bounds)) + GetRandomValue(0, 1000) / 1000.0f,
+                        GetRandomValue(0, static_cast<int>(bounds)) + GetRandomValue(0, 1000) / 1000.0f
+                    },
+                    Vector2 { 0, 0 }
+                );
+            }
+        }
     }
 }
 
