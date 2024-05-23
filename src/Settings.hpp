@@ -39,7 +39,7 @@ struct Settings
 {
     static const string defaultSettingsDir;
     static const string customSettingsDir;
-    static const string statisticsDir;
+    static const string simulationDataDir;
 
     string name;
     int types;

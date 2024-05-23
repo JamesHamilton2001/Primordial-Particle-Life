@@ -24,6 +24,9 @@ class ParticleLife
     void update();
     void draw(unsigned int pTexID) const;
 
+    long long unsigned int getFrameCount() const;
+    const vector<Particle>& getParticles() const;
+
     void saveConfig() const;
 
     void drawGrid() const;
@@ -33,8 +36,6 @@ class ParticleLife
     void randomisePositions();
 
     vector<int> countTypes() const;
-
-    void getComparisonData(Settings& settings, vector<Particle>& particles, long long unsigned int* frameCount) const;
 
     friend ostream& operator <<(ostream& os, const ParticleLife& particleLife);
 

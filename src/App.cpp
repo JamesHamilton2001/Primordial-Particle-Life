@@ -67,10 +67,10 @@ void App::update()
     // save settings and run statistics on PRESS_ENTER
     if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_ENTER)) {
         // particleLife.saveConfig(); // TODO: re-enable saving
-        runStatistics();
+        saveData();
     }
     else if (paused && IsKeyPressed(KEY_ENTER))
-        runStatistics();
+        saveData();
     
     // update simulation if not paused
     if (!paused)
@@ -102,15 +102,13 @@ void App::gui()
 
 }
 
-void App::runStatistics() const
+void App::saveData() const
 {
-    Settings settings;
-    vector<Particle> particles;
-    long long unsigned int frameCount;
-    particleLife.getComparisonData(settings, particles, &frameCount);
-
-    const int T = settings.types;
-
+    long long unsigned int frameCount = particleLife.getFrameCount();
+    const vector<Particle>& particles = particleLife.getParticles();
+    const int T = particleLife.settings.types;
+ 
+/*
     // PARTICLE SPEEDS BY TYPE
 
     auto typeSpeeds = vector<vector<float>>(T);
@@ -154,14 +152,17 @@ void App::runStatistics() const
     for (int i = 0; i < T; i++)
         for (int j = 0; j < T; j++)
             cout <<"| | ["<<i<<"]["<<j<<"]: " << t2tInterDists[i][j].size() <<", "<< t2tInterDistMeans[i][j] << endl;
+*/
 
     // WRITE INFORMATION TO FILE
 
-    ofstream file(settings.statisticsDir + settings.name +"("+to_string(frameCount)+")" + ".json");
+    string fileName = particleLife.settings.simulationDataDir + particleLife.settings.name +"("+to_string(frameCount)+")" + ".json";
+    ofstream file(fileName);
     if (!file.is_open()) {
-        cerr << "Failed to open file for writing statistics." << endl;
+        cerr << "Failed to create/open \""+fileName+"\" for writing statistics." << endl;
         return;
     }
+    const Settings& s = particleLife.settings;
     const string m = "    ";
     file << "{" << endl;
 
@@ -169,32 +170,32 @@ void App::runStatistics() const
     file <<m<< "\"frameCount\": " << frameCount << "," << endl;
     file <<m<< "\"launchSettings\":" << endl;
     file <<m<< "{" << endl;
-    file <<m+m<< "\"name\": \"" << settings.name << "\"," << endl;
-    file <<m+m<< "\"types\": " << settings.types << "," << endl;
-    file <<m+m<< "\"size\": " << settings.size << "," << endl;
-    file <<m+m<< "\"count\": " << settings.count << "," << endl;
-    file <<m+m<< "\"innerRadius\": " << settings.innerRadius << "," << endl;
-    file <<m+m<< "\"resistance\": " << settings.resistance << "," << endl;
-    file <<m+m<< "\"step\": " << settings.step << "," << endl;
+    file <<m+m<< "\"name\": \"" << s.name << "\"," << endl;
+    file <<m+m<< "\"types\": " << s.types << "," << endl;
+    file <<m+m<< "\"size\": " << s.size << "," << endl;
+    file <<m+m<< "\"count\": " << s.count << "," << endl;
+    file <<m+m<< "\"innerRadius\": " << s.innerRadius << "," << endl;
+    file <<m+m<< "\"resistance\": " << s.resistance << "," << endl;
+    file <<m+m<< "\"step\": " << s.step << "," << endl;
     file <<m+m<< "\"attractions\": [" << endl;
     for (int i = 0; i < T; i++) {
         file <<m+m+m<< '[';
         for (int j = 0; j < T; j++) {
-            file << settings.attractions[i][j];
+            file << s.attractions[i][j];
             if (j < T-1) file << ", ";
         } file << ']';
         if (i < T-1) file << ',';
         file << endl;
     } file <<m+m<< "]," << endl;
-    file <<m+m<< "\"seed\": " << settings.seed << "," << endl;
+    file <<m+m<< "\"seed\": " << s.seed << "," << endl;
     file <<m+m<< "\"typeRatio\": [ ";
     for (int i = 0; i < T; i++) {
-        file << settings.typeRatio[i];
+        file << s.typeRatio[i];
         if (i < T-1) file << ", ";
     } file << " ]," << endl;
     file <<m+m<< "\"particles\": [" << endl <<m+m+m;
-    for (int i = 0; i < settings.count; i++) {
-        const Particle& p = settings.particles[i];
+    for (int i = 0; i < s.count; i++) {
+        const Particle& p = s.particles[i];
         file << "{" << endl;
         file <<m+m+m+m<< "\"type\": " << p.type << "," << endl;
         file <<m+m+m+m<< "\"xPos\": " << p.pos.x << "," << endl;
@@ -202,13 +203,13 @@ void App::runStatistics() const
         file <<m+m+m+m<< "\"xVel\": " << p.vel.x << "," << endl;
         file <<m+m+m+m<< "\"yVel\": " << p.vel.y << endl;
         file <<m+m+m<< "}";
-        if (i < settings.count-1) file << ',';
+        if (i < s.count-1) file << ',';
     } file << endl <<m+m<< "]" << endl;
     file <<m<< "}," << endl;
 
     // resulting particle data
-    file <<m<< "\"realParticleData\": [" << endl <<m+m;
-    for (int i = 0; i < settings.count; i++) {
+    file <<m<< "\"particles\": [" << endl <<m+m;
+    for (int i = 0; i < s.count; i++) {
         const Particle& p = particles[i];
         file << "{" << endl;
         file <<m+m+m<< "\"type\": " << p.type << "," << endl;
@@ -217,8 +218,8 @@ void App::runStatistics() const
         file <<m+m+m<< "\"xVel\": " << p.vel.x << "," << endl;
         file <<m+m+m<< "\"yVel\": " << p.vel.y << endl;
         file <<m+m<< "}";
-        if (i < settings.count-1) file << ',';
-    } file << endl <<m<< "]," << endl;
+        if (i < s.count-1) file << ',';
+    } file << endl <<m<< "]" << endl;
 
     file << "}" << endl;
     file.close();

@@ -7,7 +7,7 @@
 
 const string Settings::defaultSettingsDir = "./settings/default/";
 const string Settings::customSettingsDir = "./settings/custom/";
-const string Settings::statisticsDir = "./statistics/";
+const string Settings::simulationDataDir = "./simulation_analysis/data/";
 
 Settings::Settings() :
     name("DEFAULT_HARDCODED_SETTINGS"),

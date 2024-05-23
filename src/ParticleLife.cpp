@@ -71,7 +71,6 @@ void ParticleLife::update()
     }
 }
 
-
 void ParticleLife::draw(unsigned int pTexID) const
 {
     rlSetTexture(pTexID);
@@ -80,6 +79,16 @@ void ParticleLife::draw(unsigned int pTexID) const
             p.draw();
     rlSetTexture(0);
     rlEnd();
+}
+
+long long unsigned int ParticleLife::getFrameCount() const
+{
+    return frameCount;
+}
+
+const vector<Particle>& ParticleLife::getParticles() const
+{
+    return particles;
 }
 
 void ParticleLife::drawSoftBorder() const
@@ -256,13 +265,6 @@ vector<int> ParticleLife::countTypes() const
     for (const Particle& p : particles)
         typeCounts[p.type]++;
     return typeCounts;
-}
-
-void ParticleLife::getComparisonData(Settings& settings, vector<Particle>& particles, long long unsigned int* frameCount) const
-{
-    settings = this->settings;
-    particles = this->particles;
-    *frameCount = this->frameCount;
 }
 
 ostream& operator << (ostream& os, const ParticleLife& particleLife)
