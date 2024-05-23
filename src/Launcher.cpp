@@ -200,13 +200,7 @@ bool Launcher::preloaded()
 
     // validate button
     r = { footerRec.x + footerRec.width/2 - btnWidth/2, footerRec.y + M, btnWidth, U };
-    if (btnExecute.update(r)) {
-        
-    }
-
-    // TODO: return true if settings are selected and user presses execute
-
-    return false;
+    return btnExecute.update(r);
 }
 
 bool Launcher::customised()
@@ -418,13 +412,10 @@ bool Launcher::customised()
         bool saved = saveCustomisedSettings();
     }
 
-    // execute button
+    // execute button, return true on valid input to execute
     r.x = footerRec.x + footerRec.width - (midGap + btnWidth) / 2;
-    if (btnExecute.update(r)) {
-        bool validity = validateInputSettings();
-        // TODO: clean oversized vectors
-        return validity;
-    }
+    if (btnExecute.update(r))
+        return validateInputSettings();
 
     // continue running launcher
     return false;
@@ -613,8 +604,6 @@ bool Launcher::validateInputSettings()
     // TODO: take input for particles once widget(s) implemented
     if (s.seed != -1)                          // particles
         s.particles.clear();
-
-    std::cout << s << std::endl;
 
     return true;  // false already returned on errors found
 }

@@ -27,7 +27,9 @@ int main()
     App app(width, height, 0, launcher.getSettings());
 
     std::cout << std::endl;
+    SetWindowSize(width, height);
     SetTargetFPS(0);
+    std::cout << launcher.getSettings() << std::endl;
     std::cout << std::endl;
     
     while (!WindowShouldClose())
