@@ -12,6 +12,8 @@
 #include <fstream>
 #include <filesystem>
 
+using namespace std;
+
 
 
 App::App(int width, int height, int fpsTarget, Settings& settings) :
@@ -72,7 +74,7 @@ void App::update()
     
     // save settings and run statistics on PRESS_ENTER
     if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_ENTER)) {
-        particleLife.saveConfig();
+        // particleLife.saveConfig(); // TODO: re-enable saving
         runStatistics();
     }
     else if (paused && IsKeyPressed(KEY_ENTER))
@@ -110,26 +112,69 @@ void App::gui()
 
 void App::runStatistics() const
 {
-    Settings initialSettings;
-    std::vector<Particle> particles;
+    Settings settings;
+    vector<Particle> particles;
+    vector<Particle> ghosts;
     long long unsigned int frameCount;
-    particleLife.getComparisonData(initialSettings, particles, &frameCount);
+    particleLife.getComparisonData(settings, particles, ghosts, &frameCount);
 
-    std::cout << "Statistics:" << std::endl;
-    std::cout << "| Frame Count: " << frameCount << std::endl; 
-    std::cout << "| Resulting Particle Data:" << std::endl;
-    for (const Particle& p : particles)
-        std::cout << "| | " << p << std::endl;
+    const int T = settings.types;
 
-    // TODO: calculate statistics
+    // PARTICLE SPEEDS BY TYPE
 
-    std::ofstream file(particleLife.settings.statisticsDir + particleLife.settings.name +"("+std::to_string(frameCount)+")" + ".json");
-    if (!file.is_open()) {
-        std::cerr << "Failed to open file for writing statistics." << std::endl;
-        return;
+    auto typeSpeeds = vector<vector<float>>(T);
+    auto totalTypeSpeeds = vector<float>(T, 0);
+    auto meanTypeSpeeds = vector<float>(T);
+
+    for (const Particle& p : particles) {
+        float speed = settings.step * Vector2Length(p.vel);
+        typeSpeeds[p.type].emplace_back(speed);
+        totalTypeSpeeds[p.type] += speed;
+    } for (int i = 0; i < T; i++)
+        meanTypeSpeeds[i] = totalTypeSpeeds[i] / typeSpeeds[i].size();
+
+    // PARTICLE INTERACTIONS BY TYPE
+
+    auto t2tInterDists = vector<vector<vector<float>>>(T, vector<vector<float>>(T));
+    auto t2tInterDistSums = vector<vector<float>>(T, vector<float>(T, 0.0f));
+    auto t2tInterDistMeans = vector<vector<float>>(T, vector<float>(T, 0.0f));
+
+    for (const Particle& p1 : particles) {
+        for (const Particle& p2 : particles) {
+            if (&p1 == &p2) continue;
+            float dist = Vector2Distance(p1.pos, p2.pos);
+            if (dist <= 2.0f)
+                t2tInterDists[p1.type][p2.type].emplace_back(Vector2Distance(p1.pos, p2.pos));
+        }
+        for (const Particle& g : ghosts) {
+            float dist = Vector2Distance(p1.pos, g.pos);
+            if (dist <= 2.0f)
+                t2tInterDists[p1.type][g.type].emplace_back(Vector2Distance(p1.pos, g.pos));
+        }
+    } for (int i = 0; i < T; i++) {
+        for (int j = 0; j < T; j++) {
+            for (float dist : t2tInterDists[i][j])
+                t2tInterDistSums[i][j] += dist;
+            t2tInterDistMeans[i][j] = t2tInterDistSums[i][j] / t2tInterDists[i][j].size();
+        }
     }
 
-    // TODO: write statistics to file
+    cout << "Statistics: Frame: " << frameCount << endl; 
 
-    file.close();
+    cout << "| Mean Type Speeds: " << endl;
+    for (int i = 0; i < T; i++)
+        cout << "| | ["<<i<<"]: " << meanTypeSpeeds[i] << endl;
+
+    cout << "| Type Interactions: (count, mean)" << endl;
+    for (int i = 0; i < T; i++)
+        for (int j = 0; j < T; j++)
+            cout <<"| | ["<<i<<"]["<<j<<"]: " << t2tInterDists[i][j].size() <<", "<< t2tInterDistMeans[i][j] << endl;
+
+    // // TODO: write statistics to file
+    // std::ofstream file(particleLife.settings.statisticsDir + particleLife.settings.name +"("+std::to_string(frameCount)+")" + ".json");
+    // if (!file.is_open()) {
+    //     std::cerr << "Failed to open file for writing statistics." << std::endl;
+    //     return;
+    // }
+    // file.close();
 }

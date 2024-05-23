@@ -287,7 +287,7 @@ void ParticleLife::printCellAtPos(Vector2 pos)
     printCell(spatialHash.hash(pos.y), spatialHash.hash(pos.x));
 }
 
-void ParticleLife::getComparisonData(Settings& settings, std::vector<Particle>& particles, long long unsigned int* frameCount) const
+void ParticleLife::getComparisonData(Settings& settings, std::vector<Particle>& particles, std::vector<Particle> ghosts, long long unsigned int* frameCount) const
 {
     settings = this->settings;
     particles = this->particles;
