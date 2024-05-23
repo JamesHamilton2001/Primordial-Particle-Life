@@ -362,8 +362,8 @@ void ParticleLife::debugGrid()
 
 ParticleLife::Settings::Settings() :
     name("DEFAULT_HARDCODED_SETTINGS"),
-    types(PARTICLE_LIFE_MIN_TYPES),
-    size(PARTICLE_LIFE_MIN_GRID_SIZE),
+    types(PARTICLELIFE_MIN_TYPES),
+    size(PARTICLELIFE_MIN_GRID_SIZE),
     count(15),
     innerRadius(0.5f),
     resistance(0.001f),

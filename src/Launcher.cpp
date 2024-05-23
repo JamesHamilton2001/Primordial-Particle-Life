@@ -9,17 +9,6 @@
 namespace fs = std::filesystem;
 
 
-#define PARTICLE_LIFE_MIN_MAX_TYPES         PARTICLE_LIFE_MIN_TYPES, PARTICLE_LIFE_MAX_TYPES
-#define PARTICLE_LIFE_MIN_MAX_GRID_SIZE     PARTICLE_LIFE_MIN_GRID_SIZE, PARTICLE_LIFE_MAX_GRID_SIZE
-#define PARTICLE_LIFE_MIN_MAX_COUNT         PARTICLE_LIFE_MIN_COUNT, PARTICLE_LIFE_MAX_COUNT
-#define PARTICLE_LIFE_MIN_MAX_INNER_RADIUS  PARTICLE_LIFE_MIN_INNER_RADIUS, PARTICLE_LIFE_MAX_INNER_RADIUS
-#define PARTICLE_LIFE_MIN_MAX_STEP          PARTICLE_LIFE_MIN_STEP, PARTICLE_LIFE_MAX_STEP
-#define PARTICLE_LIFE_MIN_MAX_RESISTANCE    PARTICLE_LIFE_MIN_RESISTANCE, PARTICLE_LIFE_MAX_RESISTANCE
-#define PARTICLE_LIFE_MIN_MAX_ATTRACTION    PARTICLE_LIFE_MIN_ATTRACTION, PARTICLE_LIFE_MAX_ATTRACTION
-#define PARTICLE_LIFE_MIN_MAX_SEED          PARTICLE_LIFE_MIN_SEED, PARTICLE_LIFE_MAX_SEED
-#define PARTICLE_LIFE_MIN_MAX_RATIO         PARTICLE_LIFE_MIN_RATIO, PARTICLE_LIFE_MAX_RATIO
-
-
 
 Launcher::Launcher() :
 
@@ -51,14 +40,14 @@ Launcher::Launcher() :
     grpCustomisedSettings("Customise Settings"),
 
     lblName("Name:"),                   tbxName(),  // NOTE: MIN_MAX substitutes two arguments:  min, max
-    lblTypes("Types:"),                 ibxTypes(PARTICLE_LIFE_MIN_MAX_TYPES),              
-    lblSize("Size:"),                   ibxSize(PARTICLE_LIFE_MIN_MAX_GRID_SIZE),           
-    lblCount("Count:"),                 ibxCount(PARTICLE_LIFE_MIN_MAX_COUNT),              
-    lblInnerRadius("Inner Radius:"),    fbxInnerRadius(PARTICLE_LIFE_MIN_MAX_INNER_RADIUS), 
-    lblResistance("Resistance:"),       fbxResistance(PARTICLE_LIFE_MIN_MAX_RESISTANCE),
-    lblStep("Step:"),                   fbxStep(PARTICLE_LIFE_MIN_MAX_STEP),
-    lblAttractions("Attractions"),      fbxAttractions(PARTICLE_LIFE_MAX_TYPES, std::vector<Fbx>(PARTICLE_LIFE_MAX_TYPES, Fbx(PARTICLE_LIFE_MIN_MAX_ATTRACTION))),
-    lblTypeRatios("Type Ratio"),        fbxTypeRatios(PARTICLE_LIFE_MAX_TYPES, Ibx(PARTICLE_LIFE_MIN_MAX_RATIO)),
+    lblTypes("Types:"),                 ibxTypes(PARTICLELIFE_MIN_TYPES, PARTICLELIFE_MAX_TYPES),              
+    lblSize("Size:"),                   ibxSize(PARTICLELIFE_MIN_GRID_SIZE, PARTICLELIFE_MAX_GRID_SIZE),           
+    lblCount("Count:"),                 ibxCount(PARTICLELIFE_MIN_COUNT, PARTICLELIFE_MAX_COUNT),              
+    lblInnerRadius("Inner Radius:"),    fbxInnerRadius(PARTICLELIFE_MIN_INNER_RADIUS, PARTICLELIFE_MAX_INNER_RADIUS), 
+    lblResistance("Resistance:"),       fbxResistance(PARTICLELIFE_MIN_RESISTANCE, PARTICLELIFE_MAX_RESISTANCE),
+    lblStep("Step:"),                   fbxStep(PARTICLELIFE_MIN_STEP, PARTICLELIFE_MAX_STEP),
+    lblAttractions("Attractions"),      fbxAttractions(PARTICLELIFE_MAX_TYPES, std::vector<Fbx>(PARTICLELIFE_MAX_TYPES, Fbx(PARTICLELIFE_MIN_ATTRACTION, PARTICLELIFE_MAX_ATTRACTION))),
+    lblTypeRatios("Type Ratio"),        fbxTypeRatios(PARTICLELIFE_MAX_TYPES, Ibx(PARTICLELIFE_MIN_RATIO, PARTICLELIFE_MAX_RATIO)),
 
     grpCopyPreloadedSettings("Copy Settings"),
     tglgrpCopyPreloadedSettings("Default;Custom"),
@@ -225,7 +214,7 @@ bool Launcher::preloaded()
 bool Launcher::customised()
 {
     // widget related counts
-    int T = std::clamp(ibxTypes.value, PARTICLE_LIFE_MIN_TYPES, PARTICLE_LIFE_MAX_TYPES);
+    int T = std::clamp(ibxTypes.value, PARTICLELIFE_MIN_TYPES, PARTICLELIFE_MAX_TYPES);
     int singles = 7;        // number of single settings in col1
     int multis = 2;         // number of multi settings in col2
 
@@ -469,8 +458,8 @@ bool Launcher::validateInputSettings()
     int nameLength = strlen(tbxName.text);
     if (nameLength == 0)
         errors.push_back(field + "cannot be empty.");
-    if (nameLength > PARTICLE_LIFE_MAX_NAME_LENGTH)
-        errors.push_back(field + "must have less than " + std::to_string(PARTICLE_LIFE_MAX_NAME_LENGTH) + " characters.");
+    if (nameLength > PARTICLELIFE_MAX_NAME_LENGTH)
+        errors.push_back(field + "must have less than " + std::to_string(PARTICLELIFE_MAX_NAME_LENGTH) + " characters.");
     int i = 0;
     for (; i < nameLength; i++) {
         char c = tbxName.text[i];
@@ -484,63 +473,63 @@ bool Launcher::validateInputSettings()
     // validate types
 
     field = "Types: ";
-    if (ibxTypes.value < PARTICLE_LIFE_MIN_TYPES)
-        errors.push_back(field + "must exceed " + std::to_string(PARTICLE_LIFE_MIN_TYPES) + ".");
-    if (ibxTypes.value > PARTICLE_LIFE_MAX_TYPES)
-        errors.push_back(field + "cannot exceed " + std::to_string(PARTICLE_LIFE_MAX_TYPES) + ".");
+    if (ibxTypes.value < PARTICLELIFE_MIN_TYPES)
+        errors.push_back(field + "must exceed " + std::to_string(PARTICLELIFE_MIN_TYPES) + ".");
+    if (ibxTypes.value > PARTICLELIFE_MAX_TYPES)
+        errors.push_back(field + "cannot exceed " + std::to_string(PARTICLELIFE_MAX_TYPES) + ".");
 
     // validate size
 
     field = "Size: ";
-    if (ibxSize.value < PARTICLE_LIFE_MIN_GRID_SIZE)
-        errors.push_back(field + "must exceed " + std::to_string(PARTICLE_LIFE_MIN_GRID_SIZE) + ".");
-    if (ibxSize.value > PARTICLE_LIFE_MAX_GRID_SIZE)
-        errors.push_back(field + "cannot exceed " + std::to_string(PARTICLE_LIFE_MAX_GRID_SIZE) + ".");
+    if (ibxSize.value < PARTICLELIFE_MIN_GRID_SIZE)
+        errors.push_back(field + "must exceed " + std::to_string(PARTICLELIFE_MIN_GRID_SIZE) + ".");
+    if (ibxSize.value > PARTICLELIFE_MAX_GRID_SIZE)
+        errors.push_back(field + "cannot exceed " + std::to_string(PARTICLELIFE_MAX_GRID_SIZE) + ".");
 
     // validate count
 
     field = "Count: ";
     if (ibxCount.value < ibxTypes.value)
         errors.push_back(field + "must be greater than or equal to types.");
-    if (ibxCount.value < PARTICLE_LIFE_MIN_COUNT)
-        errors.push_back(field + "must exceed " + std::to_string(PARTICLE_LIFE_MIN_COUNT) + ".");
-    if (ibxCount.value > PARTICLE_LIFE_MAX_COUNT)
-        errors.push_back(field + "cannot exceed " + std::to_string(PARTICLE_LIFE_MAX_COUNT) + ".");
+    if (ibxCount.value < PARTICLELIFE_MIN_COUNT)
+        errors.push_back(field + "must exceed " + std::to_string(PARTICLELIFE_MIN_COUNT) + ".");
+    if (ibxCount.value > PARTICLELIFE_MAX_COUNT)
+        errors.push_back(field + "cannot exceed " + std::to_string(PARTICLELIFE_MAX_COUNT) + ".");
 
 
     // validate inner radius
 
     field = "Inner Radius: ";
-    if (fbxInnerRadius.value < PARTICLE_LIFE_MIN_INNER_RADIUS)
-        errors.push_back(field + "must exceed " + std::to_string(PARTICLE_LIFE_MIN_INNER_RADIUS) + ".");
-    if (fbxInnerRadius.value > PARTICLE_LIFE_MAX_INNER_RADIUS)
-        errors.push_back(field + "cannot exceed " + std::to_string(PARTICLE_LIFE_MAX_INNER_RADIUS) + ".");
+    if (fbxInnerRadius.value < PARTICLELIFE_MIN_INNER_RADIUS)
+        errors.push_back(field + "must exceed " + std::to_string(PARTICLELIFE_MIN_INNER_RADIUS) + ".");
+    if (fbxInnerRadius.value > PARTICLELIFE_MAX_INNER_RADIUS)
+        errors.push_back(field + "cannot exceed " + std::to_string(PARTICLELIFE_MAX_INNER_RADIUS) + ".");
     
     // validate resistance
 
     field = "Resistance: ";
-    if (fbxResistance.value < PARTICLE_LIFE_MIN_RESISTANCE)
-        errors.push_back(field + "must exceed " + std::to_string(PARTICLE_LIFE_MIN_RESISTANCE) + ".");
-    if (fbxResistance.value > PARTICLE_LIFE_MAX_RESISTANCE)
-        errors.push_back(field + "cannot exceed " + std::to_string(PARTICLE_LIFE_MAX_RESISTANCE) + ".");
+    if (fbxResistance.value < PARTICLELIFE_MIN_RESISTANCE)
+        errors.push_back(field + "must exceed " + std::to_string(PARTICLELIFE_MIN_RESISTANCE) + ".");
+    if (fbxResistance.value > PARTICLELIFE_MAX_RESISTANCE)
+        errors.push_back(field + "cannot exceed " + std::to_string(PARTICLELIFE_MAX_RESISTANCE) + ".");
 
     // validate step
 
     field = "Step: ";
-    if (fbxStep.value < PARTICLE_LIFE_MIN_STEP)
-        errors.push_back(field + "must exceed " + std::to_string(PARTICLE_LIFE_MIN_STEP) + ".");
-    if (fbxStep.value > PARTICLE_LIFE_MAX_STEP)
-        errors.push_back(field + "cannot exceed " + std::to_string(PARTICLE_LIFE_MAX_STEP) + ".");
+    if (fbxStep.value < PARTICLELIFE_MIN_STEP)
+        errors.push_back(field + "must exceed " + std::to_string(PARTICLELIFE_MIN_STEP) + ".");
+    if (fbxStep.value > PARTICLELIFE_MAX_STEP)
+        errors.push_back(field + "cannot exceed " + std::to_string(PARTICLELIFE_MAX_STEP) + ".");
 
     // valiudate attractions
 
     for (int i = 0; i < ibxTypes.value; i++) {
         for (int j = 0; j < ibxTypes.value; j++) {
             field = "Attraction["+std::to_string(i)+"]["+std::to_string(j)+"]: ";
-            if (fbxAttractions[i][j].value < PARTICLE_LIFE_MIN_ATTRACTION)
-                errors.push_back(field + "must exceed " + std::to_string(PARTICLE_LIFE_MIN_ATTRACTION) + ".");
-            if (fbxAttractions[i][j].value > PARTICLE_LIFE_MAX_ATTRACTION)
-                errors.push_back(field + "must exceed " + std::to_string(PARTICLE_LIFE_MAX_ATTRACTION) + ".");
+            if (fbxAttractions[i][j].value < PARTICLELIFE_MIN_ATTRACTION)
+                errors.push_back(field + "must exceed " + std::to_string(PARTICLELIFE_MIN_ATTRACTION) + ".");
+            if (fbxAttractions[i][j].value > PARTICLELIFE_MAX_ATTRACTION)
+                errors.push_back(field + "must exceed " + std::to_string(PARTICLELIFE_MAX_ATTRACTION) + ".");
         }
     }
 
@@ -549,10 +538,10 @@ bool Launcher::validateInputSettings()
     int ratioSum = 0;
     for (int i = 0; i < ibxTypes.value; i++) {
         field = "TypeRatio["+std::to_string(i)+"]: ";
-        if (fbxTypeRatios[i].value < PARTICLE_LIFE_MIN_RATIO)
-            errors.push_back(field + "must exceed " + std::to_string(PARTICLE_LIFE_MIN_RATIO) + ".");
-        if (fbxTypeRatios[i].value > PARTICLE_LIFE_MAX_RATIO)
-            errors.push_back(field + "cannot exceed " + std::to_string(PARTICLE_LIFE_MAX_RATIO) + ".");
+        if (fbxTypeRatios[i].value < PARTICLELIFE_MIN_RATIO)
+            errors.push_back(field + "must exceed " + std::to_string(PARTICLELIFE_MIN_RATIO) + ".");
+        if (fbxTypeRatios[i].value > PARTICLELIFE_MAX_RATIO)
+            errors.push_back(field + "cannot exceed " + std::to_string(PARTICLELIFE_MAX_RATIO) + ".");
         ratioSum += fbxTypeRatios[i].value;
     } if (ratioSum > ibxCount.value)
         errors.push_back("Type Ratios: sum must not exceed count.");
