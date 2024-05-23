@@ -118,7 +118,7 @@ bool Launcher::run()
     return !submitted;
 }
 
-ParticleLife::Settings Launcher::getSettings()
+ParticleLife::Settings& Launcher::getSettings()
 {
     if (tglgrpSettingsTab.activeToggle == 0) {
         if (tglgrpSelectPreloadedSettings.activeToggle == 0)
@@ -558,9 +558,10 @@ bool Launcher::validateInputSettings()
 
     // validate paricles
 
-    if (ibxSeed.value == -1)
+    if (ibxSeed.value == -1) {
         if (userCustomisedSettings.particles.size() != ibxCount.value)
             errors.push_back("Copied particle data of length "+std::to_string(userCustomisedSettings.particles.size())+ " does not match count input");
+    }
 
     // UPDATE ERROR DISPLAY
 
@@ -609,8 +610,6 @@ bool Launcher::validateInputSettings()
     if (s.seed != -1)                          // particles
         s.particles.clear();
 
-    // TODO: input for set particles once widget(s) implemented
-
     std::cout << s << std::endl;
 
     return true;  // false already returned on errors found
@@ -647,17 +646,21 @@ bool Launcher::saveCustomisedSettings()
         file << '\n';
     }
 
-    // TODO: save type ratio once implemented in settings object read from file
-
     file << s.seed << '\n';                         // seed (-1 for preloaded particles)
 
-    if (s.seed != -1) {                             // particles
-        for (const Particle& p : s.particles) {
-            file << std::to_string(p.type) << ','
-                 << std::to_string(p.pos.x) << ','
-                 << std::to_string(p.pos.y) << ','
-                 << std::to_string(p.vel.x) << ','
-                 << std::to_string(p.vel.y) << '\n';
+    if (s.seed != -1) {                             // type ratios
+        for (int i = 0; i < s.types; i++)
+            file << std::to_string(s.typeRatio[i]) << ',';
+        file << '\n';
+    }
+
+    else {
+        for (int i = 0; i < s.count; i++) {         // particles
+            file << std::to_string(s.particles[i].type) << ','
+                 << std::to_string(s.particles[i].pos.x) << ','
+                 << std::to_string(s.particles[i].pos.y) << ','
+                 << std::to_string(s.particles[i].vel.x) << ','
+                 << std::to_string(s.particles[i].vel.y) << '\n';
         }
     }
 

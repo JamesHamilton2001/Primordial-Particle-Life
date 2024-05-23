@@ -30,7 +30,7 @@ class Launcher
     bool run();
 
     // used to access the decided settings after the launcher has run
-    ParticleLife::Settings getSettings();
+    ParticleLife::Settings& getSettings();
 
   private:
 
