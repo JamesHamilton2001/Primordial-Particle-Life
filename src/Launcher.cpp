@@ -5,6 +5,7 @@
 #include <string>
 #include <algorithm>
 #include <dirent.h>
+#include <regex>
 
 #include <filesystem>
 namespace fs = std::filesystem;
@@ -194,369 +195,6 @@ std::ostream& operator <<(std::ostream& os, const TglGrp& tglGrp)
 }
 
 
-/*
-Launcher::Launcher() :
-    choice(customisedSettings)
-{
-    for (const auto& dirEntry : fs::directory_iterator(defaultSettingsPath)) {
-        try {
-            defaultSettings.push_back(ParticleLife::Settings(dirEntry));
-        } catch (std::exception& e) { 
-            std::cout << "Failed to load settings from " << dirEntry.path() << ": " << e.what() << std::endl;
-        }
-    } for (const auto& dirEntry : fs::directory_iterator(customSettingsPath)) {
-        try {
-            customSettings.push_back(ParticleLife::Settings(dirEntry));
-        } catch (std::exception& e) { 
-            std::cout << "Failed to load settings from " << dirEntry.path() << ": " << e.what() << std::endl;
-        }
-    }
-
-    customisedSettings.name = "";
-    customisedSettings.types = 9;
-    customisedSettings.size = 0;
-    customisedSettings.count = 0;
-    customisedSettings.innerRadius = 0;
-    customisedSettings.resistance = 0;
-    customisedSettings.step = 0;
-    customisedSettings.attractions = std::vector<std::vector<float>>(9, std::vector<float>(9, 0));
-    customisedSettings.seed = 0;
-    customisedSettings.typeRatio = std::vector<int>(9, 0);
-    customisedSettings.particles = std::vector<Particle>();
-
-    std::string str;
-
-    // TOP ROW
-
-    tglCustom = Toggle { "Customise", false };
-
-    // CUSTOM
-
-    tbxName = TextBox { "", false };
-    tbxTypes = TextBox { "", false };
-    tbxSize = TextBox { "", false };
-    tbxCount = TextBox { "", false };
-    tbxInnerRadius = TextBox { "", false };
-    tbxResistance = TextBox { "", false };
-    tbxStep = TextBox { "", false };
-    tbxAttractions = std::vector<std::vector<TextBox>>(9, std::vector<TextBox>(9, TextBox { "", false }));
-    tbxTypeRatio = std::vector<TextBox>(9, TextBox { "", false });
-
-    // PREDEFINED
-
-    tglDefaultsCustoms = Toggle { "Defaults", false };
-
-    str = "";
-    if (!defaultSettings.empty())
-        str = defaultSettings[0].name;
-    if (defaultSettings.size() > 1)
-        for (unsigned int i = 1; i < defaultSettings.size(); i++)
-            str += ";" + defaultSettings[i].name;
-    lsvDefaults = ListView { str.c_str(), 0, 0 };
-
-    str = "";
-    if (!customSettings.empty())
-        str = customSettings[0].name;
-    if (customSettings.size() > 1)
-        for (unsigned int i = 1; i < customSettings.size(); i++)
-            str += ";" + customSettings[i].name;
-    lsvCustoms = ListView { str.c_str(), 0, 0 };
-
-    btnValidateCustomInput = Button { "Validate", false };
-
-    // BOTTOM ROW
-
-    btnExecute = Button { "Execute", false };
-
-}
-
-bool Launcher::run()
-{
-    BeginDrawing();
-    ClearBackground(GetColor(GuiGetStyle(DEFAULT, BACKGROUND_COLOR)));
-
-        float W = GetScreenWidth();
-        float H = GetScreenHeight();
-        float U = 16; // widget unit
-        float M = 8;  // margin unit
-        int T = customisedSettings.types;
-        float lblW = 5*U;
-        float tbxW = 3*U;
-        Rectangle r;
-
-        // BEGIN TESTYNESS
-        try {
-
-
-            r = Rectangle { 100, 500, 600, 20 };
-
-            grpKek.update(r);
-            lblKek.update(r);
-
-            r.y += 25;
-            if (btnKek.update(r))
-                std::cout << "btnKek " << btnKek << std::endl;
-            r.y += 25;
-            if (tbxKek.update(r))
-                std::cout << "tbxKek " << tbxKek << std::endl;
-            r.y += 25;
-            if (ibxKek.update(r))
-                std::cout << "ibxKek " << ibxKek << std::endl;
-            r.y += 25;
-            if (fbxKek.update(r))
-                std::cout << "fbxKek " << fbxKek << std::endl;
-            r.y += 25; r.height = 100;
-            if (lsvKek.update(r))
-                std::cout << "flsvKek " << lsvKek << std::endl;
-            r = (Rectangle) { r.x, r.y+100, 25, 20 };
-            if (tglgrpKek.update(r))
-                std::cout << "tglgrpKek " << tglgrpKek << std::endl;
-            
-        }
-        catch (std::exception& e) { std::cout << "Exception: " << e.what() << std::endl; }
-        // FINISH TESTYNESS
-
-        // HEADER ------------------------------------------------------------------
-
-        Rectangle row1 = Rectangle { M, M, W-2*M, U+2*M };
-
-        GuiGroupBox(row1, "App Settings");
-
-        r = Rectangle { row1.x+M, row1.y+M, lblW, U };
-        toggle(r, tglCustom);
-        tglCustom.text = (tglCustom.active) ? "Customised" : "Predefined";
-
-        // BODY --------------------------------------------------------------------
-
-        // CUSTOM SETTINGS
-        if (tglCustom.active) {
-
-            float colH = std::max(7*U + 8*M, (T+3)*U + (3.5f+T)*M);
-            Rectangle col1 = Rectangle {    // all 7 single settings
-                M,
-                row1.y + row1.height + M,
-                2*M + lblW + tbxW,
-                colH
-            };
-            Rectangle col2 = Rectangle {    // attraction matrix
-                col1.x + col1.width + M,
-                col1.y,
-                T*tbxW + (T+1)*M,
-                colH
-            };
-            Rectangle botm = Rectangle {
-                col1.x,
-                col1.y + col1.height - 1,
-                col1.x + col1.width + col2.width,
-                U + 2*M
-            };
-
-            // group box(es)
-            r = Rectangle { col1.x, col1.y, col1.width+col2.width+M, col1.height };
-            GuiGroupBox(r, "Custom Settings");
-            GuiGroupBox(col2, "");
-            GuiGroupBox(botm, "");
-
-            // single settings
-            r = Rectangle { col1.x+M, col1.y+M, lblW, U };          // labels...
-            GuiSetStyle(LABEL, TEXT_ALIGNMENT, TEXT_ALIGN_RIGHT);
-            GuiLabel(r, "Name:");         r.y += M+U;
-            GuiLabel(r, "Types:");        r.y += M+U;
-            GuiLabel(r, "Size:");         r.y += M+U;
-            GuiLabel(r, "Count:");        r.y += M+U;
-            GuiLabel(r, "Inner Radius:"); r.y += M+U;
-            GuiLabel(r, "Resistance:");   r.y += M+U;
-            GuiLabel(r, "Step:");         r.y += M+U;
-            r = Rectangle { r.x + lblW+M, col1.y+M, tbxW, U };      // ...and text boxes
-            textBox(r, tbxName);        r.y += M+U;
-            textBox(r, tbxTypes);       r.y += M+U;
-            textBox(r, tbxSize);        r.y += M+U;
-            textBox(r, tbxCount);       r.y += M+U;
-            textBox(r, tbxInnerRadius); r.y += M+U;
-            textBox(r, tbxResistance);  r.y += M+U;
-            textBox(r, tbxStep);        r.y += M+U;
-
-            // attraction matrix
-            r = Rectangle { col2.x, col2.y+M, col2.width, U };
-            GuiSetStyle(LABEL, TEXT_ALIGNMENT, TEXT_ALIGN_CENTER);
-            GuiLabel(r, "Attraction Matrix:");
-            r.x += M;
-            r.y += M/2 + r.height;
-            r.width = tbxW;
-            for (int i = 0; i < T; i++) {
-                for (int j = 0; j < T; j++) {
-                    textBox(r, tbxAttractions[i][j]);
-                    r.x += tbxW + M;
-                }
-                r.x = col2.x + M;
-                r.y += U + M;
-            }
-
-            // type ratios
-            r = Rectangle { col2.x, col2.y + U+2*M + customisedSettings.types*(U+M), col2.width, U };
-            GuiLabel(r, "Type Ratios:");
-            r = Rectangle { r.x + M, r.y + U+M/2, tbxW, U };
-            for (int i = 0; i < T; i++) {
-                textBox(r, tbxTypeRatio[i]);
-                r.x += tbxW + M;
-            }
-
-            // VALIDATION AND MANIPULATION
-
-            r = Rectangle { botm.x + M, botm.y + M, 3*U, U };
-            button(r, btnValidateCustomInput);
-
-            if (btnValidateCustomInput.active) {
-                if (validateCustomInput()) {
-                    // ...
-                }
-                else {
-                    // ...
-                }
-            }
-
-            // user settings choice is custom
-            choice = customisedSettings;
-            
-        }
-
-        // PREDEFINED SETTINGS
-        else {
-
-            float lsvH = 6*U;
-            float lsvW = 8*U;
-            
-            r = Rectangle { 40, 40, lsvW, U };
-            toggle(r, tglDefaultsCustoms);
-            tglDefaultsCustoms.text = (tglDefaultsCustoms.active) ? "Custom" : "Default";
-
-            r.y += r.height + M;
-            r.height = lsvH;
-
-            if (tglDefaultsCustoms.active) {
-                int i = lsvCustoms.activeIdx;
-                listView(r, lsvCustoms);
-                if (lsvCustoms.activeIdx < 0) lsvCustoms.activeIdx = i;
-                choice = customSettings[lsvCustoms.activeIdx];
-            }
-            else {
-                int i = lsvDefaults.activeIdx;
-                listView(r, lsvDefaults);
-                if (lsvDefaults.activeIdx < 0) lsvDefaults.activeIdx = i;
-                choice = defaultSettings[lsvDefaults.activeIdx];
-            }
-
-            tbxName.text = choice.name;
-            tbxTypes.text = std::to_string(choice.types);
-            tbxSize.text = std::to_string(choice.size);
-            tbxCount.text = std::to_string(choice.count);
-            tbxInnerRadius.text = std::to_string(choice.innerRadius);
-            tbxResistance.text = std::to_string(choice.resistance);
-            tbxStep.text = std::to_string(choice.step);
-            for (int i = 0; i < T; i++) {
-                tbxTypeRatio[i].text = std::to_string(choice.typeRatio[i]);
-                for (int j = 0; j < T; j++)
-                    tbxAttractions[i][j].text = std::to_string(choice.attractions[i][j]);
-            }
-        }
-
-        // FOOTER -----------------------------------------------------------------
-
-        Rectangle r1 = { W/2-U, H-1.5f*U-M, 3*U, U };
-        button(r1, btnExecute);
-
-    EndDrawing();
-
-    if (btnExecute.active) {
-        return false;
-    }
-    else {
-
-
-        return true;
-    }
-        
-
-}
-
-ParticleLife::Settings& Launcher::getSettings()
-{
-    return choice;
-}
-
-bool Launcher::button(Rectangle& rect, Button& btn)
-{
-    int ret = GuiButton(rect, btn.text.c_str());
-    btn.active = ret;
-    return ret;
-}
-
-bool Launcher::toggle(Rectangle& rect, Toggle& tgl)
-{
-    return GuiToggle(rect, tgl.text.c_str(), &tgl.active);
-}
-
-bool Launcher::textBox(Rectangle& rect, TextBox& tbx)
-{
-    int ret = GuiTextBox(rect, &tbx.text[0], tbx.text.capacity(), tbx.active);
-    if (ret) tbx.active = !tbx.active;
-    return ret;
-}
-
-bool Launcher::listView(Rectangle& rect, ListView& lsv)
-{
-    return GuiListView(rect, lsv.text.c_str(), &lsv.scrollIdx, &lsv.activeIdx);
-}
-
-bool Launcher::strIsInt(const std::string& str)
-{
-    for (char c : str)
-        if (!isdigit(c))
-            return false;
-    return true;
-}
-
-bool Launcher::strIsFloat(const std::string& str)
-{
-    if (str.empty()) return false;
-    bool hasDot = false;
-    for (unsigned int i = 0; i < str.size(); i++) {
-        if (!isdigit(str[i])) {
-            if (str[i] == '.' && !hasDot) {
-                hasDot = true;
-                continue;
-            }
-            return false;
-        }
-    }
-    return true;
-}
-
-bool Launcher::validateCustomInput()
-{
-    std::cout << "Validating custom input:" << std::endl;
-    std::cout << "| Name:             " << tbxName.text << std::endl;
-    std::cout << "| Types:            " << tbxTypes.text << std::endl;
-    std::cout << "| Size:             " << tbxSize.text << std::endl;
-    std::cout << "| Count:            " << tbxCount.text << std::endl;
-    std::cout << "| Inner Radius:     " << tbxInnerRadius.text << std::endl;
-    std::cout << "| Resistance:       " << tbxResistance.text << std::endl;
-    std::cout << "| Step:             " << tbxStep.text << std::endl;
-    std::cout << "| Attraction Matrix:" << std::endl;
-    for (int i = 0; i < customisedSettings.types; i++) {
-        std::cout << "| |";
-        for (int j = 0; j < customisedSettings.types; j++)
-            std::cout << " [" << tbxAttractions[i][j].text << "]";
-        std::cout << std::endl;
-    }
-    std::cout << "| Type Ratios:      ";
-    for (int i = 0; i < customisedSettings.types; i++)
-        std::cout << " [" << tbxTypeRatio[i].text << "]";
-    std::cout << std::endl;
-
-    return false;
-}
-*/
 
 Launcher::Launcher() :
 
@@ -609,7 +247,7 @@ Launcher::Launcher() :
     btnSaveCustomSettings    ("Save"),
 
     grpErrors("Errors"),
-    lsvErrors("TEST_ERROR_1;TEST_ERROR_2;TEST_ERROR_3;TEST_ERROR_4;TEST_ERROR_5;TEST_ERROR_6;TEST_ERROR_7"),
+    lsvErrors(""),
 
     // UNIVERSAL WIDGETS
 
@@ -997,28 +635,129 @@ void Launcher::readPreloadedSettings(FLsv& flsv, std::vector<ParticleLife::Setti
 
 bool Launcher::validateInputSettings()
 {
-    bool validity = true;
+    // current input errors
+    std::vector<std::string> errors;
 
-    // validate customised settings input
-    if (currentSettingsPtr == &userCustomisedSettings) {
-        std::cout << "Validating custom input: " << std::endl;
-        std::cout << currentSettingsPtr << std::endl;
+    // field buffer to used to format error messages
+    std::string field;
 
-        validity = false;
-        return validity;
-    }
+    // VALIDATE SETTINGS INPUTS
+
+    // validate name
+
+    field = "Name: ";
+    std::vector<char> validSpecialChars = { '-', '_', '(', ')' };
+    int nameLength = strlen(tbxName.text);
+    if (nameLength == 0)
+        errors.push_back(field + "cannot be empty.");
+    if (nameLength > PARTICLE_LIFE_MAX_NAME_LENGTH)
+        errors.push_back(field + "must have less than " + std::to_string(PARTICLE_LIFE_MAX_NAME_LENGTH) + " characters.");
+    int i = 0;
+    for (; i < nameLength; i++) {
+        char c = tbxName.text[i];
+        if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9'))
+            continue;
+        for (char sc : validSpecialChars)
+            if (c == sc) break;
+    }if (i != nameLength)
+        errors.push_back(field + "contains invalid characters.");
+
+    // validate types
+
+    field = "Types: ";
+    if (ibxTypes.value < PARTICLE_LIFE_MIN_TYPES)
+        errors.push_back(field + "must exceed " + std::to_string(PARTICLE_LIFE_MIN_TYPES) + ".");
+    if (ibxTypes.value > PARTICLE_LIFE_MAX_TYPES)
+        errors.push_back(field + "cannot exceed " + std::to_string(PARTICLE_LIFE_MAX_TYPES) + ".");
+
+    // validate size
+
+    field = "Size: ";
+    if (ibxSize.value < PARTICLE_LIFE_MIN_GRID_SIZE)
+        errors.push_back(field + "must exceed " + std::to_string(PARTICLE_LIFE_MIN_GRID_SIZE) + ".");
+    if (ibxSize.value > PARTICLE_LIFE_MAX_GRID_SIZE)
+        errors.push_back(field + "cannot exceed " + std::to_string(PARTICLE_LIFE_MAX_GRID_SIZE) + ".");
+
+    // validate count
+
+    field = "Count: ";
+    if (ibxCount.value < PARTICLE_LIFE_MIN_COUNT)
+        errors.push_back(field + "must exceed " + std::to_string(PARTICLE_LIFE_MIN_COUNT) + ".");
+    if (ibxCount.value > PARTICLE_LIFE_MAX_COUNT)
+        errors.push_back(field + "cannot exceed " + std::to_string(PARTICLE_LIFE_MAX_COUNT) + ".");
+
+    // validate inner radius
+
+    field = "Inner Radius: ";
+    if (fbxInnerRadius.value < PARTICLE_LIFE_MIN_INNER_RADIUS)
+        errors.push_back(field + "must exceed " + std::to_string(PARTICLE_LIFE_MIN_INNER_RADIUS) + ".");
+    if (fbxInnerRadius.value > PARTICLE_LIFE_MAX_INNER_RADIUS)
+        errors.push_back(field + "cannot exceed " + std::to_string(PARTICLE_LIFE_MAX_INNER_RADIUS) + ".");
     
-    // validate preloaded settings input
-    std::cout << "Validating preloaded input:" << std::endl;
-    std::cout << currentSettingsPtr << std::endl;
+    // validate resistance
 
-    validity = false;
-    return validity;
+    field = "Resistance: ";
+    if (fbxResistance.value < PARTICLE_LIFE_MIN_RESISTANCE)
+        errors.push_back(field + "must exceed " + std::to_string(PARTICLE_LIFE_MIN_RESISTANCE) + ".");
+    if (fbxResistance.value > PARTICLE_LIFE_MAX_RESISTANCE)
+        errors.push_back(field + "cannot exceed " + std::to_string(PARTICLE_LIFE_MAX_RESISTANCE) + ".");
+
+    // validate step
+
+    field = "Step: ";
+    if (fbxStep.value < PARTICLE_LIFE_MIN_STEP)
+        errors.push_back(field + "must exceed " + std::to_string(PARTICLE_LIFE_MIN_STEP) + ".");
+    if (fbxStep.value > PARTICLE_LIFE_MAX_STEP)
+        errors.push_back(field + "cannot exceed " + std::to_string(PARTICLE_LIFE_MAX_STEP) + ".");
+
+    // valiudate attractions
+
+    for (int i = 0; i < ibxTypes.value; i++) {
+        for (int j = 0; j < ibxTypes.value; j++) {
+            field = "Attraction["+std::to_string(i)+"]["+std::to_string(j)+"]: ";
+            if (fbxAttractions[i][j].value < PARTICLE_LIFE_MIN_ATTRACTION)
+                errors.push_back(field + "must exceed " + std::to_string(PARTICLE_LIFE_MIN_ATTRACTION) + ".");
+            if (fbxAttractions[i][j].value > PARTICLE_LIFE_MAX_ATTRACTION)
+                errors.push_back(field + "must exceed " + std::to_string(PARTICLE_LIFE_MAX_ATTRACTION) + ".");
+        }
+    }
+
+    // validate type ratios
+
+    int ratioSum = 0;
+    for (int i = 0; i < ibxTypes.value; i++) {
+        field = "TypeRatio["+std::to_string(i)+"]: ";
+        if (fbxTypeRatios[i].value < PARTICLE_LIFE_MIN_RATIO)
+            errors.push_back(field + "must exceed " + std::to_string(PARTICLE_LIFE_MIN_RATIO) + ".");
+        if (fbxTypeRatios[i].value > PARTICLE_LIFE_MAX_RATIO)
+            errors.push_back(field + "cannot exceed " + std::to_string(PARTICLE_LIFE_MAX_RATIO) + ".");
+        ratioSum += fbxTypeRatios[i].value;
+    } if (ratioSum > ibxCount.value)
+        errors.push_back("Type Ratios: sum must not exceed count.");
+
+    // UPDATE ERROR DISPLAY
+
+    lsvErrors.text[0] = '\0';
+    i = 0;
+    if (errors.size() > 0) {
+        for (char c : errors[0]) lsvErrors.text[i++] = c;
+        if (errors.size() > 1) {
+            for (int j = 1; j < errors.size(); j++) {
+                lsvErrors.text[i++] = ';';
+                for (char c : errors[j])
+                    lsvErrors.text[i++] = c;
+            }
+        } lsvErrors.text[i] = '\0';
+    }
+
+    // return true if no errors
+    return errors.size() == 0;
 }
 
 bool Launcher::saveCustomisedSettings()
 {
-    bool validity = validateInputSettings();
+    // // validate settings
+    // if (!validateInputSettings()) return false;
 
     return false;
 }

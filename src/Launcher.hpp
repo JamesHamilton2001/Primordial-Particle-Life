@@ -228,71 +228,7 @@ class TglGrp : public Wdgt
     friend std::ostream& operator <<(std::ostream& os, const TglGrp& tglGrp);
 };
 
-/*
-class Launcher
-{
-  public:
-    
-    Launcher();
-    ~Launcher() = default;
 
-    bool run();
-
-    ParticleLife::Settings& getSettings();
-
-    Pnl pnlKek = Pnl();
-    Grp grpKek = Grp("kek");
-    Lbl lblKek = Lbl("this is kek");
-    Btn btnKek = Btn("press 4 kek");
-    Tbx tbxKek = Tbx("enter 4 kek");
-    Fbx fbxKek = Fbx(0.42f, -1.0f, 1.0f);
-    Ibx ibxKek = Ibx(42, -100, 100);
-    FLsv lsvKek = FLsv("./settings/default/");
-    TglGrp tglgrpKek = TglGrp("kek1;kek2;kek3");
-
-  private:
-
-    struct Widget { std::string text; };
-    struct Button : public Widget { bool active; };
-    struct Toggle : public Button {};
-    struct TextBox : public Button {};
-    struct ListView : public Widget { int scrollIdx, activeIdx; };
-
-    ParticleLife::Settings& choice;
-    ParticleLife::Settings customisedSettings;
-    std::vector<ParticleLife::Settings> customSettings;
-    std::vector<ParticleLife::Settings> defaultSettings;
-
-    TextBox tbxName;
-    TextBox tbxTypes;
-    TextBox tbxSize;
-    TextBox tbxCount;
-    TextBox tbxInnerRadius;
-    TextBox tbxResistance;
-    TextBox tbxStep;
-    std::vector<std::vector<TextBox>> tbxAttractions;
-    std::vector<TextBox> tbxTypeRatio;
-    Toggle tglCustom;
-    Toggle tglDefaultsCustoms;
-    ListView lsvDefaults;
-    ListView lsvCustoms;
-    Button btnValidateCustomInput;
-    Button btnExecute;
-
-    const char defaultSettingsPath[20] = "./settings/default/";
-    const char customSettingsPath[19] = "./settings/custom/";
-
-    bool button(Rectangle& rect, Button& btn);
-    bool toggle(Rectangle& rect, Toggle& tgl);
-    bool textBox(Rectangle& rect, TextBox& tbx);
-    bool listView(Rectangle& rect, ListView& lsv);
-
-    bool strIsInt(const std::string& str);
-    bool strIsFloat(const std::string& str);
-    bool validateCustomInput();
-
-};
-*/
 
 class Launcher
 {
@@ -330,7 +266,7 @@ class Launcher
 
     // CUSTOMISED SETTINGS TAB WIDGETS
 
-    // NOTE: attractions initialised to max size, use types variable. is resized before use in simulation
+    // NOTE: attractions and type ratios initialised to max size, use types variable. is resized before use in simulation
     Grp grpCustomisedSettings;                                         // customised settings group
     Lbl lblName;        Tbx tbxName;                                   // name text box
     Lbl lblTypes;       Ibx ibxTypes;                                  // types int box
@@ -352,7 +288,7 @@ class Launcher
     Btn btnSaveCustomSettings;     // save settings button
 
     Grp grpErrors;  // errors group box
-    Lsv lsvErrors;  // list view of current errors    // TODO: update on validation
+    Lsv lsvErrors;  // list view of current errors
 
     // UNIVRSAL WIDGETS
 
