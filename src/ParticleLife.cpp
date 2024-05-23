@@ -13,6 +13,7 @@ namespace fs = std::filesystem;
 
 ParticleLife::ParticleLife(Settings& settings) :
     settings    (settings),
+    frameCount  (0),
     types       (settings.types),
     size        (settings.size),
     bounds      (2.0f * settings.size),
@@ -32,8 +33,9 @@ ParticleLife::ParticleLife(Settings& settings) :
 
 void ParticleLife::update()
 {
+    frameCount++;
+    
     spatialHash.map(particles);
-    debugGrid();
 
     // for each cell...
     for (int row = 1; row <= size; row++) {
@@ -343,9 +345,4 @@ void ParticleLife::particleInteraction(Particle& p1, Particle& p2)
         p1.vel.x += coef * (dx / dist);
         p1.vel.y += coef * (dy / dist);
     }
-}
-
-void ParticleLife::debugGrid()
-{
-
 }

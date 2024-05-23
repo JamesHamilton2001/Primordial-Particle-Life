@@ -41,6 +41,8 @@ class ParticleLife
 
   private:
 
+    long long unsigned int frameCount;
+
     const int types;
     const int size;
     const float bounds;
@@ -55,8 +57,6 @@ class ParticleLife
     SpatialHash spatialHash;
 
     void particleInteraction(Particle& p1, Particle& p2);
-
-    void debugGrid();
 
 };
 
