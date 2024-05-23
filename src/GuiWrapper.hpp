@@ -129,6 +129,7 @@ class Fbx : public Tbx
   public:
 
     float value;
+    float oldValue;
     float minValue;
     float maxValue;
     char* oldText;

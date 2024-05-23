@@ -113,10 +113,11 @@ class Launcher
 
     // UTIL METHODS
 
+    void readPreloadedSettings(FLsv& flsv, std::vector<ParticleLife::Settings>& settings);
+
     bool validateInputSettings();
     bool saveCustomisedSettings();
-
-    void readPreloadedSettings(FLsv& flsv, std::vector<ParticleLife::Settings>& settings);
+    void copyToCustomisedSettings(const ParticleLife::Settings& settings);
     
 };
 

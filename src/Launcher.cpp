@@ -386,7 +386,11 @@ bool Launcher::customised()
 
     // copy settings button
     r = { copyRow2.x + M, copyRow2.y + M, btnWidth, U };
-    btnCopyPreloadedSettings.update(r);
+    if (btnCopyPreloadedSettings.update(r)) {
+        if (tglgrpCopyPreloadedSettings.activeToggle == 0)
+            copyToCustomisedSettings(defaultSettings[flsvCopyDefaultSettings.activeIdx]);
+        else copyToCustomisedSettings(customSettings[flsvCopyCustomSettings.activeIdx]);
+    }
 
     // ERRORS
 
@@ -672,4 +676,25 @@ bool Launcher::saveCustomisedSettings()
     readPreloadedSettings(flsvCopyCustomSettings, customSettings);
 
     return true;
+}
+
+void Launcher::copyToCustomisedSettings(const ParticleLife::Settings& settings)
+{
+    // copy the actual settings object over
+    userCustomisedSettings = settings;
+    
+    // update the widgets with the new settings
+    strcpy(tbxName.text, settings.name.c_str());
+    ibxTypes.value = settings.types;
+    ibxSize.value = settings.size;
+    ibxCount.value = settings.count;
+    fbxInnerRadius.value = settings.innerRadius;
+    fbxResistance.value = settings.resistance;
+    fbxStep.value = settings.step;
+    ibxSeed.value = settings.seed;
+    for (int i = 0; i < settings.types; i++)
+        for (int j = 0; j < settings.types; j++)
+            fbxAttractions[i][j].value = settings.attractions[i][j];
+    for (int i = 0; i < settings.types; i++)
+        fbxTypeRatios[i].value = settings.typeRatio[i];
 }

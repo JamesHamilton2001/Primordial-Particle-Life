@@ -10,6 +10,12 @@
 #define RAYGUI_IMPLEMENTATION
 #include "raygui.h"
 
+/*
+TODO:
+ - remove trailing zeros after last digit after point from float box
+*/
+
+
 
 Color getGuiBackgroundColor()
 {
@@ -132,7 +138,17 @@ bool Fbx::update(Rectangle& rect)
         }
         return false; // return false if invalid float input
     }
-    return false; // return false if contents not updated
+
+    // handle external change of value
+    if (value != oldValue) {
+        text[0] = '\0';
+        oldText[0] = '\0';
+        snprintf(text, textBufferSize, "%f", value);
+        strcpy(oldText, text);
+        oldValue = value;
+    }
+
+    return false; // return false if contents not updated by user
 }
 
 std::ostream& operator <<(std::ostream& os, const Fbx& fbx)
