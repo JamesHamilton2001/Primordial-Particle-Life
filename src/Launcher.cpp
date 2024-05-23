@@ -19,7 +19,6 @@ Launcher::Launcher() :
     customSettings (std::vector<ParticleLife::Settings>(1, ParticleLife::Settings())),
 
     userCustomisedSettings(ParticleLife::Settings()),  // defaults to default
-    currentSettingsPtr(&userCustomisedSettings),       // defaults guaranteed instance
 
     // HEADER WIDGETS
 
@@ -101,15 +100,8 @@ bool Launcher::run()
 {
     if (windowWidth != GetScreenWidth() || windowHeight != GetScreenHeight())
         SetWindowSize(windowWidth, windowHeight);
-
-    if (tglgrpSettingsTab.activeToggle == 0)
-        currentSettingsPtr = (tglgrpSelectPreloadedSettings.activeToggle == 0)
-          ? &defaultSettings[flsvSelectDefaultSettings.activeIdx]
-          : &customSettings[flsvSelectCustomSettings.activeIdx];
-    else currentSettingsPtr = &userCustomisedSettings;
     
     BeginDrawing();
-    // ClearBackground(GetColor(GuiGetStyle(DEFAULT, BACKGROUND_COLOR)));
     ClearBackground(getGuiBackgroundColor());
 
     header();
@@ -126,9 +118,14 @@ bool Launcher::run()
     return !submitted;
 }
 
-ParticleLife::Settings& Launcher::getSettings()
+ParticleLife::Settings Launcher::getSettings()
 {
-    return *currentSettingsPtr;
+    if (tglgrpSettingsTab.activeToggle == 0) {
+        if (tglgrpSelectPreloadedSettings.activeToggle == 0)
+            return defaultSettings[flsvSelectDefaultSettings.activeIdx];
+        else return customSettings[flsvSelectCustomSettings.activeIdx];
+    }
+    return userCustomisedSettings;
 }
 
 void Launcher::header()

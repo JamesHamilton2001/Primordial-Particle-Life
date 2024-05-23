@@ -14,7 +14,7 @@
 /*
 TODO:
  - add warnings widget for seed/ratio/particles shenanigans
- - function to copy to customised settings
+ - copy to customised settings
  - create widget for custom seed
  - update particle life setting object to contatin type ratios
 */
@@ -30,7 +30,7 @@ class Launcher
     bool run();
 
     // used to access the decided settings after the launcher has run
-    ParticleLife::Settings& getSettings();
+    ParticleLife::Settings getSettings();
 
   private:
 
@@ -40,8 +40,6 @@ class Launcher
     std::vector<ParticleLife::Settings> customSettings;     // hard copy of all custom settings
 
     ParticleLife::Settings userCustomisedSettings;  // user customised settings
-
-    ParticleLife::Settings* currentSettingsPtr;        // reference to current settings
 
     // HEADER WIDGETS
 
