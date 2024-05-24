@@ -156,11 +156,11 @@ void App::saveData() const
     for (int i = 0; i < s.count; i++) {
         const Particle& p = s.particles[i];
         file << "{" << endl;
-        file <<m+m+m+m<< "\"type\": " << p.type << "," << endl;
-        file <<m+m+m+m<< "\"xPos\": " << p.pos.x << "," << endl;
-        file <<m+m+m+m<< "\"yPos\": " << p.pos.y << "," << endl;
-        file <<m+m+m+m<< "\"xVel\": " << p.vel.x << "," << endl;
-        file <<m+m+m+m<< "\"yVel\": " << p.vel.y << endl;
+        file <<m+m+m+m<< "\"t\": " << p.type << "," << endl;
+        file <<m+m+m+m<< "\"x\": " << p.pos.x << "," << endl;
+        file <<m+m+m+m<< "\"y\": " << p.pos.y << "," << endl;
+        file <<m+m+m+m<< "\"vx\": " << p.vel.x << "," << endl;
+        file <<m+m+m+m<< "\"vy\": " << p.vel.y << endl;
         file <<m+m+m<< "}";
         if (i < s.count-1) file << ',';
     } file << endl <<m+m<< "]" << endl;
@@ -171,11 +171,11 @@ void App::saveData() const
     for (int i = 0; i < s.count; i++) {
         const Particle& p = particles[i];
         file << "{" << endl;
-        file <<m+m+m<< "\"type\": " << p.type << "," << endl;
-        file <<m+m+m<< "\"xPos\": " << p.pos.x << "," << endl;
-        file <<m+m+m<< "\"yPos\": " << p.pos.y << "," << endl;
-        file <<m+m+m<< "\"xVel\": " << p.vel.x << "," << endl;
-        file <<m+m+m<< "\"yVel\": " << p.vel.y << endl;
+        file <<m+m+m<< "\"t\": " << p.type << "," << endl;
+        file <<m+m+m<< "\"x\": " << p.pos.x << "," << endl;
+        file <<m+m+m<< "\"y\": " << p.pos.y << "," << endl;
+        file <<m+m+m<< "\"xv\": " << p.vel.x << "," << endl;
+        file <<m+m+m<< "\"yv\": " << p.vel.y << endl;
         file <<m+m<< "}";
         if (i < s.count-1) file << ',';
     } file << endl <<m<< "]" << endl;
