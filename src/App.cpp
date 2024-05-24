@@ -121,6 +121,7 @@ void App::saveData() const
     }
     const Settings& s = particleLife.settings;
     const string m = "    ";
+    
     file << "{" << endl;
     file << "\"simulation\":" << endl;
     file << "{" << endl;
@@ -174,8 +175,8 @@ void App::saveData() const
         file <<m+m+m<< "\"t\": " << p.type << "," << endl;
         file <<m+m+m<< "\"x\": " << p.pos.x << "," << endl;
         file <<m+m+m<< "\"y\": " << p.pos.y << "," << endl;
-        file <<m+m+m<< "\"xv\": " << p.vel.x << "," << endl;
-        file <<m+m+m<< "\"yv\": " << p.vel.y << endl;
+        file <<m+m+m<< "\"vx\": " << p.vel.x << "," << endl;
+        file <<m+m+m<< "\"vy\": " << p.vel.y << endl;
         file <<m+m<< "}";
         if (i < s.count-1) file << ',';
     } file << endl <<m<< "]" << endl;

@@ -73,15 +73,15 @@ def count_types(particles):
     t = sim.types
     results = [0 for _ in range(t)]
     for p in particles:
-        results[p["type"]] += 1
+        results[p["t"]] += 1
     return results
 
-def get_ptype_data(data):
-    dest = [[] for _ in range(T)]
-    for p1data in data:
-        t = p1data["type"]
-        dest[t].append(Particle(t, p1data["xPos"], p1data["yPos"], p1data["xVel"], p1data["yVel"]))
-    return dest
+# def get_ptype_data(data):
+#     dest = [[] for _ in range(T)]
+#     for p1data in data:
+#         t = p1data["t"]
+#         dest[t].append(Particle(t, p1data["x"], p1data["y"], p1data["xv"], p1data["yv"]))
+#     return dest
 
 sim = read_json(DIR_NAME + fileName)
 T = sim.types
@@ -91,15 +91,19 @@ type_counts = count_types(sim.originals)
 o_particles = [[] for _ in range(T)]
 r_particles = [[] for _ in range(T)]
 
-for i in range (N):
-    op_data = sim.originals[i]
-    rp_data = sim.resulting[i]
-    o_particles[op_data["type"]].append(Particle(op_data["xPos"], op_data["yPos"], op_data["xVel"], op_data["yVel"]))
-    r_particles[rp_data["type"]].append(Particle(rp_data["xPos"], rp_data["yPos"], rp_data["xVel"], rp_data["yVel"]))
-# r_particles = get_ptype_data(sim.resulting)
-# get_ptype_data(sim.resulting)
-# print()
-# for t in range(T):
-#     print()
-#     for p in r_particles[t]:
-#         print(t, p)
+for op_data in sim.originals:
+    t = op_data["t"]
+    o_particles[t].append( Particle(t, op_data["x"], op_data["y"], op_data["vx"], op_data["vy"]) )
+for rp_data in sim.resulting:
+    t = rp_data["t"]
+    r_particles[t].append( Particle(t, rp_data["x"], rp_data["y"], rp_data["vx"], rp_data["vy"]) )
+
+for i, tparticles in enumerate(o_particles):
+    print(f"Type {i}: {len(tparticles)}")
+    for p in tparticles:
+        print(f" {p}")
+print()
+for i, tparticles in enumerate(r_particles):
+    print(f"Type {i}: {len(tparticles)}")
+    for p in tparticles:
+        print(f" {p}")
