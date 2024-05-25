@@ -34,7 +34,7 @@ def get_typed_speeds(typed_particles):
 
 
 def get_typed_interdists(typed_particles):
-    interdists = [ [ [] for _ in range(T) ] for _ in range(T) ]
+    typed_interdists = [ [ [] for _ in range(T) ] for _ in range(T) ]
 
     for t1, particles1 in enumerate(typed_particles):
         for t2, particles2 in enumerate(typed_particles):
@@ -43,9 +43,13 @@ def get_typed_interdists(typed_particles):
                     if p1 != p2:
                         dist = math.sqrt((p1.x - p2.x)**2 + (p1.y - p2.y)**2)
                         if dist <= 2:
-                            interdists[t1][t2].append(dist)
+                            typed_interdists[t1][t2].append(dist)
 
-    return interdists
+    for interdists in typed_interdists:
+        for dists in interdists:
+            dists.sort()
+    
+    return typed_interdists
 
 
 
@@ -70,8 +74,9 @@ def main():
 
     ## TODO: comparison of originals and resulting
 
-    printing = True
-    plotting = False
+    isPrinting = True
+    isPlotting = False
+
 
     typed_particles = get_particles_by_type(RAW_DATA["simulation"]["particles"])
 
@@ -82,7 +87,7 @@ def main():
     typed_inner_interdists, typed_outer_interdists = get_inner_outer_interdists(typed_interdists)
 
 
-    if printing:
+    if isPrinting:
 
         print("\nAvg Speeds:")
         for t, speeds in enumerate(typed_speeds):
@@ -112,7 +117,8 @@ def main():
                 print(len(dists), end=" ")
         print()
 
-    if plotting:
+
+    if isPlotting:
         pass
 
 
