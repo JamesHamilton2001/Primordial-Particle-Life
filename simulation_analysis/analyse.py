@@ -276,6 +276,9 @@ def visualise_speeds(t_speeds, speed_stats):
         ax.fill_between([xmin, xmax], q1, q3, color="white")
         ax.fill_between([xmin, xmax], q1, q3, color=(c[0],c[1],c[2],alphas[0]), edgecolor="black", linestyle="dashed")
         ax.hlines(q2, xmin=xmin, xmax=xmax, color="black", linestyle="dashed", linewidth=1)
+        ax.text(xmax, q1, format(q1, ".4g"), ha="left", va="top", fontsize=7)
+        ax.text(xmax, q2, format(q2, ".4g"), ha="left", va="center", fontsize=7)
+        ax.text(xmax, q3, format(q3, ".4g"), ha="left", va="bottom", fontsize=7)
         
 
     alphas.reverse()
