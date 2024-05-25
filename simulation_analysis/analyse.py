@@ -4,7 +4,6 @@ import math
 from math import pi
 from collections import namedtuple
 import matplotlib.pyplot as plt
-import matplotlib.colors as mcolours
 import matplotlib.patches as mpatches
 
 
@@ -27,7 +26,7 @@ particle_colours = [
     (0.0, 0.0, 1.0),  # blue
     (1.0, 1.0, 0.0),  # yellow
     (0.5, 0.0, 0.5),  # purple
-    (0.0, 1.0, 0.0),  # green
+    (0.0, 0.8, 0.0),  # green
     (1.0, 0.5, 0.0),  # orange
     (1.0, 0.75, 0.8),  # pink
     (0.0, 1.0, 1.0),  # cyan
@@ -243,31 +242,37 @@ def OLD_visual_speeds(t_speeds, speed_stats):
 
 def visualise_speeds(t_speeds, speed_stats):
     
-    type_labels = [ f"Type {t}" for t in range(T) ]
     plots = {
-        "Standard Deviation": [s.std for s in speed_stats.typed],
-        "Mean": [s.avg for s in speed_stats.typed],
-        "Max": [speeds[-1] for speeds in t_speeds],
+        "Standard Deviations": [s.std for s in speed_stats.typed],
+        "Means": [s.avg for s in speed_stats.typed],
+        "Maxs": [speeds[-1] for speeds in t_speeds],
     }
+    qt1s, qt2s, qt3s = zip(*[s.qts for s in speed_stats.typed])
+    print(qt1s, qt2s, qt3s, sep="\n")
 
-    x = np.arange(T)
-    width = 0.25
-    mult = 0
-    alphas = [0.3, 0.5, 0.7]
 
     fig, ax = plt.subplots(layout="constrained")
+    x = np.arange(T)
+    group_width = 0.25
+    ax.set_ylabel("Speed")
+    ax.set_xlabel("Type")
+    ax.set_xticks(x + group_width, [f"{t}" for t in range(T)])
+    ax.set_ylim(0, 1.25 * max(plots["Max"]))
 
-    for (label, data), alpha in zip(plots.items(), alphas):
-        offset = width * mult
-        colours = [mcolours.to_rgba(c, alpha=alpha) for c in particle_colours]
-        rects = ax.bar(x + offset, data, width, label=label, color=colours)
+    mult = 0
+    alphas = [0.3, 0.5, 0.7]
+    edge_colours = [(0.5, 0.5, 0.5, 1.0), (0.25, 0.25, 0.25, 1.0), (0.0, 0.0, 0.0, 1.0)]
+
+    for (label, data), a, edge_colour in zip(plots.items(), alphas, edge_colours):
+        offset = group_width * mult
+        t_colours = [(c[0], c[1], c[2], a) for c in particle_colours]
+        rects = ax.bar(x + offset, data, group_width, label=label, color=t_colours, edgecolor=edge_colour, linewidth=1)
         ax.bar_label(rects, padding=3)
         mult += 1
 
-    ax.set_ylabel("Speed")
-    ax.legend(loc="upper right", ncols=3)
-    ax.set_xticks(x + width, type_labels)
-    ax.set_ylim(0, 1.25 * max(plots["Max"]))
+    alphas.reverse()
+    legend_handles = [ mpatches.Patch(color=(a,a,a, 1.0), label=l) for a, l in zip(alphas, plots.keys())]
+    ax.legend(handles=legend_handles, loc="upper right", ncols=3)
     
     plt.show()
 
