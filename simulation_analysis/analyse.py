@@ -247,28 +247,37 @@ def visualise_speeds(t_speeds, speed_stats):
         "Means": [s.avg for s in speed_stats.typed],
         "Maxs": [speeds[-1] for speeds in t_speeds],
     }
-    qt1s, qt2s, qt3s = zip(*[s.qts for s in speed_stats.typed])
-    print(qt1s, qt2s, qt3s, sep="\n")
 
 
     fig, ax = plt.subplots(layout="constrained")
     x = np.arange(T)
-    group_width = 0.25
+    w = 0.25
     ax.set_ylabel("Speed")
     ax.set_xlabel("Type")
-    ax.set_xticks(x + group_width, [f"{t}" for t in range(T)])
-    ax.set_ylim(0, 1.25 * max(plots["Max"]))
+    ax.set_xticks(x + w, [f"{t}" for t in range(T)])
+    ax.set_ylim(0, 1.25 * max(plots["Maxs"]))
 
     mult = 0
     alphas = [0.3, 0.5, 0.7]
-    edge_colours = [(0.5, 0.5, 0.5, 1.0), (0.25, 0.25, 0.25, 1.0), (0.0, 0.0, 0.0, 1.0)]
+    edge_colours = [(0.5, 0.5, 0.5, 1), (0.25, 0.25, 0.25, 1), (0, 0, 0, 1)]
 
     for (label, data), a, edge_colour in zip(plots.items(), alphas, edge_colours):
-        offset = group_width * mult
+        offset = w * mult
         t_colours = [(c[0], c[1], c[2], a) for c in particle_colours]
-        rects = ax.bar(x + offset, data, group_width, label=label, color=t_colours, edgecolor=edge_colour, linewidth=1)
+        rects = ax.bar(x + offset, data, w, label=label, color=t_colours, edgecolor=edge_colour, linewidth=1)
         ax.bar_label(rects, padding=3)
         mult += 1
+
+    qt1s, qt2s, qt3s = zip(*[s.qts for s in speed_stats.typed])
+    # for q1, q2, q3 in [qt1s, qt2s, qt3s]:
+    #     xmin = x + 1.5*w
+    #     xmax = xmin + w
+    for x_val, q1, q2, q3 in zip(x, qt1s, qt2s, qt3s):
+        xmin = x_val + 1.5*w
+        xmax = xmin + w
+        ax.fill_between([xmin, xmax], q1, q3, color="white", edgecolor="black", linestyle="dashed")
+        ax.hlines(q2, xmin=xmin, xmax=xmax, color="black", linestyle="dashed", linewidth=1)
+
 
     alphas.reverse()
     legend_handles = [ mpatches.Patch(color=(a,a,a, 1.0), label=l) for a, l in zip(alphas, plots.keys())]
