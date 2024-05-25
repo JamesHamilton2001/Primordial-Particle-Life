@@ -23,8 +23,8 @@ type_radial_angles += type_radial_angles[:1] # close circle
 
 particle_colours = [
     (1.0, 0.0, 0.0),  # red
-    (0.0, 0.0, 1.0),  # blue
-    (1.0, 1.0, 0.0),  # yellow
+    (0.0, 0.0, 0.8),  # blue
+    (0.8, 0.8, 0.0),  # yellow
     (0.5, 0.0, 0.5),  # purple
     (0.0, 0.8, 0.0),  # green
     (1.0, 0.5, 0.0),  # orange
@@ -251,16 +251,18 @@ def visualise_speeds(t_speeds, speed_stats):
     plots["Mean"].append(speed_stats.all.avg)
     plots["Maximum"].append(max(plots["Maximum"]))
 
-    fig, ax = plt.subplots(layout="constrained", figsize=(16, 8))
+    fig, ax = plt.subplots(figsize=(16, 9))
+    
     x = np.arange(T+1)
     w = 0.25
+    ax.set_title("Speeds Statistics")
     ax.set_ylabel("Speed")
     ax.set_xlabel("Type")
-    ax.set_xticks(x + w, [f"{t}" for t in range(T+1)])
+    ax.set_xticks(x + w, [f"{t}" for t in range(T)]+["All"])
     ax.set_ylim(0, 1.25 * plots["Maximum"][-1])
 
-    alphas = [0.3, 0.5, 0.7]
-    colours = particle_colours[:T] + [(0, 0, 0)]
+    alphas = [0.3, 0.5, 1]
+    colours = particle_colours[:T] + [(0.5, 0.5, 0.5)]
     edge_colours = [(0.5, 0.5, 0.5, 1), (0.25, 0.25, 0.25, 1), (0, 0, 0, 1)]
 
     mult = 0
@@ -274,18 +276,16 @@ def visualise_speeds(t_speeds, speed_stats):
     for x_val, (q1, q2, q3) in zip(x, [s.qts for s in speed_stats.typed]+[speed_stats.all.qts]):
         xmin = x_val + 1.5*w
         xmax = xmin + w
-        c = colours[x_val]
-        ax.fill_between([xmin, xmax], q1, q3, color="white")
-        ax.fill_between([xmin, xmax], q1, q3, color=(c[0],c[1],c[2],alphas[0]), edgecolor="black", linestyle="dashed")
+        ax.fill_between([xmin, xmax], q1, q3, color=(0,0,0,0), edgecolor="black", linestyle="dashed")
         ax.hlines(q2, xmin=xmin, xmax=xmax, color="black", linestyle="dashed", linewidth=1)
         ax.text(xmax+0.03, q1, format(q1, ".6g"), ha="left", va="top", fontsize=10)
         ax.text(xmax+0.03, q2, format(q2, ".6g"), ha="left", va="center", fontsize=10)
         ax.text(xmax+0.03, q3, format(q3, ".6g"), ha="left", va="bottom", fontsize=10)
 
-    alphas.reverse()
-    legend_handles = [ mpatches.Patch(color=(a,a,a,1), label=l) for a, l in zip(alphas, plots.keys())]
+    colours = [(0.75,0.75,0.75),(0.55,0.55,0.55),(0.4,0.4,0.4)]
+    legend_handles = [ mpatches.Patch(facecolor=colour, label=l, edgecolor="black") for colour, l in zip(colours, plots.keys())]
     legend_handles.append(mpatches.Patch(facecolor="white", edgecolor="black", linestyle="dashed", label="Quartiles"))
-    ax.legend(handles=legend_handles, loc="upper right", ncols=3)
+    ax.legend(handles=legend_handles, loc="upper right", ncols=4)
     
     plt.show()
 
