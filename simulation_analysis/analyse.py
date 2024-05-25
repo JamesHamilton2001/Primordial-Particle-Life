@@ -128,6 +128,39 @@ def get_interdist_stats(typed_interdists):
     all_stats = get_stats([d for t1dists in typed_interdists for dists in t1dists for d in dists])
     return DataStats(typed_stats, all_stats)
 
+def get_state_stats(state_data):
+    speeds = get_speed_stats(state_data.typed_speeds)
+    interdists = get_interdist_stats(state_data.typed_interdists)
+    inner_interdists = get_interdist_stats(state_data.typed_inner_interdists)
+    outer_interdists = get_interdist_stats(state_data.typed_outer_interdists)
+    return StateStats(speeds, interdists, inner_interdists, outer_interdists)
+
+def print_state_stats(state_stats):
+
+    ## TODO: print alls
+
+    print("\n  Speed Stats:")
+    for t, stats in enumerate(state_stats.speeds.typed):
+        print(f"   t{t}: {stats}")
+    
+
+    print("\n  Interdist Stats:")
+    for t1, t1stats in enumerate(state_stats.interdists.typed):
+        for t2, stats in enumerate(t1stats):
+            print(f"   t{t}: {stats}")
+    
+
+    print("\n  Inner Interdist Stats:")
+    for t1, t1stats in enumerate(state_stats.inner_interdists.typed):
+        for t2, stats in enumerate(t1stats):
+            print(f"   t{t}: {stats}")
+    
+
+    print("\n  Outer Interdist Stats:")
+    for t1, t1stats in enumerate(state_stats.outer_interdists.typed):
+        for t2, stats in enumerate(t1stats):
+            print(f"   t{t}: {stats}")
+
 
 
 def main():
@@ -140,11 +173,8 @@ def main():
     # launch_state_data = get_state_data(RAW_DATA["simulation"]["launchSettings"]["particles"])
     result_state_data = get_state_data(RAW_DATA["simulation"]["particles"])
 
-    # launch_speed_stats = get_speed_stats(launch_state_data.typed_speeds)
-    result_speed_stats = get_speed_stats(result_state_data.typed_speeds)
+    result_state_stats = get_state_stats(result_state_data)
 
-    # launch_interdist_stats = get_interdist_stats(launch_state_data.typed_interdists)
-    result_interdist_stats = get_interdist_stats(result_state_data.typed_interdists)
 
     if isPrinting:
 
@@ -155,16 +185,18 @@ def main():
         print()
 
         print("\nResult Stats:")
+        print_state_stats(result_state_stats)
+        print()
 
-        print("\n  Speed Stats:")
-        for t, stats in enumerate(result_speed_stats.typed):
-            print(f"   t{t}: avg={stats.avg}, std={stats.std}, qts={stats.qts}")
-        print(f"   T: avg={result_speed_stats.all.avg}, std={result_speed_stats.all.std}, qts={result_speed_stats.all.qts}")
+        # print("\n  Speed Stats:")
+        # for t, stats in enumerate(result_speed_stats.typed):
+        #     print(f"   t{t}: avg={stats.avg}, std={stats.std}, qts={stats.qts}")
+        # print(f"   T: avg={result_speed_stats.all.avg}, std={result_speed_stats.all.std}, qts={result_speed_stats.all.qts}")
 
-        print("\n  Interdist Stats:")
-        for t1, t1stats in enumerate(result_interdist_stats.typed):
-            for t2, stats in enumerate(t1stats):
-                print(f"   {t1}->{t2}: avg={stats.avg}, std={stats.std}, qts={stats.qts}")
+        # print("\n  Interdist Stats:")
+        # for t1, t1stats in enumerate(result_interdist_stats.typed):
+        #     for t2, stats in enumerate(t1stats):
+        #         print(f"   {t1}->{t2}: avg={stats.avg}, std={stats.std}, qts={stats.qts}")
 
 
     if isPlotting:
