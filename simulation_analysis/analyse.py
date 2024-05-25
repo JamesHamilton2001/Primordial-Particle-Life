@@ -2,6 +2,8 @@ import pandas as pd
 from collections import namedtuple
 import matplotlib.pyplot as plt
 import math
+from math import pi
+import numpy as np
 
 
 
@@ -13,6 +15,9 @@ RAW_DATA = pd.read_json(DIR_NAME+JSON_NAME)
 
 T = RAW_DATA["simulation"]["launchSettings"]["types"]
 N = RAW_DATA["simulation"]["launchSettings"]["count"]
+
+radial_angles = [2 * pi * i / T for i in range(T)]
+radial_angles += radial_angles[:1] # close circle
 
 
 Particle = namedtuple("Particle", [ "t", "x", "y", "vx", "vy" ])
@@ -176,6 +181,36 @@ def print_simulation_stats(simulation_stats):
 
 
 
+def visual_speeds(t_speeds, speed_stats):
+
+    labels = [f"Type: {t}" for t in range(T)]
+    t_avgs, t_stds, t_qt1s, t_qt2s, t_qt3s = zip(*[(s.avg, s.std, s.qts[0], s.qts[1], s.qts[2]) for s in speed_stats.typed])
+    t_maxs = [speeds[-1] for speeds in t_speeds]
+    a_avg, a_std, (a_qt1, a_qt2, a_qt3) = speed_stats.all
+    a_max = t_maxs[-1]
+
+    ## (1 row, 1 col, 1 subplot), axes are radial
+    ax = plt.subplot(111, polar=True)
+    
+    ## labled radial axes
+    plt.xticks(radial_angles[:-1], labels, color='grey', size=8)
+    
+    ## circular ticks scaled to data
+    ax.set_rlabel_position(0)
+    plt.yticks([10,20,30], ["10","20","30"], color="grey", size=7)
+
+    ## limit to just above maximum value
+    plt.ylim(0, 1.2*a_max)
+
+    ## plot each types maximum
+    values = t_maxs + [t_maxs[0]]
+    ax.plot(radial_angles, values, linewidth=1, linestyle='solid')
+
+    # ax.fill(radial_angles, values, 'b', alpha=0.1)
+
+    plt.show()
+
+
 
 def main():
 
@@ -197,7 +232,8 @@ def main():
         print_simulation_stats(simulation_state_stats)
 
     if isPlotting:
-        pass
+
+        visual_speeds(simulation_state_data.result.typed_speeds, simulation_state_stats.result.speeds)
 
 
 if __name__ == "__main__":
