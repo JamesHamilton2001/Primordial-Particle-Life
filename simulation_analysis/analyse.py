@@ -251,7 +251,7 @@ def visualise_speeds(t_speeds, speed_stats):
     plots["Mean"].append(speed_stats.all.avg)
     plots["Maximum"].append(max(plots["Maximum"]))
 
-    fig, ax = plt.subplots(layout="constrained")
+    fig, ax = plt.subplots(layout="constrained", figsize=(16, 8))
     x = np.arange(T+1)
     w = 0.25
     ax.set_ylabel("Speed")
@@ -270,7 +270,7 @@ def visualise_speeds(t_speeds, speed_stats):
         rects = ax.bar(x + offset, data, w, label=label, color=bar_colours, edgecolor=edge_colour, linewidth=1)
         for rect in rects:
             height = rect.get_height()
-            ax.text(rect.get_x() + rect.get_width() / 2, height, format(height, ".4g"), ha="center", va="bottom", fontsize=7)
+            ax.text(rect.get_x() + rect.get_width() / 2, height, format(height, ".6g"), ha="center", va="bottom", fontsize=10)
         mult += 1
 
     for x_val, (q1, q2, q3) in zip(x, [s.qts for s in speed_stats.typed]+[speed_stats.all.qts]):
@@ -280,9 +280,9 @@ def visualise_speeds(t_speeds, speed_stats):
         ax.fill_between([xmin, xmax], q1, q3, color="white")
         ax.fill_between([xmin, xmax], q1, q3, color=(c[0],c[1],c[2],alphas[0]), edgecolor="black", linestyle="dashed")
         ax.hlines(q2, xmin=xmin, xmax=xmax, color="black", linestyle="dashed", linewidth=1)
-        ax.text(xmax, q1, format(q1, ".4g"), ha="left", va="top", fontsize=7)
-        ax.text(xmax, q2, format(q2, ".4g"), ha="left", va="center", fontsize=7)
-        ax.text(xmax, q3, format(q3, ".4g"), ha="left", va="bottom", fontsize=7)
+        ax.text(xmax+0.03, q1, format(q1, ".6g"), ha="left", va="top", fontsize=10)
+        ax.text(xmax+0.03, q2, format(q2, ".6g"), ha="left", va="center", fontsize=10)
+        ax.text(xmax+0.03, q3, format(q3, ".6g"), ha="left", va="bottom", fontsize=10)
         
 
     alphas.reverse()
