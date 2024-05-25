@@ -195,50 +195,6 @@ def print_simulation_stats(simulation_stats):
     print()
 
 
-## NOTE: use same radar chart, but for interdists
-def OLD_visual_speeds(t_speeds, speed_stats):
-
-    ## get on type data
-    t_avgs, t_stds, t_qt1s, t_qt2s, t_qt3s = zip(*[(s.avg, s.std, s.qts[0], s.qts[1], s.qts[2]) for s in speed_stats.typed])
-    t_maxs = [speeds[-1] for speeds in t_speeds]
-
-    ## get on all data
-    a_avg, a_std, (a_qt1, a_qt2, a_qt3) = speed_stats.all
-    a_max = t_maxs[-1]
-
-    ## setup figure and axes
-    fig, axs = plt.subplots(1, 3, subplot_kw={"projection": "polar"}, figsize=(18, 6))
-    axs[0].set_title("General")
-    axs[1].set_title("Standard Deviations")
-    axs[2].set_title("Minimums")
-    
-    # ## TYPED GENERAL STATS
-
-    labels = ["Type Mean", "Type Q1", "Type Q2", "Type Q3"]
-    groups = [ f"Type {t}" for t in range(T) ] + ["All"]
-    data = []
-    for s in speed_stats.typed:
-        data.append([s.avg, s.qts[0], s.qts[1], s.qts[2]])
-
-    angles = [ 2*pi * n/4 for n in range(4) ]
-    angles += angles[:1]
-
-    axs[0].set_theta_offset(pi / 2)
-    axs[0].set_theta_direction(-1)
-
-    axs[0].set_xticks(angles[:-1], labels)
-
-    axs[0].set_ylim(0, a_max)
-    axs[0].set_rlabel_position(0)
-    axs[0].set_yticks([a_avg, a_qt1, a_qt2, a_qt3], ["Mean", "Q1", "Q2", "Q3"], color="grey", size=7)
-
-    for t, d in enumerate(data):
-        d += [d[0]]
-        axs[0].plot(angles, d, linewidth=1, linestyle="solid", label=groups[t], color=particle_colours[t])
-    
-    plt.show()
-
-
 
 def visualise_speeds(t_speeds, speed_stats):
     
@@ -289,6 +245,45 @@ def visualise_speeds(t_speeds, speed_stats):
     
     plt.show()
 
+def visualise_interdists(t_interdists, interdist_stats):
+    ## TODO: move counts to own function, use 3d bar chart with 2d data
+    ## counts, overlap each and all for t, allall
+    ## means, overlap each and all for t, all all
+    ## stds, overlap each and all for t, all all
+    ## quartiles ???
+
+    t_angles = [ 2*pi * t/T for t in range(T) ] + [0]
+
+    fig, axs = plt.subplots(2, 3, subplot_kw={"projection": "polar"}, figsize=(16, 9))
+    fig, ax = plt.subplots(subplot_kw={"projection": "polar"}, figsize=(16, 9))
+
+    t_labels = [ f"Type {t}" for t in range(T) ]
+    t_groups = [ f"Type {t}" for t in range(T) ]
+
+    for ax in axs.flat:
+        ax.set_theta_offset(pi / 2)
+        ax.set_theta_direction(-1)
+
+    ## COUNTS
+
+    typed_intercounts = [ [ len(dists) for dists in t1dists ] for t1dists in t_interdists ]
+    total_intercounts_flat_sorted = sorted([ count for t1count in typed_intercounts for count in t1count ])
+    total_intercount_stats = get_stats(total_intercounts_flat_sorted)
+    max_intercount = total_intercounts_flat_sorted[-1]
+
+    # ax = axs[0][0]
+    ax.set_title("Total T2T Interactions")
+    ax.set_xticks(t_angles[:-1], t_labels)
+    ax.set_yticks(list(total_intercount_stats.qts), ["Q1", "Q2", "Q3"], color="grey", size=7)
+    ax.set_ylim(0, 1.25 * max_intercount)
+
+    for data, group, colour in zip(typed_intercounts, t_groups, particle_colours):
+        data += [data[0]]
+        print(data)
+        ax.plot(t_angles, data, linewidth=1, linestyle="solid", label=group, color=colour)
+
+    plt.show()
+    
 
 
 def main():
@@ -312,7 +307,8 @@ def main():
 
     if isPlotting:
 
-        visualise_speeds(simulation_state_data.result.typed_speeds, simulation_state_stats.result.speeds)
+        # visualise_speeds(simulation_state_data.result.typed_speeds, simulation_state_stats.result.speeds)
+        visualise_interdists(simulation_state_data.result.typed_interdists, simulation_state_stats.result.interdists)
 
 
 if __name__ == "__main__":
