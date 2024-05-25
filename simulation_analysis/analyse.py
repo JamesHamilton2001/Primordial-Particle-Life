@@ -16,18 +16,13 @@ N = RAW_DATA["simulation"]["launchSettings"]["count"]
 
 
 Particle = namedtuple("Particle", [ "t", "x", "y", "vx", "vy" ])
-
 StateData = namedtuple("StateData", [ "particles", "typed_speeds", "typed_interdists", "typed_inner_interdists", "typed_outer_interdists" ])
-
 SimulationData = namedtuple("SimulationData", [ "launch", "result" ])
 
 
 Stats = namedtuple("Stats", [ "avg", "std", "qts" ])
-
 DataStats = namedtuple("DataStats", [ "typed", "all" ])
-
 StateStats = namedtuple("StateStats", [ "speeds", "interdists", "inner_interdists", "outer_interdists" ])
-
 SimulationStats = namedtuple("SimulationStats", [ "launch", "result" ])
 
 
@@ -182,24 +177,19 @@ def print_simulation_stats(simulation_stats):
 
 def main():
 
-    isPrintingData = True
-    isPrintingStats = True
-    isPlotting = False
+    isPrintingData = False
+    isPrintingStats = False
+    isPlotting = True
 
-    simulation_state_data = SimulationData(
-        get_state_data(RAW_DATA["simulation"]["launchSettings"]["particles"]),
-        get_state_data(RAW_DATA["simulation"]["particles"])
-    )
-    simulation_state_stats = SimulationStats(
-        get_state_stats(simulation_state_data.launch),
-        get_state_stats(simulation_state_data.result)
-    )
-
+    simulation_state_data = SimulationData( get_state_data(RAW_DATA["simulation"]["launchSettings"]["particles"]),
+                                            get_state_data(RAW_DATA["simulation"]["particles"])                  )
+    
+    simulation_state_stats = SimulationStats( get_state_stats(simulation_state_data.launch),
+                                              get_state_stats(simulation_state_data.result) )
 
     if isPrintingData:
         print("\nSimulation Data:")
         print_simulation_data(simulation_state_data)
-
     if isPrintingStats:
         print("\nSimulation Stats:")
         print_simulation_stats(simulation_state_stats)
