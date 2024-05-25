@@ -31,6 +31,7 @@ particle_colours = [
     (0.0, 1.0, 1.0),  # cyan
     (0.6, 0.4, 0.2)  # brown
 ]
+particle_colours = particle_colours[:T]
 
 
 Particle = namedtuple("Particle", [ "t", "x", "y", "vx", "vy" ])
@@ -247,23 +248,22 @@ def visualise_speeds(t_speeds, speed_stats):
         "Max": [speeds[-1] for speeds in t_speeds],
     }
 
-    x = np.arange(len(type_labels))
+    x = np.arange(T)
     width = 0.25
     mult = 0
 
     fig, ax = plt.subplots(layout="constrained")
 
-    for label, data in plots.items():
+    for mult, (label, data) in enumerate(plots.items()):
         offset = width * mult
         rects = ax.bar(x + offset, data, width, label=label)
         ax.bar_label(rects, padding=3)
-        mult += 1
 
     ax.set_ylabel("Speed")
     ax.legend(loc="upper right", ncols=3)
-    ylim = 1.25 * max([speeds[-1] for speeds in t_speeds])
-    ax.set_ylim(0, ylim)
-
+    ax.set_xticks(x + width, type_labels)
+    ax.set_ylim(0, 1.25 * max(plots["Max"]))
+    
     plt.show()
 
 
