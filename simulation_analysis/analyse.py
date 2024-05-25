@@ -8,12 +8,12 @@ import math
 DIR_NAME = "./data/"
 
 JSON_FILE_NAME = "small_boy_seeded(30000).json"
+# JSON_FILE_NAME = "debug_preloaded(30000).json"
 
 RAW_DATA = pd.read_json(DIR_NAME+JSON_FILE_NAME)
 
 T = RAW_DATA["simulation"]["launchSettings"]["types"]
 N = RAW_DATA["simulation"]["launchSettings"]["count"]
-
 
 
 Particle = namedtuple("Particle", ["t", "x", "y", "vx", "vy"])
@@ -30,9 +30,24 @@ def get_particles_by_type(particles_data):
 
 
 def get_typed_speeds(typed_particles):
-    step = RAW_DATA["simulation"]["launchSettings"]["step"]
     return [ [ math.sqrt(p.vx**2 + p.vy**2) for p in particles ] for particles in typed_particles ]
 
+
+
+def get_typed_interdists(typed_particles):
+    interdists = [ [ [] for _ in range(T) ] for _ in range(T) ]
+
+    for t1, particles1 in enumerate(typed_particles):
+        for t2, particles2 in enumerate(typed_particles):
+            for p1 in particles1:
+                for p2 in particles2:
+                    if p1 != p2:
+                        dist = math.sqrt((p1.x - p2.x)**2 + (p1.y - p2.y)**2)
+                        if dist <= 2:
+                            interdists[t1][t2].append(dist)
+
+    return interdists
+        
 
 
 def main():
@@ -43,12 +58,21 @@ def main():
 
     typed_speeds = get_typed_speeds(typed_particles)
 
+    typed_interdists = get_typed_interdists(typed_particles)
+
     print("\nAvg Speeds:")
     for t, speeds in enumerate(typed_speeds):
         avg = sum(speeds) / len(speeds)
         print(f" t{t}: {avg}")
     total_avg = sum([sum(speeds) for speeds in typed_speeds]) / sum([len(speeds) for speeds in typed_speeds])
     print(f"T: {total_avg}")
+
+    print("\Interactions:", end="")
+    for t1, t1dists in enumerate(typed_interdists):
+        print(f"\nt{t1}: ", end="")
+        for dists in t1dists:
+            print(len(dists), end=" ")
+    print()
 
 
 
