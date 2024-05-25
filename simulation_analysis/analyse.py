@@ -47,7 +47,23 @@ def get_typed_interdists(typed_particles):
                             interdists[t1][t2].append(dist)
 
     return interdists
-        
+
+
+
+def get_inner_outer_interdists(typed_interdists):
+    inner_radius = RAW_DATA["simulation"]["launchSettings"]["innerRadius"]
+    inner_interdists = [ [ [] for _ in range(T) ] for _ in range(T) ]
+    outer_interdists = [ [ [] for _ in range(T) ] for _ in range(T) ]
+
+    for t1, t1dists in enumerate(typed_interdists):
+        for t2, dists in enumerate(t1dists):
+            for d in dists:
+                if d < inner_radius:
+                    inner_interdists[t1][t2].append(d)
+                else:
+                    outer_interdists[t1][t2].append(d)
+    
+    return inner_interdists, outer_interdists
 
 
 def main():
@@ -59,6 +75,8 @@ def main():
     typed_speeds = get_typed_speeds(typed_particles)
 
     typed_interdists = get_typed_interdists(typed_particles)
+
+    typed_inner_interdists, typed_outer_interdists = get_inner_outer_interdists(typed_interdists)
 
     print("\nAvg Speeds:")
     for t, speeds in enumerate(typed_speeds):
@@ -73,6 +91,13 @@ def main():
         for dists in t1dists:
             print(len(dists), end=" ")
     print()
+
+    print("\nInner Interactions:", end="")
+    for t1, t1dists in enumerate(typed_inner_interdists):
+        print(f"\nt{t1}: ", end="")
+        for dists in t1dists:
+            print(len(dists), end=" ")
+
 
 
 
