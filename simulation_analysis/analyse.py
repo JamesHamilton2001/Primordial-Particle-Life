@@ -243,9 +243,9 @@ def OLD_visual_speeds(t_speeds, speed_stats):
 def visualise_speeds(t_speeds, speed_stats):
     
     plots = {
-        "Standard Deviations": [s.std for s in speed_stats.typed],
-        "Means": [s.avg for s in speed_stats.typed],
-        "Maxs": [speeds[-1] for speeds in t_speeds],
+        "Standard Deviation": [s.std for s in speed_stats.typed],
+        "Mean": [s.avg for s in speed_stats.typed],
+        "Maximum": [speeds[-1] for speeds in t_speeds],
     }
 
     fig, ax = plt.subplots(layout="constrained")
@@ -254,7 +254,7 @@ def visualise_speeds(t_speeds, speed_stats):
     ax.set_ylabel("Speed")
     ax.set_xlabel("Type")
     ax.set_xticks(x + w, [f"{t}" for t in range(T)])
-    ax.set_ylim(0, 1.25 * max(plots["Maxs"]))
+    ax.set_ylim(0, 1.25 * max(plots["Maximum"]))
 
     alphas = [0.3, 0.5, 0.7]
     edge_colours = [(0.5, 0.5, 0.5, 1), (0.25, 0.25, 0.25, 1), (0, 0, 0, 1)]
@@ -282,7 +282,8 @@ def visualise_speeds(t_speeds, speed_stats):
         
 
     alphas.reverse()
-    legend_handles = [ mpatches.Patch(color=(a,a,a, 1.0), label=l) for a, l in zip(alphas, plots.keys())]
+    legend_handles = [ mpatches.Patch(color=(a,a,a,1), label=l) for a, l in zip(alphas, plots.keys())]
+    legend_handles.append(mpatches.Patch(facecolor="white", edgecolor="black", linestyle="dashed", label="Quartiles"))
     ax.legend(handles=legend_handles, loc="upper right", ncols=3)
     
     plt.show()
