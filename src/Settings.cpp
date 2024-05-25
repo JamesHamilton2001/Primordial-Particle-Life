@@ -8,6 +8,7 @@
 const string Settings::defaultSettingsDir = "./settings/default/";
 const string Settings::customSettingsDir = "./settings/custom/";
 const string Settings::simulationDataDir = "./simulation_analysis/data/";
+const string Settings::simulationScreenshotsDir = "./simulation_analysis/screenshots/";
 
 Settings::Settings() :
     name("DEFAULT_HARDCODED_SETTINGS"),

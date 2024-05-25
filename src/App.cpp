@@ -61,62 +61,21 @@ bool App::update()
 
 void App::saveData() const
 {
+    string fileName = particleLife.settings.name + "(" + to_string(particleLife.getFrameCount()) + ")";
+
+    // TAKE SCREENSHOT
+    TakeScreenshot((particleLife.settings.simulationScreenshotsDir + fileName + ".png").c_str());
+
     long long unsigned int frameCount = particleLife.getFrameCount();
     const vector<Particle>& particles = particleLife.getParticles();
     const int T = particleLife.settings.types;
- 
-/*
-    // PARTICLE SPEEDS BY TYPE
-
-    auto typeSpeeds = vector<vector<float>>(T);
-    auto totalTypeSpeeds = vector<float>(T, 0);
-    auto meanTypeSpeeds = vector<float>(T);
-
-    for (const Particle& p : particles) {
-        float speed = settings.step * Vector2Length(p.vel);
-        typeSpeeds[p.type].emplace_back(speed);
-        totalTypeSpeeds[p.type] += speed;
-    } for (int i = 0; i < T; i++)
-        meanTypeSpeeds[i] = totalTypeSpeeds[i] / typeSpeeds[i].size();
-
-    // PARTICLE INTERACTIONS BY TYPE
-
-    auto t2tInterDists = vector<vector<vector<float>>>(T, vector<vector<float>>(T));
-    auto t2tInterDistSums = vector<vector<float>>(T, vector<float>(T, 0.0f));
-    auto t2tInterDistMeans = vector<vector<float>>(T, vector<float>(T, 0.0f));
-
-    for (const Particle& p1 : particles) {
-        for (const Particle& p2 : particles) {
-            if (&p1 == &p2) continue;
-            float dist = Vector2Distance(p1.pos, p2.pos);
-            if (dist <= 2.0f)
-                t2tInterDists[p1.type][p2.type].emplace_back(Vector2Distance(p1.pos, p2.pos));
-        }
-    } for (int i = 0; i < T; i++) {
-        for (int j = 0; j < T; j++) {
-            for (float dist : t2tInterDists[i][j])
-                t2tInterDistSums[i][j] += dist;
-            t2tInterDistMeans[i][j] = t2tInterDistSums[i][j] / t2tInterDists[i][j].size();
-        }
-    }
-
-    // PRINT STATISTICS
-    cout << "Statistics: Frame: " << frameCount << endl; 
-    cout << "| Mean Type Speeds: " << endl;
-    for (int i = 0; i < T; i++)
-        cout << "| | ["<<i<<"]: " << meanTypeSpeeds[i] << endl;
-    cout << "| Type Interactions: (count, mean)" << endl;
-    for (int i = 0; i < T; i++)
-        for (int j = 0; j < T; j++)
-            cout <<"| | ["<<i<<"]["<<j<<"]: " << t2tInterDists[i][j].size() <<", "<< t2tInterDistMeans[i][j] << endl;
-*/
 
     // WRITE INFORMATION TO FILE
 
-    string fileName = particleLife.settings.simulationDataDir + particleLife.settings.name +"("+to_string(frameCount)+")" + ".json";
-    ofstream file(fileName);
+    string filePath = particleLife.settings.simulationDataDir + fileName + ".json";
+    ofstream file(filePath);
     if (!file.is_open()) {
-        cerr << "Failed to create/open \""+fileName+"\" for writing statistics." << endl;
+        cerr << "Failed to create/open \""+filePath+"\" for writing statistics." << endl;
         return;
     }
     const Settings& s = particleLife.settings;

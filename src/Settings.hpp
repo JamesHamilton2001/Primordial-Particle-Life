@@ -37,10 +37,6 @@ using namespace std;
 
 struct Settings
 {
-    static const string defaultSettingsDir;
-    static const string customSettingsDir;
-    static const string simulationDataDir;
-
     string name;
     int types;
     int size;
@@ -59,6 +55,11 @@ struct Settings
     void generateParticleData();
 
     friend ostream& operator <<(ostream& os, const Settings& settings);
+
+    static const string defaultSettingsDir;
+    static const string customSettingsDir;
+    static const string simulationDataDir;
+    static const string simulationScreenshotsDir;
 };
 
 
