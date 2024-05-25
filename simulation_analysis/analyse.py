@@ -4,106 +4,57 @@ import matplotlib.pyplot as plt
 import math
 
 
-Sim = namedtuple("SimParams", [
-    "name",
-    "frame_count",
-    "types",
-    "size",
-    "count",
-    "inner_radius",
-    "resistance",
-    "step",
-    "attractions",
-    "type_ratios",
-    "seed",
-    "originals",
-    "resulting"
-])
-
-# PStat = namedtuple("PStat", [
-#     "type",
-#     "speed",
-#     "inter_dists"
-# ])
-class Particle:
-    def __init__(self, t, x, y, vx, vy):
-        self.t = t
-        self.x = x
-        self.y = y
-        self.vx = vx
-        self.vy = vy
-    def __str__(self):
-        return "{"+f"t: {self.t}, x: {self.x}, y: {self.y}, vx: {self.vx}, vy: {self.vy}"+"}"
-    def __repr__(self): return self.__str__()
-
-class PStat:
-    def __init__(self, speed, inter_dists):
-        self.speed = speed
-        self.inter_dists = inter_dists
 
 DIR_NAME = "./data/"
 
-fileName = "debug_seeded(10000).json"
+JSON_FILE_NAME = "small_boy_seeded(30000).json"
 
-T = 0
-N = 0
-type_counts = []
+RAW_DATA = pd.read_json(DIR_NAME+JSON_FILE_NAME)
+
+T = RAW_DATA["simulation"]["launchSettings"]["types"]
+N = RAW_DATA["simulation"]["launchSettings"]["count"]
 
 
-def read_json(file_path):
-    data = pd.read_json(file_path)
+
+Particle = namedtuple("Particle", ["t", "x", "y", "vx", "vy"])
+
+
+
+def get_particles_by_type(particles_data):
+    typed_particles = [[] for _ in range(T)]
+    for p_data in particles_data:
+        t = p_data["t"]
+        typed_particles[t].append( Particle(t, p_data["x"], p_data["y"], p_data["vx"], p_data["vy"]) )
+    return typed_particles
+
+
+
+def get_typed_speeds(typed_particles):
+    return [ [ math.sqrt(p.vx**2 + p.vy**2) for p in particles ] for particles in typed_particles ]
+
+
+
+
     
-    name = file_path[:-5]
-    frame_count = data["simulation"]["frameCount"]
-    types = data["simulation"]["launchSettings"]["types"]
-    size = data["simulation"]["launchSettings"]["size"]
-    count = data["simulation"]["launchSettings"]["count"]
-    inner_radius = data["simulation"]["launchSettings"]["innerRadius"]
-    resistance = data["simulation"]["launchSettings"]["resistance"]
-    step = data["simulation"]["launchSettings"]["step"]
-    attractions = data["simulation"]["launchSettings"]["attractions"]
-    type_ratios = data["simulation"]["launchSettings"]["typeRatio"]
-    seed = data["simulation"]["launchSettings"]["seed"]
-    originals = data["simulation"]["launchSettings"]["particles"]
-    resulting = data["simulation"]["particles"]
 
-    return Sim(name, frame_count, types, size, count, inner_radius, resistance, step, attractions, type_ratios, seed, originals, resulting)
 
-def count_types(particles):
-    t = sim.types
-    results = [0 for _ in range(t)]
-    for p in particles:
-        results[p["t"]] += 1
-    return results
+def main():
 
-# def get_ptype_data(data):
-#     dest = [[] for _ in range(T)]
-#     for p1data in data:
-#         t = p1data["t"]
-#         dest[t].append(Particle(t, p1data["x"], p1data["y"], p1data["xv"], p1data["yv"]))
-#     return dest
+    ## TODO: comparison of originals and resulting
 
-sim = read_json(DIR_NAME + fileName)
-T = sim.types
-N = sim.count
-type_counts = count_types(sim.originals)
+    typed_particles = get_particles_by_type(RAW_DATA["simulation"]["particles"])
 
-o_particles = [[] for _ in range(T)]
-r_particles = [[] for _ in range(T)]
+    typed_speeds = get_typed_speeds(typed_particles)
 
-for op_data in sim.originals:
-    t = op_data["t"]
-    o_particles[t].append( Particle(t, op_data["x"], op_data["y"], op_data["vx"], op_data["vy"]) )
-for rp_data in sim.resulting:
-    t = rp_data["t"]
-    r_particles[t].append( Particle(t, rp_data["x"], rp_data["y"], rp_data["vx"], rp_data["vy"]) )
+    # print("\nAvg Speeds:")
+    # for t, speeds in enumerate(typed_speeds):
+    #     avg = sum(speeds) / len(speeds)
+    #     print(f" t{t}: {avg}")
+    # total_avg = sum([sum(speeds) for speeds in typed_speeds]) / sum([len(speeds) for speeds in typed_speeds])
+    # print(f"T: {total_avg}")
 
-for i, tparticles in enumerate(o_particles):
-    print(f"Type {i}: {len(tparticles)}")
-    for p in tparticles:
-        print(f" {p}")
-print()
-for i, tparticles in enumerate(r_particles):
-    print(f"Type {i}: {len(tparticles)}")
-    for p in tparticles:
-        print(f" {p}")
+
+
+
+if __name__ == "__main__":
+    main()

@@ -10,7 +10,7 @@ int main()
 {
     int width = 1024;
     int height = 768;
-    long long unsigned int finalFrame = 10000;
+    long long unsigned int finalFrame = 30000;
 
     cout << endl;
     InitWindow(width, height, "Particle Life");
