@@ -40,11 +40,8 @@ def get_typed_particles(particles_data):
         typed_particles[t].append( Particle(t, p_data["x"], p_data["y"], p_data["vx"], p_data["vy"]) )
     return typed_particles
 
-
-
 def get_typed_speeds(typed_particles):
     return [ sorted([ math.sqrt( p.vx**2 + p.vy**2 ) for p in particles ]) for particles in typed_particles ]
-
 
 def get_typed_interdists(typed_particles):
     typed_interdists = [ [ [] for _ in range(T) ] for _ in range(T) ]
@@ -64,8 +61,6 @@ def get_typed_interdists(typed_particles):
     
     return typed_interdists
 
-
-
 def get_typed_inner_outer_interdists(typed_interdists):
     inner_radius = RAW_DATA["simulation"]["launchSettings"]["innerRadius"]
     inner_interdists = [ [ [] for _ in range(T) ] for _ in range(T) ]
@@ -81,16 +76,12 @@ def get_typed_inner_outer_interdists(typed_interdists):
     
     return inner_interdists, outer_interdists
 
-
-
 def get_state_data(state_raw_data):
     particles = get_typed_particles(state_raw_data)
     speeds = get_typed_speeds(particles)
     interdists = get_typed_interdists(particles)
     inner_interdists, outer_interdists = get_typed_inner_outer_interdists(interdists)
     return StateData(particles, speeds, interdists, inner_interdists, outer_interdists)
-
-
 
 def print_state_data(state_data):
 
@@ -135,6 +126,24 @@ def get_speed_stats(typed_speeds):
 
     return DataStats(typed_stats, all_stats)
 
+def get_interdist_stats(typed_interdists):
+
+    typed_stats = [ [ [] for _ in range(T) ] for _ in range(T) ]
+    for t1, t1dists in enumerate(typed_interdists):
+        for t2, dists in enumerate(t1dists):
+            t_len = len(dists)
+            t_avg = sum(dists) / t_len
+            typed_stats[t1][t2] = Stats( t_avg,
+                                         math.sqrt(sum([ (dist - t_avg)**2 for dist in dists ]) / t_len),
+                                         (dists[t_len//4], dists[t_len//2], dists[t_len-t_len//4])       )
+    
+    all_interdists = [d for t1dists in typed_interdists for dists in t1dists for d in dists]
+    all_avg = sum(all_interdists) / N
+    all_std = math.sqrt(sum([ (dist - all_avg)**2 for dist in all_interdists ]) / N)
+    all_qts = (all_interdists[N//4], all_interdists[N//2], all_interdists[N-N//4])
+    all_stats = Stats(all_avg, all_std, all_qts)
+
+    return DataStats(typed_stats, all_stats)
 
 
 
@@ -151,6 +160,9 @@ def main():
     # launch_speed_stats = get_speed_stats(launch_state_data.typed_speeds)
     result_speed_stats = get_speed_stats(result_state_data.typed_speeds)
 
+    # launch_interdist_stats = get_interdist_stats(launch_state_data.typed_interdists)
+    result_interdist_stats = get_interdist_stats(result_state_data.typed_interdists)
+
     if isPrinting:
 
         # print("\nLaunch State Data:")
@@ -161,10 +173,15 @@ def main():
 
         print("\nResult Stats:")
 
-        print("\n  Result Speed Stats:")
+        print("\n  Speed Stats:")
         for t, stats in enumerate(result_speed_stats.typed):
             print(f"   t{t}: avg={stats.avg}, std={stats.std}, qts={stats.qts}")
         print(f"   T: avg={result_speed_stats.all.avg}, std={result_speed_stats.all.std}, qts={result_speed_stats.all.qts}")
+
+        print("\n  Interdist Stats:")
+        for t1, t1stats in enumerate(result_interdist_stats.typed):
+            for t2, stats in enumerate(t1stats):
+                print(f"   {t1}->{t2}: avg={stats.avg}, std={stats.std}, qts={stats.qts}")
 
 
     if isPlotting:
