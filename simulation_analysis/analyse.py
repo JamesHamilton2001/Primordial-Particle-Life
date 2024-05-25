@@ -31,7 +31,7 @@ def get_particles_by_type(particles_data):
 
 def get_typed_speeds(typed_particles):
     step = RAW_DATA["simulation"]["launchSettings"]["step"]
-    return [ [ step * math.sqrt(p.vx**2 + p.vy**2) for p in particles ] for particles in typed_particles ]
+    return [ [ math.sqrt(p.vx**2 + p.vy**2) for p in particles ] for particles in typed_particles ]
 
 
 
