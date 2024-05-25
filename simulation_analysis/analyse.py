@@ -109,7 +109,8 @@ def print_simulation_data(simulation_data):
 def get_stats(lst):
     
     slen = len(lst)
-    if slen == 0: return None
+    if slen == 0:
+        return Stats(0, 0, (0, 0, 0))
 
     avg = sum(lst) / slen
     std = math.sqrt(sum([ (x - avg)**2 for x in lst ]) / slen)
@@ -117,7 +118,7 @@ def get_stats(lst):
     if slen < 4:
         qts = (lst[0], lst[slen//2], lst[-1])
     else:
-        qts = (lst[slen//4], lst[slen//2], lst[slen-slen//4])   
+        qts = (lst[slen//4], lst[slen//2], lst[slen-slen//4])
 
     return Stats(avg, std, qts)
 
@@ -175,6 +176,7 @@ def print_simulation_stats(simulation_stats):
 
 
 
+
 def main():
 
     isPrintingData = False
@@ -193,7 +195,6 @@ def main():
     if isPrintingStats:
         print("\nSimulation Stats:")
         print_simulation_stats(simulation_state_stats)
-
 
     if isPlotting:
         pass
