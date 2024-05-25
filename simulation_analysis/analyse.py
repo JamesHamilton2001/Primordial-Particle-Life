@@ -108,41 +108,24 @@ def print_state_data(state_data):
 
 
 
+def get_stats(lst):
+    slen = len(lst)
+    if slen == 0: return None
+    avg = sum(lst) / slen
+    std = math.sqrt(sum([ (x - avg)**2 for x in lst ]) / slen)
+    qts = (lst[slen//4], lst[slen//2], lst[slen-slen//4])   
+    return Stats(avg, std, qts)
+
+
+
 def get_speed_stats(typed_speeds):
-    
-    typed_stats = [ [] for _ in range(T) ]
-    for t, speeds in enumerate(typed_speeds):
-        t_len = len(speeds)
-        t_avg = sum(speeds) / t_len
-        typed_stats[t] = Stats( t_avg,
-                                math.sqrt(sum([ (speed - t_avg)**2 for speed in speeds ]) / t_len),
-                                (speeds[t_len//4], speeds[t_len//2], speeds[t_len-t_len//4])       )
-
-    all_speeds = sorted([s for speeds in typed_speeds for s in speeds])
-    all_avg = sum(all_speeds) / N
-    all_std = math.sqrt(sum([ (speed - all_avg)**2 for speeds in typed_speeds for speed in speeds ]) / N)
-    all_qts = (all_speeds[N//4], all_speeds[N//2], all_speeds[N-N//4])
-    all_stats = Stats(all_avg, all_std, all_qts)
-
+    typed_stats = [get_stats(speeds) for speeds in typed_speeds]
+    all_stats = get_stats([s for speeds in typed_speeds for s in speeds])
     return DataStats(typed_stats, all_stats)
 
 def get_interdist_stats(typed_interdists):
-
-    typed_stats = [ [ [] for _ in range(T) ] for _ in range(T) ]
-    for t1, t1dists in enumerate(typed_interdists):
-        for t2, dists in enumerate(t1dists):
-            t_len = len(dists)
-            t_avg = sum(dists) / t_len
-            typed_stats[t1][t2] = Stats( t_avg,
-                                         math.sqrt(sum([ (dist - t_avg)**2 for dist in dists ]) / t_len),
-                                         (dists[t_len//4], dists[t_len//2], dists[t_len-t_len//4])       )
-    
-    all_interdists = [d for t1dists in typed_interdists for dists in t1dists for d in dists]
-    all_avg = sum(all_interdists) / N
-    all_std = math.sqrt(sum([ (dist - all_avg)**2 for dist in all_interdists ]) / N)
-    all_qts = (all_interdists[N//4], all_interdists[N//2], all_interdists[N-N//4])
-    all_stats = Stats(all_avg, all_std, all_qts)
-
+    typed_stats = [ [ get_stats(dists) for dists in t1dists ] for t1dists in typed_interdists ]
+    all_stats = get_stats([d for t1dists in typed_interdists for dists in t1dists for d in dists])
     return DataStats(typed_stats, all_stats)
 
 
