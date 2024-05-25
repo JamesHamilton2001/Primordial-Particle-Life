@@ -27,7 +27,7 @@ StateData = namedtuple("StateData", [
 
 Stats = namedtuple("Stats", [ "avg", "std", "qts" ])
 
-DataStats = namedtuple("DataStats", [ "typed", "every" ])
+DataStats = namedtuple("DataStats", [ "typed", "all" ])
 
 StateStats = namedtuple("StateStats", [ "speeds", "interdists", "inner_interdists", "outer_interdists" ])
 
@@ -118,23 +118,23 @@ def print_state_data(state_data):
 
 
 def get_speed_stats(typed_speeds):
+    
     typed_stats = [ [] for _ in range(T) ]
-    every_speed = sorted([s for speeds in typed_speeds for s in speeds])
-
-    every_avg = 0
     for t, speeds in enumerate(typed_speeds):
         t_len = len(speeds)
-        t_sum = sum(speeds)
-        t_avg = t_sum/t_len
+        t_avg = sum(speeds) / t_len
         typed_stats[t] = Stats( t_avg,
                                 math.sqrt(sum([ (speed - t_avg)**2 for speed in speeds ]) / t_len),
                                 (speeds[t_len//4], speeds[t_len//2], speeds[t_len-t_len//4])       )
-        every_avg += t_sum
-    every_avg /= N
-    every_std = math.sqrt(sum([ (speed - every_avg)**2 for speeds in typed_speeds for speed in speeds ]) / N)
-    every_qts = (every_speed[N//4], every_speed[N//2], every_speed[N-N//4])
 
-    return DataStats(typed_stats, Stats(every_avg, every_std, every_qts))
+    all_speeds = sorted([s for speeds in typed_speeds for s in speeds])
+    all_avg = sum(all_speeds) / N
+    all_std = math.sqrt(sum([ (speed - all_avg)**2 for speeds in typed_speeds for speed in speeds ]) / N)
+    all_qts = (all_speeds[N//4], all_speeds[N//2], all_speeds[N-N//4])
+    all_stats = Stats(all_avg, all_std, all_qts)
+
+    return DataStats(typed_stats, all_stats)
+
 
 
 
@@ -164,7 +164,7 @@ def main():
         print("\n  Result Speed Stats:")
         for t, stats in enumerate(result_speed_stats.typed):
             print(f"   t{t}: avg={stats.avg}, std={stats.std}, qts={stats.qts}")
-        print(f"   T: avg={result_speed_stats.every.avg}, std={result_speed_stats.every.std}, qts={result_speed_stats.every.qts}")
+        print(f"   T: avg={result_speed_stats.all.avg}, std={result_speed_stats.all.std}, qts={result_speed_stats.all.qts}")
 
 
     if isPlotting:
