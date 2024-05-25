@@ -5,10 +5,9 @@ import math
 
 
 
-DIR_NAME = "./simulation_analysis/data/"
+DIR_NAME = "./data/"
 
 JSON_NAME = "small_boy_seeded(30000).json"
-# JSON_NAME = "debug_preloaded(30000).json"
 
 RAW_DATA = pd.read_json(DIR_NAME+JSON_NAME)
 
@@ -66,9 +65,13 @@ def get_inner_outer_interdists(typed_interdists):
     return inner_interdists, outer_interdists
 
 
+
 def main():
 
     ## TODO: comparison of originals and resulting
+
+    printing = True
+    plotting = False
 
     typed_particles = get_particles_by_type(RAW_DATA["simulation"]["particles"])
 
@@ -79,28 +82,38 @@ def main():
     typed_inner_interdists, typed_outer_interdists = get_inner_outer_interdists(typed_interdists)
 
 
-    print("\nAvg Speeds:")
-    for t, speeds in enumerate(typed_speeds):
-        avg = sum(speeds) / len(speeds)
-        print(f" t{t}: {avg}")
-    total_avg = sum([sum(speeds) for speeds in typed_speeds]) / sum([len(speeds) for speeds in typed_speeds])
-    print(f"T: {total_avg}")
+    if printing:
 
-    print("\nInteractions:", end="")
-    for t1, t1dists in enumerate(typed_interdists):
-        print(f"\nt{t1}: ", end="")
-        for dists in t1dists:
-            print(len(dists), end=" ")
-    print()
+        print("\nAvg Speeds:")
+        for t, speeds in enumerate(typed_speeds):
+            avg = sum(speeds) / len(speeds)
+            print(f" t{t}: {avg}")
+        total_avg = sum([sum(speeds) for speeds in typed_speeds]) / sum([len(speeds) for speeds in typed_speeds])
+        print(f"T: {total_avg}")
 
-    print("\nInner Interactions:", end="")
-    for t1, t1dists in enumerate(typed_inner_interdists):
-        print(f"\nt{t1}: ", end="")
-        for dists in t1dists:
-            print(len(dists), end=" ")
-    print()
+        print("\nInteractions:", end="")
+        for t1, t1dists in enumerate(typed_interdists):
+            print(f"\nt{t1}: ", end="")
+            for dists in t1dists:
+                print(len(dists), end=" ")
+        print()
 
+        print("\nInner Interactions:", end="")
+        for t1, t1dists in enumerate(typed_inner_interdists):
+            print(f"\nt{t1}: ", end="")
+            for dists in t1dists:
+                print(len(dists), end=" ")
+        print()
 
+        print("\nOuter Interactions:", end="")
+        for t1, t1dists in enumerate(typed_outer_interdists):
+            print(f"\nt{t1}: ", end="")
+            for dists in t1dists:
+                print(len(dists), end=" ")
+        print()
+
+    if plotting:
+        pass
 
 
 if __name__ == "__main__":

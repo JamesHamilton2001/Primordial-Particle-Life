@@ -60,6 +60,7 @@
             "name": "Debug analyse.py",
             "type": "debugpy",
             "request": "launch",
+            "cwd": "${workspaceFolder}/simulation_analysis",
             "program": "${workspaceFolder}/simulation_analysis/analyse.py",
             "console": "integratedTerminal"
         }
