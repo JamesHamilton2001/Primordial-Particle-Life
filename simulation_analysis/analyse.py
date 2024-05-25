@@ -15,11 +15,19 @@ T = RAW_DATA["simulation"]["launchSettings"]["types"]
 N = RAW_DATA["simulation"]["launchSettings"]["count"]
 
 
-Particle = namedtuple("Particle", ["t", "x", "y", "vx", "vy"])
+Particle = namedtuple("Particle", [ "t", "x", "y", "vx", "vy" ])
+
+StateData = namedtuple("StateData", [
+    "particles",
+    "typed_speeds",
+    "typed_interdists",
+    "typed_inner_interdists",
+    "typed_outer_interdists"
+])
 
 
 
-def get_particles_by_type(particles_data):
+def get_typed_particles(particles_data):
     typed_particles = [[] for _ in range(T)]
     for p_data in particles_data:
         t = p_data["t"]
@@ -53,7 +61,7 @@ def get_typed_interdists(typed_particles):
 
 
 
-def get_inner_outer_interdists(typed_interdists):
+def get_typed_inner_outer_interdists(typed_interdists):
     inner_radius = RAW_DATA["simulation"]["launchSettings"]["innerRadius"]
     inner_interdists = [ [ [] for _ in range(T) ] for _ in range(T) ]
     outer_interdists = [ [ [] for _ in range(T) ] for _ in range(T) ]
@@ -70,6 +78,47 @@ def get_inner_outer_interdists(typed_interdists):
 
 
 
+def get_state_data(state_raw_data):
+    particles = get_typed_particles(state_raw_data)
+    speeds = get_typed_speeds(particles)
+    interdists = get_typed_interdists(particles)
+    inner_interdists, outer_interdists = get_typed_inner_outer_interdists(interdists)
+    return StateData(particles, speeds, interdists, inner_interdists, outer_interdists)
+
+
+
+def print_state_data(state_data):
+
+    print("\n  Avg Speeds:")
+    for t, speeds in enumerate(state_data.typed_speeds):
+        avg = sum(speeds) / len(speeds)
+        print(f"   t{t}: {avg}")
+    total_avg = sum([sum(speeds) for speeds in state_data.typed_speeds]) / sum([len(speeds) for speeds in state_data.typed_speeds])
+    print(f"   T: {total_avg}")
+
+    print("\n  Interactions:", end="")
+    for t1, t1dists in enumerate(state_data.typed_interdists):
+        print(f"\n   t{t1}: ", end="")
+        for dists in t1dists:
+            print(len(dists), end=" ")
+    print()
+
+    print("\n  Inner Interactions:", end="")
+    for t1, t1dists in enumerate(state_data.typed_inner_interdists):
+        print(f"\n   t{t1}: ", end="")
+        for dists in t1dists:
+            print(len(dists), end=" ")
+    print()
+
+    print("\n  Outer Interactions:", end="")
+    for t1, t1dists in enumerate(state_data.typed_outer_interdists):
+        print(f"\n   t{t1}: ", end="")
+        for dists in t1dists:
+            print(len(dists), end=" ")
+    print()
+
+
+
 def main():
 
     ## TODO: comparison of originals and resulting
@@ -77,46 +126,16 @@ def main():
     isPrinting = True
     isPlotting = False
 
-
-    typed_particles = get_particles_by_type(RAW_DATA["simulation"]["particles"])
-
-    typed_speeds = get_typed_speeds(typed_particles)
-
-    typed_interdists = get_typed_interdists(typed_particles)
-
-    typed_inner_interdists, typed_outer_interdists = get_inner_outer_interdists(typed_interdists)
-
+    launch_state_data = get_state_data(RAW_DATA["simulation"]["launchSettings"]["particles"])
+    result_state_data = get_state_data(RAW_DATA["simulation"]["particles"])
 
     if isPrinting:
 
-        print("\nAvg Speeds:")
-        for t, speeds in enumerate(typed_speeds):
-            avg = sum(speeds) / len(speeds)
-            print(f" t{t}: {avg}")
-        total_avg = sum([sum(speeds) for speeds in typed_speeds]) / sum([len(speeds) for speeds in typed_speeds])
-        print(f"T: {total_avg}")
-
-        print("\nInteractions:", end="")
-        for t1, t1dists in enumerate(typed_interdists):
-            print(f"\nt{t1}: ", end="")
-            for dists in t1dists:
-                print(len(dists), end=" ")
+        print("\nLaunch State Data:")
+        print_state_data(launch_state_data)
+        print("\nResult State Data:")
+        print_state_data(result_state_data)
         print()
-
-        print("\nInner Interactions:", end="")
-        for t1, t1dists in enumerate(typed_inner_interdists):
-            print(f"\nt{t1}: ", end="")
-            for dists in t1dists:
-                print(len(dists), end=" ")
-        print()
-
-        print("\nOuter Interactions:", end="")
-        for t1, t1dists in enumerate(typed_outer_interdists):
-            print(f"\nt{t1}: ", end="")
-            for dists in t1dists:
-                print(len(dists), end=" ")
-        print()
-
 
     if isPlotting:
         pass
@@ -124,3 +143,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
