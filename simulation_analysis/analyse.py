@@ -268,9 +268,7 @@ def visualise_speeds(t_speeds, speed_stats):
         offset = w * mult
         bar_colours = [(c[0], c[1], c[2], a) for c in colours]
         rects = ax.bar(x + offset, data, w, label=label, color=bar_colours, edgecolor=edge_colour, linewidth=1)
-        for rect in rects:
-            height = rect.get_height()
-            ax.text(rect.get_x() + rect.get_width() / 2, height, format(height, ".6g"), ha="center", va="bottom", fontsize=10)
+        ax.bar_label(rects, labels=[format(d, ".6g") for d in data], label_type="edge", fontsize=10, padding=3)
         mult += 1
 
     for x_val, (q1, q2, q3) in zip(x, [s.qts for s in speed_stats.typed]+[speed_stats.all.qts]):
@@ -283,7 +281,6 @@ def visualise_speeds(t_speeds, speed_stats):
         ax.text(xmax+0.03, q1, format(q1, ".6g"), ha="left", va="top", fontsize=10)
         ax.text(xmax+0.03, q2, format(q2, ".6g"), ha="left", va="center", fontsize=10)
         ax.text(xmax+0.03, q3, format(q3, ".6g"), ha="left", va="bottom", fontsize=10)
-        
 
     alphas.reverse()
     legend_handles = [ mpatches.Patch(color=(a,a,a,1), label=l) for a, l in zip(alphas, plots.keys())]
