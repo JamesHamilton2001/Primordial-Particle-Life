@@ -247,32 +247,36 @@ def visualise_speeds(t_speeds, speed_stats):
         "Mean": [s.avg for s in speed_stats.typed],
         "Maximum": [speeds[-1] for speeds in t_speeds],
     }
+    plots["Standard Deviation"].append(speed_stats.all.std)
+    plots["Mean"].append(speed_stats.all.avg)
+    plots["Maximum"].append(max(plots["Maximum"]))
 
     fig, ax = plt.subplots(layout="constrained")
-    x = np.arange(T)
+    x = np.arange(T+1)
     w = 0.25
     ax.set_ylabel("Speed")
     ax.set_xlabel("Type")
-    ax.set_xticks(x + w, [f"{t}" for t in range(T)])
-    ax.set_ylim(0, 1.25 * max(plots["Maximum"]))
+    ax.set_xticks(x + w, [f"{t}" for t in range(T+1)])
+    ax.set_ylim(0, 1.25 * plots["Maximum"][-1])
 
     alphas = [0.3, 0.5, 0.7]
+    colours = particle_colours[:T] + [(0, 0, 0)]
     edge_colours = [(0.5, 0.5, 0.5, 1), (0.25, 0.25, 0.25, 1), (0, 0, 0, 1)]
 
     mult = 0
     for (label, data), a, edge_colour in zip(plots.items(), alphas, edge_colours):
         offset = w * mult
-        t_colours = [(c[0], c[1], c[2], a) for c in particle_colours]
-        rects = ax.bar(x + offset, data, w, label=label, color=t_colours, edgecolor=edge_colour, linewidth=1)
+        bar_colours = [(c[0], c[1], c[2], a) for c in colours]
+        rects = ax.bar(x + offset, data, w, label=label, color=bar_colours, edgecolor=edge_colour, linewidth=1)
         for rect in rects:
             height = rect.get_height()
             ax.text(rect.get_x() + rect.get_width() / 2, height, format(height, ".4g"), ha="center", va="bottom", fontsize=7)
         mult += 1
 
-    for x_val, (q1, q2, q3) in zip(x, [s.qts for s in speed_stats.typed]):
+    for x_val, (q1, q2, q3) in zip(x, [s.qts for s in speed_stats.typed]+[speed_stats.all.qts]):
         xmin = x_val + 1.5*w
         xmax = xmin + w
-        c = particle_colours[x_val]
+        c = colours[x_val]
         ax.fill_between([xmin, xmax], q1, q3, color="white")
         ax.fill_between([xmin, xmax], q1, q3, color=(c[0],c[1],c[2],alphas[0]), edgecolor="black", linestyle="dashed")
         ax.hlines(q2, xmin=xmin, xmax=xmax, color="black", linestyle="dashed", linewidth=1)
