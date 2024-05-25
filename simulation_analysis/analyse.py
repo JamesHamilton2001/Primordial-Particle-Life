@@ -16,8 +16,21 @@ RAW_DATA = pd.read_json(DIR_NAME+JSON_NAME)
 T = RAW_DATA["simulation"]["launchSettings"]["types"]
 N = RAW_DATA["simulation"]["launchSettings"]["count"]
 
-radial_angles = [2 * pi * i / T for i in range(T)]
-radial_angles += radial_angles[:1] # close circle
+type_radial_angles = [2 * pi * i / T for i in range(T)]
+type_radial_angles += type_radial_angles[:1] # close circle
+
+
+particle_colours = [
+    (1.0, 0.0, 0.0),  # red
+    (0.0, 0.0, 1.0),  # blue
+    (1.0, 1.0, 0.0),  # yellow
+    (0.5, 0.0, 0.5),  # purple
+    (0.0, 1.0, 0.0),  # green
+    (1.0, 0.5, 0.0),  # orange
+    (1.0, 0.75, 0.8),  # pink
+    (0.0, 1.0, 1.0),  # cyan
+    (0.6, 0.4, 0.2)  # brown
+]
 
 
 Particle = namedtuple("Particle", [ "t", "x", "y", "vx", "vy" ])
@@ -180,33 +193,76 @@ def print_simulation_stats(simulation_stats):
     print()
 
 
+## NOTE: use same radar chart, but for interdists
+def OLD_visual_speeds(t_speeds, speed_stats):
 
-def visual_speeds(t_speeds, speed_stats):
-
-    labels = [f"Type: {t}" for t in range(T)]
+    ## get on type data
     t_avgs, t_stds, t_qt1s, t_qt2s, t_qt3s = zip(*[(s.avg, s.std, s.qts[0], s.qts[1], s.qts[2]) for s in speed_stats.typed])
     t_maxs = [speeds[-1] for speeds in t_speeds]
+
+    ## get on all data
     a_avg, a_std, (a_qt1, a_qt2, a_qt3) = speed_stats.all
     a_max = t_maxs[-1]
 
-    ## (1 row, 1 col, 1 subplot), axes are radial
-    ax = plt.subplot(111, polar=True)
+    ## setup figure and axes
+    fig, axs = plt.subplots(1, 3, subplot_kw={"projection": "polar"}, figsize=(18, 6))
+    axs[0].set_title("General")
+    axs[1].set_title("Standard Deviations")
+    axs[2].set_title("Minimums")
     
-    ## labled radial axes
-    plt.xticks(radial_angles[:-1], labels, color='grey', size=8)
+    # ## TYPED GENERAL STATS
+
+    labels = ["Type Mean", "Type Q1", "Type Q2", "Type Q3"]
+    groups = [ f"Type {t}" for t in range(T) ] + ["All"]
+    data = []
+    for s in speed_stats.typed:
+        data.append([s.avg, s.qts[0], s.qts[1], s.qts[2]])
+
+    angles = [ 2*pi * n/4 for n in range(4) ]
+    angles += angles[:1]
+
+    axs[0].set_theta_offset(pi / 2)
+    axs[0].set_theta_direction(-1)
+
+    axs[0].set_xticks(angles[:-1], labels)
+
+    axs[0].set_ylim(0, a_max)
+    axs[0].set_rlabel_position(0)
+    axs[0].set_yticks([a_avg, a_qt1, a_qt2, a_qt3], ["Mean", "Q1", "Q2", "Q3"], color="grey", size=7)
+
+    for t, d in enumerate(data):
+        d += [d[0]]
+        axs[0].plot(angles, d, linewidth=1, linestyle="solid", label=groups[t], color=particle_colours[t])
     
-    ## circular ticks scaled to data
-    ax.set_rlabel_position(0)
-    plt.yticks([10,20,30], ["10","20","30"], color="grey", size=7)
+    plt.show()
 
-    ## limit to just above maximum value
-    plt.ylim(0, 1.2*a_max)
 
-    ## plot each types maximum
-    values = t_maxs + [t_maxs[0]]
-    ax.plot(radial_angles, values, linewidth=1, linestyle='solid')
 
-    # ax.fill(radial_angles, values, 'b', alpha=0.1)
+def visualise_speeds(t_speeds, speed_stats):
+    
+    type_labels = [ f"Type {t}" for t in range(T) ]
+    plots = {
+        "Standard Deviation": [s.std for s in speed_stats.typed],
+        "Mean": [s.avg for s in speed_stats.typed],
+        "Max": [speeds[-1] for speeds in t_speeds],
+    }
+
+    x = np.arange(len(type_labels))
+    width = 0.25
+    mult = 0
+
+    fig, ax = plt.subplots(layout="constrained")
+
+    for label, data in plots.items():
+        offset = width * mult
+        rects = ax.bar(x + offset, data, width, label=label)
+        ax.bar_label(rects, padding=3)
+        mult += 1
+
+    ax.set_ylabel("Speed")
+    ax.legend(loc="upper right", ncols=3)
+    ylim = 1.25 * max([speeds[-1] for speeds in t_speeds])
+    ax.set_ylim(0, ylim)
 
     plt.show()
 
@@ -233,7 +289,7 @@ def main():
 
     if isPlotting:
 
-        visual_speeds(simulation_state_data.result.typed_speeds, simulation_state_stats.result.speeds)
+        visualise_speeds(simulation_state_data.result.typed_speeds, simulation_state_stats.result.speeds)
 
 
 if __name__ == "__main__":
