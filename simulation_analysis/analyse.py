@@ -1,9 +1,11 @@
 import pandas as pd
-from collections import namedtuple
-import matplotlib.pyplot as plt
+import numpy as np
 import math
 from math import pi
-import numpy as np
+from collections import namedtuple
+import matplotlib.pyplot as plt
+import matplotlib.colors as mcolours
+import matplotlib.patches as mpatches
 
 
 
@@ -251,13 +253,16 @@ def visualise_speeds(t_speeds, speed_stats):
     x = np.arange(T)
     width = 0.25
     mult = 0
+    alphas = [0.3, 0.5, 0.7]
 
     fig, ax = plt.subplots(layout="constrained")
 
-    for mult, (label, data) in enumerate(plots.items()):
+    for (label, data), alpha in zip(plots.items(), alphas):
         offset = width * mult
-        rects = ax.bar(x + offset, data, width, label=label)
+        colours = [mcolours.to_rgba(c, alpha=alpha) for c in particle_colours]
+        rects = ax.bar(x + offset, data, width, label=label, color=colours)
         ax.bar_label(rects, padding=3)
+        mult += 1
 
     ax.set_ylabel("Speed")
     ax.legend(loc="upper right", ncols=3)
