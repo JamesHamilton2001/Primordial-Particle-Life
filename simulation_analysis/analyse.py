@@ -17,19 +17,18 @@ N = RAW_DATA["simulation"]["launchSettings"]["count"]
 
 Particle = namedtuple("Particle", [ "t", "x", "y", "vx", "vy" ])
 
-StateData = namedtuple("StateData", [
-    "particles",
-    "typed_speeds",
-    "typed_interdists",
-    "typed_inner_interdists",
-    "typed_outer_interdists"
-])
+StateData = namedtuple("StateData", [ "particles", "typed_speeds", "typed_interdists", "typed_inner_interdists", "typed_outer_interdists" ])
+
+SimulationData = namedtuple("SimulationData", [ "launch", "result" ])
+
 
 Stats = namedtuple("Stats", [ "avg", "std", "qts" ])
 
 DataStats = namedtuple("DataStats", [ "typed", "all" ])
 
 StateStats = namedtuple("StateStats", [ "speeds", "interdists", "inner_interdists", "outer_interdists" ])
+
+SimulationStats = namedtuple("SimulationStats", [ "launch", "result" ])
 
 
 
@@ -84,33 +83,47 @@ def get_state_data(state_raw_data):
     return StateData(particles, speeds, interdists, inner_interdists, outer_interdists)
 
 def print_state_data(state_data):
-    print("\n  Interactions:", end="")
+
+    print("||Interactions:", end="")
     for t1, t1dists in enumerate(state_data.typed_interdists):
-        print(f"\n   t{t1}: ", end="")
+        print(f"\n|||t{t1}: ", end="")
         for dists in t1dists:
             print(len(dists), end=" ")
-    print()
-    print("\n  Inner Interactions:", end="")
+
+    print("\n||Inner_Interactions:", end="")
     for t1, t1dists in enumerate(state_data.typed_inner_interdists):
-        print(f"\n   t{t1}: ", end="")
+        print(f"\n|||t{t1}: ", end="")
         for dists in t1dists:
             print(len(dists), end=" ")
-    print()
-    print("\n  Outer Interactions:", end="")
+
+    print("\n||Outer_Interactions:", end="")
     for t1, t1dists in enumerate(state_data.typed_outer_interdists):
-        print(f"\n   t{t1}: ", end="")
+        print(f"\n|||t{t1}: ", end="")
         for dists in t1dists:
             print(len(dists), end=" ")
     print()
+
+def print_simulation_data(simulation_data):
+    print("|Launch:")
+    print_state_data(simulation_data.launch)
+    print("|Result:")
+    print_state_data(simulation_data.result)
 
 
 
 def get_stats(lst):
+    
     slen = len(lst)
     if slen == 0: return None
+
     avg = sum(lst) / slen
     std = math.sqrt(sum([ (x - avg)**2 for x in lst ]) / slen)
-    qts = (lst[slen//4], lst[slen//2], lst[slen-slen//4])   
+
+    if slen < 4:
+        qts = (lst[0], lst[slen//2], lst[-1])
+    else:
+        qts = (lst[slen//4], lst[slen//2], lst[slen-slen//4])   
+
     return Stats(avg, std, qts)
 
 def get_speed_stats(typed_speeds):
@@ -131,51 +144,65 @@ def get_state_stats(state_data):
     return StateStats(speeds, interdists, inner_interdists, outer_interdists)
 
 def print_state_stats(state_stats):
-    print("\n  Speed Stats:")
+
+    print("||Speed Stats:")
     for t, stats in enumerate(state_stats.speeds.typed):
-        print(f"   t{t}: {stats}")
-    print(f"   T: {state_stats.speeds.all}")
-    print("\n  Interdist Stats:")
+        print(f"|||t{t}: {stats}")
+    print(f"|||T: {state_stats.speeds.all}")
+
+    print("||Interdist Stats:")
     for t1, t1stats in enumerate(state_stats.interdists.typed):
         for t2, stats in enumerate(t1stats.typed):
-            print(f"   t{t1}-{t2}: {stats}")
-        print(f"   T{t1}: {t1stats.all}")
-    print(f"   T: {state_stats.interdists.all}")
-    print("\n  Inner Interdist Stats:")
+            print(f"|||t{t1}-{t2}: {stats}")
+        print(f"|||T{t1}: {t1stats.all}")
+    print(f"|||T: {state_stats.interdists.all}")
+
+    print("||Inner Interdist Stats:")
     for t1, t1stats in enumerate(state_stats.inner_interdists.typed):
         for t2, stats in enumerate(t1stats.typed):
-            print(f"   t{t1}-{t2}: {stats}")
-        print(f"   T{t1}: {t1stats.all}")
-    print(f"   T: {state_stats.inner_interdists.all}")
-    print("\n  Outer Interdist Stats:")
+            print(f"|||t{t1}-{t2}: {stats}")
+        print(f"|||T{t1}: {t1stats.all}")
+    print(f"|||T: {state_stats.inner_interdists.all}")
+
+    print("||Outer Interdist Stats:")
     for t1, t1stats in enumerate(state_stats.outer_interdists.typed):
         for t2, stats in enumerate(t1stats.typed):
-            print(f"   t{t1}-{t2}: {stats}")
-        print(f"   T{t1}: {t1stats.all}")
-    print(f"   T: {state_stats.outer_interdists.all}")
+            print(f"|||t{t1}-{t2}: {stats}")
+        print(f"|||T{t1}: {t1stats.all}")
+    print(f"|||T: {state_stats.outer_interdists.all}")
+
+def print_simulation_stats(simulation_stats):
+    print("|Launch:")
+    print_state_stats(simulation_stats.launch)
+    print("|Result:")
+    print_state_stats(simulation_stats.result)
+    print()
 
 
 
 def main():
 
-    ## TODO: comparison of originals and resulting
-
-    isPrinting = True
+    isPrintingData = True
+    isPrintingStats = True
     isPlotting = False
 
-    result_state_data = get_state_data(RAW_DATA["simulation"]["particles"])
-    result_state_stats = get_state_stats(result_state_data)
+    simulation_state_data = SimulationData(
+        get_state_data(RAW_DATA["simulation"]["launchSettings"]["particles"]),
+        get_state_data(RAW_DATA["simulation"]["particles"])
+    )
+    simulation_state_stats = SimulationStats(
+        get_state_stats(simulation_state_data.launch),
+        get_state_stats(simulation_state_data.result)
+    )
 
 
-    if isPrinting:
+    if isPrintingData:
+        print("\nSimulation Data:")
+        print_simulation_data(simulation_state_data)
 
-        print("\nResult State Data:")
-        print_state_data(result_state_data)
-        print()
-
-        print("\nResult Stats:")
-        print_state_stats(result_state_stats)
-        print()
+    if isPrintingStats:
+        print("\nSimulation Stats:")
+        print_simulation_stats(simulation_state_stats)
 
 
     if isPlotting:
