@@ -30,12 +30,9 @@ def get_particles_by_type(particles_data):
 
 
 def get_typed_speeds(typed_particles):
-    return [ [ math.sqrt(p.vx**2 + p.vy**2) for p in particles ] for particles in typed_particles ]
+    step = RAW_DATA["simulation"]["launchSettings"]["step"]
+    return [ [ step * math.sqrt(p.vx**2 + p.vy**2) for p in particles ] for particles in typed_particles ]
 
-
-
-
-    
 
 
 def main():
@@ -46,12 +43,12 @@ def main():
 
     typed_speeds = get_typed_speeds(typed_particles)
 
-    # print("\nAvg Speeds:")
-    # for t, speeds in enumerate(typed_speeds):
-    #     avg = sum(speeds) / len(speeds)
-    #     print(f" t{t}: {avg}")
-    # total_avg = sum([sum(speeds) for speeds in typed_speeds]) / sum([len(speeds) for speeds in typed_speeds])
-    # print(f"T: {total_avg}")
+    print("\nAvg Speeds:")
+    for t, speeds in enumerate(typed_speeds):
+        avg = sum(speeds) / len(speeds)
+        print(f" t{t}: {avg}")
+    total_avg = sum([sum(speeds) for speeds in typed_speeds]) / sum([len(speeds) for speeds in typed_speeds])
+    print(f"T: {total_avg}")
 
 
 
