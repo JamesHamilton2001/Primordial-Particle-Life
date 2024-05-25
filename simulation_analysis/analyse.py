@@ -25,9 +25,9 @@ StateData = namedtuple("StateData", [
     "typed_outer_interdists"
 ])
 
-Stats = namedtuple("Stats", [ "avg", "qts", "std" ])
+Stats = namedtuple("Stats", [ "avg", "std", "qts" ])
 
-DataStats = namedtuple("SpeedStats", [ "typed", "total" ])
+DataStats = namedtuple("DataStats", [ "typed", "every" ])
 
 StateStats = namedtuple("StateStats", [ "speeds", "interdists", "inner_interdists", "outer_interdists" ])
 
@@ -94,13 +94,6 @@ def get_state_data(state_raw_data):
 
 def print_state_data(state_data):
 
-    print("\n  Avg Speeds:")
-    for t, speeds in enumerate(state_data.typed_speeds):
-        avg = sum(speeds) / len(speeds)
-        print(f"   t{t}: {avg}")
-    total_avg = sum([sum(speeds) for speeds in state_data.typed_speeds]) / sum([len(speeds) for speeds in state_data.typed_speeds])
-    print(f"   T: {total_avg}")
-
     print("\n  Interactions:", end="")
     for t1, t1dists in enumerate(state_data.typed_interdists):
         print(f"\n   t{t1}: ", end="")
@@ -125,8 +118,23 @@ def print_state_data(state_data):
 
 
 def get_speed_stats(typed_speeds):
-    typed_stats = Stats([],[],[])
-    total_stats = Stats([],[],[])
+    typed_stats = [ [] for _ in range(T) ]
+    every_speed = sorted([s for speeds in typed_speeds for s in speeds])
+
+    every_avg = 0
+    for t, speeds in enumerate(typed_speeds):
+        t_len = len(speeds)
+        t_sum = sum(speeds)
+        t_avg = t_sum/t_len
+        typed_stats[t] = Stats( t_avg,
+                                math.sqrt(sum([ (speed - t_avg)**2 for speed in speeds ]) / t_len),
+                                (speeds[t_len//4], speeds[t_len//2], speeds[t_len-t_len//4])       )
+        every_avg += t_sum
+    every_avg /= N
+    every_std = math.sqrt(sum([ (speed - every_avg)**2 for speeds in typed_speeds for speed in speeds ]) / N)
+    every_qts = (every_speed[N//4], every_speed[N//2], every_speed[N-N//4])
+
+    return DataStats(typed_stats, Stats(every_avg, every_std, every_qts))
 
 
 
@@ -137,16 +145,27 @@ def main():
     isPrinting = True
     isPlotting = False
 
-    launch_state_data = get_state_data(RAW_DATA["simulation"]["launchSettings"]["particles"])
+    # launch_state_data = get_state_data(RAW_DATA["simulation"]["launchSettings"]["particles"])
     result_state_data = get_state_data(RAW_DATA["simulation"]["particles"])
+
+    # launch_speed_stats = get_speed_stats(launch_state_data.typed_speeds)
+    result_speed_stats = get_speed_stats(result_state_data.typed_speeds)
 
     if isPrinting:
 
-        print("\nLaunch State Data:")
-        print_state_data(launch_state_data)
+        # print("\nLaunch State Data:")
+        # print_state_data(launch_state_data)
         print("\nResult State Data:")
         print_state_data(result_state_data)
         print()
+
+        print("\nResult Stats:")
+
+        print("\n  Result Speed Stats:")
+        for t, stats in enumerate(result_speed_stats.typed):
+            print(f"   t{t}: avg={stats.avg}, std={stats.std}, qts={stats.qts}")
+        print(f"   T: avg={result_speed_stats.every.avg}, std={result_speed_stats.every.std}, qts={result_speed_stats.every.qts}")
+
 
     if isPlotting:
         pass
