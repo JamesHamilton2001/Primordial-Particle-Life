@@ -25,6 +25,12 @@ StateData = namedtuple("StateData", [
     "typed_outer_interdists"
 ])
 
+Stats = namedtuple("Stats", [ "avg", "qts", "std" ])
+
+DataStats = namedtuple("SpeedStats", [ "typed", "total" ])
+
+StateStats = namedtuple("StateStats", [ "speeds", "interdists", "inner_interdists", "outer_interdists" ])
+
 
 
 def get_typed_particles(particles_data):
@@ -37,8 +43,7 @@ def get_typed_particles(particles_data):
 
 
 def get_typed_speeds(typed_particles):
-    return [ [ math.sqrt(p.vx**2 + p.vy**2) for p in particles ] for particles in typed_particles ]
-
+    return [ sorted([ math.sqrt( p.vx**2 + p.vy**2 ) for p in particles ]) for particles in typed_particles ]
 
 
 def get_typed_interdists(typed_particles):
@@ -116,6 +121,12 @@ def print_state_data(state_data):
         for dists in t1dists:
             print(len(dists), end=" ")
     print()
+
+
+
+def get_speed_stats(typed_speeds):
+    typed_stats = Stats([],[],[])
+    total_stats = Stats([],[],[])
 
 
 
