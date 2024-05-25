@@ -55,6 +55,13 @@
             "miDebuggerPath": "/usr/bin/gdb"
           },
           "preLaunchTask": "build release",
+        },
+        {
+            "name": "Debug analyse.py",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/simulation_analysis/analyse.py",
+            "console": "integratedTerminal"
         }
       ]
     }

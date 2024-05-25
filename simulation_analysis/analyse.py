@@ -5,12 +5,12 @@ import math
 
 
 
-DIR_NAME = "./data/"
+DIR_NAME = "./simulation_analysis/data/"
 
-JSON_FILE_NAME = "small_boy_seeded(30000).json"
-# JSON_FILE_NAME = "debug_preloaded(30000).json"
+JSON_NAME = "small_boy_seeded(30000).json"
+# JSON_NAME = "debug_preloaded(30000).json"
 
-RAW_DATA = pd.read_json(DIR_NAME+JSON_FILE_NAME)
+RAW_DATA = pd.read_json(DIR_NAME+JSON_NAME)
 
 T = RAW_DATA["simulation"]["launchSettings"]["types"]
 N = RAW_DATA["simulation"]["launchSettings"]["count"]
@@ -78,6 +78,7 @@ def main():
 
     typed_inner_interdists, typed_outer_interdists = get_inner_outer_interdists(typed_interdists)
 
+
     print("\nAvg Speeds:")
     for t, speeds in enumerate(typed_speeds):
         avg = sum(speeds) / len(speeds)
@@ -85,7 +86,7 @@ def main():
     total_avg = sum([sum(speeds) for speeds in typed_speeds]) / sum([len(speeds) for speeds in typed_speeds])
     print(f"T: {total_avg}")
 
-    print("\Interactions:", end="")
+    print("\nInteractions:", end="")
     for t1, t1dists in enumerate(typed_interdists):
         print(f"\nt{t1}: ", end="")
         for dists in t1dists:
@@ -97,7 +98,7 @@ def main():
         print(f"\nt{t1}: ", end="")
         for dists in t1dists:
             print(len(dists), end=" ")
-
+    print()
 
 
 
