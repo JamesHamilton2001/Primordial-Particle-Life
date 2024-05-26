@@ -275,10 +275,10 @@ def visualise_intercounts(t_interdists, interdist_stats):
     xyticks = np.arange(T)
 
     xyticks = np.arange(T)
-    for xpos, c1, tdata in zip(xyticks, particle_colours, typed_intercounts):
-        for ypos, c2, h in zip(xyticks, particle_colours, tdata):
+    for xt, c1, tdata in zip(xyticks, particle_colours, typed_intercounts):
+        for yt, c2, h in zip(xyticks, particle_colours, tdata):
             colour = ((c1[0]+c2[0])/2, (c1[1]+c2[1])/2, (c1[2]+c2[2])/2, a)
-            ax.bar3d(xpos+0.5-wd/2, ypos+0.5-wd/2, 0, wd, wd, h, color=colour, linestyle="solid", edgecolor="black", linewidth=0.5)
+            ax.bar3d(xt+0.5-wd/2, yt+0.5-wd/2, 0, wd, wd, h, color=colour, linestyle="solid", edgecolor="black", linewidth=0.5)
 
     zticks = ax.get_zticks()
 
