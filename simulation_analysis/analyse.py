@@ -305,35 +305,49 @@ def visualise_intercounts(t_interdists, interdist_stats):
 
 def visualise_interdists_overlayed(t_interdists, interdist_stats, inter_range_str=None):
 
+    fill_alpha = 0.25
+    line_alpha = 0.75
+    rader_colour = (0.75, 0.75, 0.75, 1)
+    chart_names = ["T2T Means", "T2T Standard Deviations", "T2T Inter Quartiles", "T2T Medians"]
+
     title = "Interaction Statistics"
     if inter_range_str: title = inter_range_str.capitalize() + title
+
+    t2tplots = []
+    for tstats in interdist_stats.typed:
+        plots =  [[s.avg for s in tstats.typed]]
+        plots += [[s.std for s in tstats.typed]]
+        plots += [[s.qts[0] for s in tstats.typed]]
+        plots += [[s.qts[1] for s in tstats.typed]]
+        plots += [[s.qts[2] for s in tstats.typed]]
+        for plot in plots: plot += plot[:1]
+        t2tplots += [plots]
 
     t_angles = [ 2*pi * t/T for t in range(T) ] + [0]
     t_labels = [ f"Type {t}" for t in range(T) ]
 
-    fig, axs = plt.subplots(1, 3, subplot_kw={"projection": "polar"}, figsize=(16, 9))
-    avgax, stdax, qtsax = axs
+    fig, axs = plt.subplots(2, 2, subplot_kw={"projection": "polar"}, figsize=(11, 11))
+    avgax, stdax, qtsax, medax = axs.flatten()
     fig.suptitle(title)
 
-    for ax, ttl in zip(axs, ["T2T Means", "T2T Standard Deviations", "T2T Quartiles"]):
+    for ax, ttl in zip(axs.flatten(), chart_names):
         ax.set_title(ttl)
         ax.set_theta_offset(pi / 2)
         ax.set_theta_direction(-1)
+        ax.set_facecolor(rader_colour)
         ax.set_xticks(t_angles[:-1], t_labels)
 
-    for c, tstats in zip(particle_colours, interdist_stats.typed):
-        avgs, stds, qt1s, qt2s, qt3s = map(list, zip(*[(s.avg, s.std, *s.qts) for s in tstats.typed]))
+    for plots, colour in zip(t2tplots, particle_colours):
+        avgax.fill(t_angles, plots[0], color=colour, alpha=fill_alpha)
+        stdax.fill(t_angles, plots[1], color=colour, alpha=fill_alpha)
+        qtsax.fill_between(t_angles, plots[2], plots[4], color=colour, alpha=fill_alpha)
+        medax.fill(t_angles, plots[3], linewidth=0.5, color=colour, alpha=fill_alpha)
 
-        for data in [avgs, stds, qt1s, qt2s, qt3s]:
-            data += data[:1]
-
-        avgax.plot(t_angles, avgs, linewidth=0.5, linestyle="solid", color=c)
-        avgax.fill(t_angles, avgs, color=c, alpha=0.25)
-
-        stdax.plot(t_angles, stds, linewidth=0.5, linestyle="solid", color=c)
-        stdax.fill(t_angles, stds, color=c, alpha=0.25)
-
-        qtsax.fill_between(t_angles, qt1s, qt3s, color=c, alpha=0.25)
+    for plots, colour in zip(t2tplots, particle_colours):
+        avgax.plot(t_angles, plots[0], linewidth=0.5, color=colour, alpha=line_alpha)
+        stdax.plot(t_angles, plots[1], linewidth=0.5, color=colour, alpha=line_alpha)
+        qtsax.plot(t_angles, plots[2], linewidth=0.5, color=colour, alpha=line_alpha)
+        medax.plot(t_angles, plots[3], linewidth=0.5, color=colour, alpha=line_alpha)
 
     plt.show()
 
@@ -363,6 +377,8 @@ def main():
         # visualise_speeds(simulation_state_data.result.typed_speeds, simulation_state_stats.result.speeds)
         # visualise_intercounts(simulation_state_data.result.typed_interdists, simulation_state_stats.result.interdists)
         visualise_interdists_overlayed(simulation_state_data.result.typed_interdists, simulation_state_stats.result.interdists)
+        # visualise_interdists_overlayed(simulation_state_data.result.typed_interdists, simulation_state_stats.result.inner_interdists, "inner")
+        # visualise_interdists_overlayed(simulation_state_data.result.typed_interdists, simulation_state_stats.result.outer_interdists, "outer")
 
 
 if __name__ == "__main__":
