@@ -284,19 +284,22 @@ def visualise_intercounts(t_interdists, interdist_stats):
             colour = ((c1[0]+c2[0])/2, (c1[1]+c2[1])/2, (c1[2]+c2[2])/2, a)
             ax.bar3d(xpos+0.5-wd/2, ypos+0.5-wd/2, 0, wd, wd, h, color=colour, linestyle="solid", edgecolor="black", linewidth=0.5)
 
+    zticks = ax.get_zticks()
+    zt = ax.get_zticks()[1]
+
+    tick_labels = [f"T {t}" for t in range(T)]
     ax.set_xlim(0, T)
     ax.set_ylim(0, T)
     ax.set_zlim(0, zticks[-1])
     ax.set_xticks(xyticks)
     ax.set_yticks(xyticks)
-    zt = ax.get_zticks()[1]
     zticks = [zt*i for i in range(1, len(zticks)-1)]
     ax.set_zticks(zticks)
-    ax.set_xticklabels([f"{t}" for t in zticks])
+    ax.set_zticklabels([f"{t}" for t in zticks], color="white", fontsize=8)
     
     for pos in range(T):
-        ax.text(pos+0.5, -0.5, -0.25*zt, f"T{pos}", "x", color="white", fontsize=10, ha="center", va="center")
-        ax.text(-0.5, pos+0.5, -0.25*zt, f"T{pos}", "y", color="white", fontsize=10, ha="center", va="center")
+        ax.text(pos+0.5, -0.5, -0.25*zt, f"T{pos}", "x", color="white", fontsize=8, ha="center", va="center")
+        ax.text(-0.5, pos+0.5, -0.25*zt, f"T{pos}", "y", color="white", fontsize=8, ha="center", va="center")
     
     plt.show()
 
