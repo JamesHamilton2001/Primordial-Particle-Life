@@ -248,6 +248,8 @@ def visualise_speeds(t_speeds, speed_stats):
 def visualise_intercounts(t_interdists, interdist_stats):
 
     typed_intercounts = [ [ len(dists) for dists in t1dists ] for t1dists in t_interdists ]
+    for tis in typed_intercounts:
+        tis.reverse()
 
     print()
     for ti in typed_intercounts:
@@ -258,13 +260,20 @@ def visualise_intercounts(t_interdists, interdist_stats):
     ax.view_init(azim=-135, elev=45)
 
     xyticks = range(T)
+
+    ## cross hatch 1
     for colour, ys, tick in zip(particle_colours, typed_intercounts, xyticks):
         xs = np.arange(T)
         ax.bar(xs, ys, zs=tick, zdir='y', color=colour, alpha=0.8)
+    
+    ## cross hatch 2
+    for colour, ys, tick in zip(particle_colours, zip(*typed_intercounts), xyticks):
+        xs = np.arange(T)
+        ax.bar(xs, ys, zs=tick, zdir='x', color=colour, alpha=0.8)
 
-    ax.set_xlabel('X')
-    ax.set_ylabel('Y')
-    ax.set_zlabel('Z')
+    ax.set_xlabel("Type 1")
+    ax.set_ylabel("Type 2")
+    ax.set_zlabel("Interactions")
 
     ax.set_yticks(xyticks)
 
