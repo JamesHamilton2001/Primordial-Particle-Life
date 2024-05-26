@@ -247,38 +247,32 @@ def visualise_speeds(t_speeds, speed_stats):
 
 def visualise_intercounts(t_interdists, interdist_stats):
 
-    typed_intercounts = [ [ len(dists) for dists in t1dists ] for t1dists in t_interdists ]
-    for tis in typed_intercounts:
-        tis.reverse()
-
-    print()
-    for ti in typed_intercounts:
-        print(ti)
-    
     fig = plt.figure()
     ax = fig.add_subplot(projection="3d")
     ax.view_init(azim=-135, elev=45)
 
-    xyticks = range(T)
-
-    ## cross hatch 1
-    for colour, ys, tick in zip(particle_colours, typed_intercounts, xyticks):
-        xs = np.arange(T)
-        ax.bar(xs, ys, zs=tick, zdir='y', color=colour, alpha=0.8)
-    
-    ## cross hatch 2
-    for colour, ys, tick in zip(particle_colours, zip(*typed_intercounts), xyticks):
-        xs = np.arange(T)
-        ax.bar(xs, ys, zs=tick, zdir='x', color=colour, alpha=0.8)
-
-    ax.set_xlabel("Type 1")
-    ax.set_ylabel("Type 2")
+    ax.set_xlabel("Type 2")
+    ax.set_ylabel("Type 1")
     ax.set_zlabel("Interactions")
 
-    ax.set_yticks(xyticks)
+    typed_intercounts = [ [ len(dists) for dists in t1dists ] for t1dists in t_interdists ]
+
+    print()
+    for ti in typed_intercounts:
+        print(ti)
+
+    a = 0.4
+    w = d = 0.4
+    xs = np.arange(T) + w/2
+    ys = np.arange(T) + d/2
+    for xpos, c1, tdata in zip(xs, particle_colours, typed_intercounts):
+        for ypos, c2, h in zip(ys, particle_colours, tdata):
+            colour = ((c1[0]+c2[0])/2, (c1[1]+c2[1])/2, (c1[2]+c2[2])/2, a)
+            ax.bar3d(xpos, ypos, 0, w, d, h, color=colour)
 
     plt.show()
-    
+
+
 
 def visualise_interdists(t_interdists, interdist_stats):
     ## TODO: move counts to own function, use 3d bar chart with 2d data
