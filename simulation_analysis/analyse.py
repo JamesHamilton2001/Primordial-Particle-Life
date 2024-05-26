@@ -247,29 +247,57 @@ def visualise_speeds(t_speeds, speed_stats):
 
 def visualise_intercounts(t_interdists, interdist_stats):
 
-    fig = plt.figure()
-    ax = fig.add_subplot(projection="3d")
-    ax.view_init(azim=-135, elev=45)
-
-    ax.set_xlabel("Type 2")
-    ax.set_ylabel("Type 1")
-    ax.set_zlabel("Interactions")
-
     typed_intercounts = [ [ len(dists) for dists in t1dists ] for t1dists in t_interdists ]
+
+    fig = plt.figure(figsize=(10, 10))
+    ax = fig.add_subplot(projection="3d")
+
+    ax.set_title("Total T2T Interactions", color="white")
+    
+    ax.view_init(azim=-135, elev=45)
+    ax.set_box_aspect(None, zoom=0.8)
+
+    plt.style.use('dark_background')
+    ax.set_facecolor("black")
+    ax.xaxis.pane.fill = False
+    ax.yaxis.pane.fill = False
+    ax.zaxis.pane.fill = False
+    ax.xaxis.pane.set_edgecolor("w")
+    ax.yaxis.pane.set_edgecolor("w")
+    ax.zaxis.pane.set_edgecolor((0,0,0,0))
+
+    ax.set_xlabel("XType 2", labelpad=15, color="white")
+    ax.set_ylabel("YType 1", labelpad=15, color="white")
+    ax.set_zlabel("Interactions", labelpad=15, color="white")
 
     print()
     for ti in typed_intercounts:
         print(ti)
 
+    wd = 0.4
     a = 0.4
-    w = d = 0.4
-    xs = np.arange(T) + w/2
-    ys = np.arange(T) + d/2
-    for xpos, c1, tdata in zip(xs, particle_colours, typed_intercounts):
-        for ypos, c2, h in zip(ys, particle_colours, tdata):
-            colour = ((c1[0]+c2[0])/2, (c1[1]+c2[1])/2, (c1[2]+c2[2])/2, a)
-            ax.bar3d(xpos, ypos, 0, w, d, h, color=colour)
+    xyticks = np.arange(T)
 
+    xyticks = np.arange(T)
+    for xpos, c1, tdata in zip(xyticks, particle_colours, typed_intercounts):
+        for ypos, c2, h in zip(xyticks, particle_colours, tdata):
+            colour = ((c1[0]+c2[0])/2, (c1[1]+c2[1])/2, (c1[2]+c2[2])/2, a)
+            ax.bar3d(xpos+0.5-wd/2, ypos+0.5-wd/2, 0, wd, wd, h, color=colour, linestyle="solid", edgecolor="black", linewidth=0.5)
+
+    ax.set_xlim(0, T)
+    ax.set_ylim(0, T)
+    ax.set_zlim(0, zticks[-1])
+    ax.set_xticks(xyticks)
+    ax.set_yticks(xyticks)
+    zt = ax.get_zticks()[1]
+    zticks = [zt*i for i in range(1, len(zticks)-1)]
+    ax.set_zticks(zticks)
+    ax.set_xticklabels([f"{t}" for t in zticks])
+    
+    for pos in range(T):
+        ax.text(pos+0.5, -0.5, -0.25*zt, f"T{pos}", "x", color="white", fontsize=10, ha="center", va="center")
+        ax.text(-0.5, pos+0.5, -0.25*zt, f"T{pos}", "y", color="white", fontsize=10, ha="center", va="center")
+    
     plt.show()
 
 
