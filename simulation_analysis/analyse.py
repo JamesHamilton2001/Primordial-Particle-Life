@@ -245,6 +245,32 @@ def visualise_speeds(t_speeds, speed_stats):
     
     plt.show()
 
+def visualise_intercounts(t_interdists, interdist_stats):
+
+    typed_intercounts = [ [ len(dists) for dists in t1dists ] for t1dists in t_interdists ]
+
+    print()
+    for ti in typed_intercounts:
+        print(ti)
+    
+    fig = plt.figure()
+    ax = fig.add_subplot(projection="3d")
+    ax.view_init(azim=-135, elev=45)
+
+    xyticks = range(T)
+    for colour, ys, tick in zip(particle_colours, typed_intercounts, xyticks):
+        xs = np.arange(T)
+        ax.bar(xs, ys, zs=tick, zdir='y', color=colour, alpha=0.8)
+
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+    ax.set_zlabel('Z')
+
+    ax.set_yticks(xyticks)
+
+    plt.show()
+    
+
 def visualise_interdists(t_interdists, interdist_stats):
     ## TODO: move counts to own function, use 3d bar chart with 2d data
     ## counts, overlap each and all for t, allall
@@ -308,7 +334,7 @@ def main():
     if isPlotting:
 
         # visualise_speeds(simulation_state_data.result.typed_speeds, simulation_state_stats.result.speeds)
-        visualise_interdists(simulation_state_data.result.typed_interdists, simulation_state_stats.result.interdists)
+        visualise_intercounts(simulation_state_data.result.typed_interdists, simulation_state_stats.result.interdists)
 
 
 if __name__ == "__main__":
