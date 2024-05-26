@@ -270,10 +270,6 @@ def visualise_intercounts(t_interdists, interdist_stats):
     ax.set_ylabel("YType 1", labelpad=15, color="white")
     ax.set_zlabel("Interactions", labelpad=15, color="white")
 
-    print()
-    for ti in typed_intercounts:
-        print(ti)
-
     wd = 0.4
     a = 0.4
     xyticks = np.arange(T)
@@ -285,21 +281,24 @@ def visualise_intercounts(t_interdists, interdist_stats):
             ax.bar3d(xpos+0.5-wd/2, ypos+0.5-wd/2, 0, wd, wd, h, color=colour, linestyle="solid", edgecolor="black", linewidth=0.5)
 
     zticks = ax.get_zticks()
-    zt = ax.get_zticks()[1]
 
-    tick_labels = [f"T {t}" for t in range(T)]
     ax.set_xlim(0, T)
     ax.set_ylim(0, T)
     ax.set_zlim(0, zticks[-1])
     ax.set_xticks(xyticks)
     ax.set_yticks(xyticks)
-    zticks = [zt*i for i in range(1, len(zticks)-1)]
+    zticks = zticks[1:-1]
     ax.set_zticks(zticks)
     ax.set_zticklabels([f"{t}" for t in zticks], color="white", fontsize=8)
     
+    zt = zticks[0]
     for pos in range(T):
         ax.text(pos+0.5, -0.5, -0.25*zt, f"T{pos}", "x", color="white", fontsize=8, ha="center", va="center")
         ax.text(-0.5, pos+0.5, -0.25*zt, f"T{pos}", "y", color="white", fontsize=8, ha="center", va="center")
+
+    for xt, tdata in zip(xyticks, typed_intercounts):
+        for yt, h in zip(xyticks, tdata):
+            ax.text(xt+0.5, yt+0.5, h+0.1*zt, f"{h}", color="white", fontsize=7, ha="center", va="center", zorder=99999)
     
     plt.show()
 
