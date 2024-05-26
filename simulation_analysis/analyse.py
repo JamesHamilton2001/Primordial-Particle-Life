@@ -21,16 +21,17 @@ type_radial_angles = [2 * pi * i / T for i in range(T)]
 type_radial_angles += type_radial_angles[:1] # close circle
 
 
+
 particle_colours = [
-    (1.0, 0.0, 0.0),  # red
-    (0.0, 0.0, 0.8),  # blue
-    (0.8, 0.8, 0.0),  # yellow
-    (0.5, 0.0, 0.5),  # purple
-    (0.0, 0.8, 0.0),  # green
-    (1.0, 0.5, 0.0),  # orange
-    (1.0, 0.75, 0.8),  # pink
-    (0.0, 1.0, 1.0),  # cyan
-    (0.6, 0.4, 0.2)  # brown
+    (1,0,0),        # red
+    (0,1,0),        # green
+    (0,0,1),        # blue
+    (1,1,0),        # yellow
+    (1,0,1),        # magenta
+    (0,1,1),        # cyan
+    (1,0.5,0),      # orange
+    (0.5,0,1),      # purple
+    (0.8,0.8,0.8),  # light grey
 ]
 particle_colours = particle_colours[:T]
 
@@ -302,53 +303,46 @@ def visualise_intercounts(t_interdists, interdist_stats):
     
     plt.show()
 
+def visualise_interdists_overlayed(t_interdists, interdist_stats, inter_range_str=None):
 
-
-def visualise_interdists(t_interdists, interdist_stats):
-    ## TODO: move counts to own function, use 3d bar chart with 2d data
-    ## counts, overlap each and all for t, allall
-    ## means, overlap each and all for t, all all
-    ## stds, overlap each and all for t, all all
-    ## quartiles ???
+    title = "Interaction Statistics"
+    if inter_range_str: title = inter_range_str.capitalize() + title
 
     t_angles = [ 2*pi * t/T for t in range(T) ] + [0]
-
-    fig, axs = plt.subplots(2, 3, subplot_kw={"projection": "polar"}, figsize=(16, 9))
-    fig, ax = plt.subplots(subplot_kw={"projection": "polar"}, figsize=(16, 9))
-
     t_labels = [ f"Type {t}" for t in range(T) ]
-    t_groups = [ f"Type {t}" for t in range(T) ]
 
-    for ax in axs.flat:
+    fig, axs = plt.subplots(1, 3, subplot_kw={"projection": "polar"}, figsize=(16, 9))
+    avgax, stdax, qtsax = axs
+    fig.suptitle(title)
+
+    for ax, ttl in zip(axs, ["T2T Means", "T2T Standard Deviations", "T2T Quartiles"]):
+        ax.set_title(ttl)
         ax.set_theta_offset(pi / 2)
         ax.set_theta_direction(-1)
+        ax.set_xticks(t_angles[:-1], t_labels)
 
-    ## COUNTS
+    for c, tstats in zip(particle_colours, interdist_stats.typed):
+        avgs, stds, qt1s, qt2s, qt3s = map(list, zip(*[(s.avg, s.std, *s.qts) for s in tstats.typed]))
 
-    typed_intercounts = [ [ len(dists) for dists in t1dists ] for t1dists in t_interdists ]
-    total_intercounts_flat_sorted = sorted([ count for t1count in typed_intercounts for count in t1count ])
-    total_intercount_stats = get_stats(total_intercounts_flat_sorted)
-    max_intercount = total_intercounts_flat_sorted[-1]
+        for data in [avgs, stds, qt1s, qt2s, qt3s]:
+            data += data[:1]
 
-    # ax = axs[0][0]
-    ax.set_title("Total T2T Interactions")
-    ax.set_xticks(t_angles[:-1], t_labels)
-    ax.set_yticks(list(total_intercount_stats.qts), ["Q1", "Q2", "Q3"], color="grey", size=7)
-    ax.set_ylim(0, 1.25 * max_intercount)
+        avgax.plot(t_angles, avgs, linewidth=0.5, linestyle="solid", color=c)
+        avgax.fill(t_angles, avgs, color=c, alpha=0.25)
 
-    for data, group, colour in zip(typed_intercounts, t_groups, particle_colours):
-        data += [data[0]]
-        print(data)
-        ax.plot(t_angles, data, linewidth=1, linestyle="solid", label=group, color=colour)
+        stdax.plot(t_angles, stds, linewidth=0.5, linestyle="solid", color=c)
+        stdax.fill(t_angles, stds, color=c, alpha=0.25)
+
+        qtsax.fill_between(t_angles, qt1s, qt3s, color=c, alpha=0.25)
 
     plt.show()
-    
+
 
 
 def main():
 
     isPrintingData = False
-    isPrintingStats = False
+    isPrintingStats = True
     isPlotting = True
 
     simulation_state_data = SimulationData( get_state_data(RAW_DATA["simulation"]["launchSettings"]["particles"]),
@@ -367,7 +361,8 @@ def main():
     if isPlotting:
 
         # visualise_speeds(simulation_state_data.result.typed_speeds, simulation_state_stats.result.speeds)
-        visualise_intercounts(simulation_state_data.result.typed_interdists, simulation_state_stats.result.interdists)
+        # visualise_intercounts(simulation_state_data.result.typed_interdists, simulation_state_stats.result.interdists)
+        visualise_interdists_overlayed(simulation_state_data.result.typed_interdists, simulation_state_stats.result.interdists)
 
 
 if __name__ == "__main__":
