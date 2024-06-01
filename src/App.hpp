@@ -37,7 +37,7 @@ class App
     Texture2D particleTexture;
 
     void draw() const;
-    void ui();
+    void userInput();
 
 };
 

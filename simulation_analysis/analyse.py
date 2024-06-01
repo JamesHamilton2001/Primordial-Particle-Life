@@ -305,23 +305,20 @@ def visualise_intercounts(t_interdists, interdist_stats):
 
 def visualise_interdists_overlayed(t_interdists, interdist_stats, inter_range_str=None):
 
-    fill_alpha = 0.25
-    line_alpha = 0.75
-    rader_colour = (0.75, 0.75, 0.75, 1)
+    fill_alpha = 0.3
+    line_alpha = 0.6
+    rader_colour = (0.7, 0.7, 0.7, 1)
     chart_names = ["T2T Means", "T2T Standard Deviations", "T2T Inter Quartiles", "T2T Medians"]
 
     title = "Interaction Statistics"
     if inter_range_str: title = inter_range_str.capitalize() + title
 
-    t2tplots = []
-    for tstats in interdist_stats.typed:
-        plots =  [[s.avg for s in tstats.typed]]
-        plots += [[s.std for s in tstats.typed]]
-        plots += [[s.qts[0] for s in tstats.typed]]
-        plots += [[s.qts[1] for s in tstats.typed]]
-        plots += [[s.qts[2] for s in tstats.typed]]
-        for plot in plots: plot += plot[:1]
-        t2tplots += [plots]
+    t2tplots = [ [ [s.avg for s in tstats.typed]     +  [tstats.typed[0].avg],
+                   [s.std for s in tstats.typed]     +  [tstats.typed[0].std],
+                   [s.qts[0] for s in tstats.typed]  +  [tstats.typed[0].qts[0]],
+                   [s.qts[1] for s in tstats.typed]  +  [tstats.typed[0].qts[1]],
+                   [s.qts[2] for s in tstats.typed]  +  [tstats.typed[0].qts[2]] ]
+                     for tstats in interdist_stats.typed                               ]
 
     t_angles = [ 2*pi * t/T for t in range(T) ] + [0]
     t_labels = [ f"Type {t}" for t in range(T) ]

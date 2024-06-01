@@ -15,15 +15,15 @@
 
 
 App::App(int width, int height, int fpsTarget, Settings& settings, long long unsigned int finalFrame) :
-    width(width),
-    height(height),
-    fpsTarget(fpsTarget),
+    width (width),
+    height (height),
+    fpsTarget (fpsTarget),
     finalFrame(finalFrame),
-    progressPercent(0),
-    particleLife(settings),
-    paused(false),
-    drawGrid(true),
-    drawGhosts(true),
+    progressPercent (0),
+    particleLife (settings),
+    paused (false),
+    drawGrid (true),
+    drawGhosts (true),
     camera { Vector2 { float(width/2), float(height/2) },
              Vector2 { 0, 0 }, 0.0f, 25.0f             }
 {
@@ -42,7 +42,7 @@ App::~App()
 bool App::update()
 {
     // handle user input and update gui
-    ui();
+    userInput();
 
     // update simulation if not paused
     if (!paused) particleLife.update();
@@ -159,7 +159,7 @@ void App::draw() const
     EndDrawing();
 }
 
-void App::ui()
+void App::userInput()
 {
     // camera zoom on MOUSE_WHEEL
     float wheel = GetMouseWheelMove();
