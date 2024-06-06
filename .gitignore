@@ -4,4 +4,4 @@ main
 *.exe
 *.dsym
 main
-./statistics/temp.py
+statistics/temp.py
