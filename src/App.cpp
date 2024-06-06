@@ -80,7 +80,7 @@ void App::saveData() const
     string fileName = particleLife.settings.name +"(f"+ to_string(particleLife.getFrameCount()) +")";
 
     // TAKE SCREENSHOT
-    TakeScreenshot((particleLife.settings.simulationScreenshotsDir + fileName + ".png").c_str());
+    TakeScreenshot((PARTICLELIFE_STATS_SCREENSHOTS_DIR + fileName + ".png").c_str());
 
     long long unsigned int frameCount = particleLife.getFrameCount();
     const vector<Particle>& particles = particleLife.getParticles();
@@ -88,7 +88,7 @@ void App::saveData() const
 
     // WRITE INFORMATION TO FILE
 
-    string filePath = particleLife.settings.simulationDataDir + fileName + ".json";
+    string filePath = PARTICLELIFE_STATS_DATA_DIR + fileName + ".json";
     ofstream file(filePath);
     if (!file.is_open()) {
         cerr << "Failed to create/open \""+filePath+"\" for writing statistics." << endl;

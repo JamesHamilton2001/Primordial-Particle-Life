@@ -5,10 +5,6 @@
 #include <algorithm>
 
 
-const string Settings::defaultSettingsDir = "./settings/default/";
-const string Settings::customSettingsDir = "./settings/custom/";
-const string Settings::simulationDataDir = "./statistics/data/";
-const string Settings::simulationScreenshotsDir = "./statistics/screenshots/";
 
 Settings::Settings() :
     name("DEFAULT_HARDCODED_SETTINGS"),
@@ -179,7 +175,7 @@ void Settings::generateParticleData()
     }    
 }
 
-ostream& operator << (ostream& os, const Settings& settings)
+ostream& operator <<(ostream& os, const Settings& settings)
 {
     os << "| name | " << settings.name << endl
        << "| types | " << settings.types << endl

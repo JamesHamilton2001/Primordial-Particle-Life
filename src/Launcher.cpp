@@ -617,7 +617,7 @@ bool Launcher::saveCustomisedSettings()
     if (!validateCustomisedSettings()) return false;
 
     // create and/or open settings file, log error if failed
-    ofstream file(Settings::customSettingsDir + userCustomisedSettings.name + ".txt");
+    ofstream file(PARTICLELIFE_CUSTOM_SETTINGS_DIR + userCustomisedSettings.name + ".txt");
     if (!file.is_open()) {
         string error = "Failed to save settings to " + userCustomisedSettings.name + ".txt";
         strcpy(lsvErrors.text, error.c_str());

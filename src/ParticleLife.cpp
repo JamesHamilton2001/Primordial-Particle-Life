@@ -208,7 +208,7 @@ void ParticleLife::drawGhosts(unsigned int pTexID) const
 void ParticleLife::save() const
 {
     // open settings file
-    ofstream file(settings.customSettingsDir + settings.name +"(f"+ to_string(frameCount) +").txt", ofstream::out);
+    ofstream file(PARTICLELIFE_CUSTOM_SETTINGS_DIR + settings.name +"(f"+ to_string(frameCount) +").txt", ofstream::out);
     if (!file.is_open()) {
         throw runtime_error("Failed to open config file");
     }
