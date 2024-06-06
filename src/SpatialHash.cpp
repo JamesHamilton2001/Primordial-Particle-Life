@@ -13,13 +13,7 @@ SpatialHash::SpatialHash(unsigned int size, unsigned int types) :
     bounds(2.0f * size),
     grid(size+2, vector<vector<Particle*>>(size+2, vector<Particle*>())),
     cornerWrapCells(4, vector<Particle>()),
-    edgeWrapCells(4, vector<vector<Particle>>(size)),
-    allWrapCellPtrs([&]() {
-        vector<vector<Particle>*> cellPtrs;
-        for (auto& corner : cornerWrapCells) cellPtrs.emplace_back(&corner);
-        for (auto& edge : edgeWrapCells) for (auto& cell : edge) cellPtrs.emplace_back(&cell);
-        return cellPtrs;
-    }())
+    edgeWrapCells(4, vector<vector<Particle>>(size))
 {}
 
 
@@ -111,12 +105,12 @@ vector<Particle*>& SpatialHash::getCell(unsigned int row, unsigned int col)
     return grid[row][col];
 }
 
-// const vector<vector<Particle>*> SpatialHash::getWrapCellPtrs() const
-// {
-//     return vector<vector<Particle>*>([&]() {
-//         vector<vector<Particle>*> cellPtrs;
-//         for (const auto& corner : cornerWrapCells) cellPtrs.emplace_back(&corner);
-//         for (const auto& edge : edgeWrapCells) for (const auto& cell : edge) cellPtrs.emplace_back(&cell);
-//         return cellPtrs;
-//     }());
-// }
+const vector<const vector<Particle>*> SpatialHash::getWrapCellPtrs() const
+{
+    vector<const vector<Particle>*> cellPtrs;
+    for (const auto& corner : cornerWrapCells) cellPtrs.push_back(&corner);
+    for (const auto& edge : edgeWrapCells) 
+        for (const auto& cell : edge) 
+            cellPtrs.push_back(&cell);
+    return cellPtrs;
+}

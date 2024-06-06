@@ -20,7 +20,7 @@ class SpatialHash
 
     vector<Particle*>& getCell(unsigned int row, unsigned int col);
 
-    // const vector<vector<Particle>*> getWrapCellPtrs() const;
+    const vector<const vector<Particle>*> getWrapCellPtrs() const;
 
   private:
 
@@ -36,7 +36,7 @@ class SpatialHash
 
   public:
     
-    const vector<vector<Particle>*> allWrapCellPtrs;
+    // const vector<vector<Particle>*> allWrapCellPtrs;
 
 };
 

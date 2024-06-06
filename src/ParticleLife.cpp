@@ -96,11 +96,6 @@ const vector<Particle>& ParticleLife::getParticles() const
     return particles;
 }
 
-// const vector<vector<Particle>*> ParticleLife::getWrapCellPtrs() const
-// {
-//     return spatialHash.getWrapCellPtrs();
-// }
-
 void ParticleLife::drawSoftBorder() const
 {
     const float b = bounds;
@@ -218,24 +213,7 @@ void ParticleLife::drawGhosts(unsigned int pTexID) const
 {
     rlSetTexture(pTexID);
     rlBegin(RL_QUADS);
-    // for (const auto& corner : spatialHash.getCornerWraps()) 
-    //     for (const Particle& p : corner)
-    //         rlColor4ub(R[p.type], G[p.type], B[p.type], 255),
-    //         rlNormal3f(0.0f, 0.0f, 1.0f),
-    //         rlTexCoord2f(0.0f, 0.0f), rlVertex2f(p.pos.x-0.05f, p.pos.y-0.05f), // top left
-    //         rlTexCoord2f(0.0f, 1.0f), rlVertex2f(p.pos.x-0.05f, p.pos.y+0.05f), // bottom left
-    //         rlTexCoord2f(1.0f, 1.0f), rlVertex2f(p.pos.x+0.05f, p.pos.y+0.05f), // bottom right
-    //         rlTexCoord2f(1.0f, 0.0f), rlVertex2f(p.pos.x+0.05f, p.pos.y-0.05f); // top right
-    // for (const auto& edge : spatialHash.getEdgeWraps())
-    //     for (const auto& cell : edge)
-    //         for (const Particle& p : cell)
-    //             rlColor4ub(R[p.type], G[p.type], B[p.type], 255),
-    //             rlNormal3f(0.0f, 0.0f, 1.0f),
-    //             rlTexCoord2f(0.0f, 0.0f), rlVertex2f(p.pos.x-0.05f, p.pos.y-0.05f), // top left
-    //             rlTexCoord2f(0.0f, 1.0f), rlVertex2f(p.pos.x-0.05f, p.pos.y+0.05f), // bottom left
-    //             rlTexCoord2f(1.0f, 1.0f), rlVertex2f(p.pos.x+0.05f, p.pos.y+0.05f), // bottom right
-    //             rlTexCoord2f(1.0f, 0.0f), rlVertex2f(p.pos.x+0.05f, p.pos.y-0.05f); // top right
-    for (const auto& cell : spatialHash.allWrapCellPtrs)
+    for (auto& cell : spatialHash.getWrapCellPtrs())
         for (const Particle& p : *cell)
                 rlColor4ub(R[p.type], G[p.type], B[p.type], 255),
                 rlNormal3f(0.0f, 0.0f, 1.0f),

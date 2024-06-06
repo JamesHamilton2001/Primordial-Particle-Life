@@ -26,7 +26,6 @@ class ParticleLife
 
     long long unsigned int getFrameCount() const;
     const vector<Particle>& getParticles() const;
-    // const vector<vector<Particle>*> getWrapCellPtrs() const;
 
     void save() const;
 
