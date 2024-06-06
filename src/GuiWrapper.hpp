@@ -59,7 +59,7 @@ class Wdgt
         return *this;
     }
 
-    virtual bool update(Rectangle& rect) = 0;
+    virtual bool update(Rectangle& rec) = 0;
 
     void setText(const char* cstr);
 
@@ -71,7 +71,7 @@ class Lbl : public Wdgt
 {
   public: using Wdgt::Wdgt;
 
-    bool update(Rectangle& rect) override;
+    bool update(Rectangle& rec) override;
 };
 
 class Pnl : public Wdgt
@@ -80,7 +80,7 @@ class Pnl : public Wdgt
     
     Pnl() : Wdgt() {};
 
-    bool update(Rectangle& rect) override;
+    bool update(Rectangle& rec) override;
 };
 
 class Grp : public Wdgt
@@ -90,21 +90,21 @@ class Grp : public Wdgt
     Grp(const char* text) : Wdgt(64, text) {};
     Grp() : Grp("") {};
 
-    bool update(Rectangle& rect) override;
+    bool update(Rectangle& rec) override;
 };
 
 class Btn : public Wdgt
 {
   public: using Wdgt::Wdgt;
   
-    bool update(Rectangle& rect) override;
+    bool update(Rectangle& rec) override;
 };
 
 class Tbx : public Wdgt
 {
   public: using Wdgt::Wdgt;
 
-    bool update(Rectangle& rect) override;
+    bool update(Rectangle& rec) override;
 };
 
 class Ibx : public Wdgt
@@ -121,7 +121,7 @@ class Ibx : public Wdgt
         maxValue(maxValue) {};
     Ibx(int minValue, int maxValue) : Ibx(0, minValue, maxValue) {};
 
-    bool update(Rectangle& rect) override;
+    bool update(Rectangle& rec) override;
 
     friend ostream& operator <<(ostream& os, const Ibx& ibx);
         
@@ -169,7 +169,7 @@ class Fbx : public Tbx
         return *this;
     }
 
-    bool update(Rectangle& rect) override;
+    bool update(Rectangle& rec) override;
 
     friend ostream& operator <<(ostream& os, const Fbx& fbx);
 };
@@ -187,7 +187,7 @@ class Lsv : public Wdgt
         activeIdx(0) {};
     Lsv() : Lsv("") {};
 
-    bool update(Rectangle& rect) override;
+    bool update(Rectangle& rec) override;
 
     friend ostream& operator <<(ostream& os, const Lsv& lsv);
 };
@@ -217,7 +217,7 @@ class TglGrp : public Wdgt
         Wdgt(items),
         activeToggle(0) {};
     
-    bool update(Rectangle& rect) override;
+    bool update(Rectangle& rec) override;
 
     friend ostream& operator <<(ostream& os, const TglGrp& tglGrp);
 };

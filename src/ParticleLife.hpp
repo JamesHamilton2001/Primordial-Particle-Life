@@ -27,13 +27,11 @@ class ParticleLife
     long long unsigned int getFrameCount() const;
     const vector<Particle>& getParticles() const;
 
-    void saveConfig() const;
+    void save() const;
 
     void drawGrid() const;
     void drawGhosts(unsigned int pTexID) const;
     void drawSoftBorder() const;
-
-    void randomisePositions();
 
     vector<int> countTypes() const;
 
@@ -56,7 +54,7 @@ class ParticleLife
 
     SpatialHash spatialHash;
 
-    void particleInteraction(Particle& p1, Particle& p2);
+    void particleInteraction(Particle& p1, Particle& p2) const;
 
 };
 

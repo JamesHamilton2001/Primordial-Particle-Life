@@ -205,7 +205,7 @@ void ParticleLife::drawGhosts(unsigned int pTexID) const
 }
 
 
-void ParticleLife::saveConfig() const
+void ParticleLife::save() const
 {
     // open settings file
     ofstream file(settings.customSettingsDir + settings.name +"("+ to_string(frameCount) +").txt", ofstream::out);
@@ -237,26 +237,6 @@ void ParticleLife::saveConfig() const
                 to_string(p.vel.x) << ',' << to_string(p.vel.y) << '\n';
     
     file.close();
-}
-
-
-void ParticleLife::randomisePositions()
-{
-    unsigned int ct = 0;
-    while (ct < count) {
-        for (unsigned int t = 0; t < types; t++) {
-            for (unsigned int j = 0; j < static_cast<unsigned int>(settings.typeRatio[t]) && ct < count; j++) {
-                particles[ct++] = Particle(
-                    t,
-                    Vector2 {
-                        GetRandomValue(0, static_cast<int>(bounds)) + GetRandomValue(0, 1000) / 1000.0f,
-                        GetRandomValue(0, static_cast<int>(bounds)) + GetRandomValue(0, 1000) / 1000.0f
-                    },
-                    Vector2 { 0, 0 }
-                );
-            }
-        }
-    }
 }
 
 vector<int> ParticleLife::countTypes() const
@@ -305,7 +285,7 @@ ostream& operator << (ostream& os, const ParticleLife& particleLife)
 }
 
 
-void ParticleLife::particleInteraction(Particle& p1, Particle& p2)
+void ParticleLife::particleInteraction(Particle& p1, Particle& p2) const
 {
     // calculate the square distance between the particles
     const float dx = p2.pos.x - p1.pos.x;

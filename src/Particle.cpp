@@ -13,23 +13,23 @@ const unsigned char Particle::B[9] = { 50,  255, 0,   255, 50,  0,   200, 130, 2
 
 
 
-Particle::Particle(int type, Vector2 pos, Vector2 vel) :
+Particle::Particle(unsigned int type, Vector2 pos, Vector2 vel) :
     type(type),
     pos(pos),
     vel(vel)
 {}
 
-Particle::Particle(int type, Vector2 pos) :
+Particle::Particle(unsigned int type, Vector2 pos) :
     type(type),
     pos(pos),
     vel(Vector2 { 0, 0 })
 {}
 
-Particle::Particle(int type, float x, float y, float xv, float yv) :
+Particle::Particle(unsigned int type, float x, float y, float xv, float yv) :
     Particle(type, Vector2 { x, y }, Vector2 { xv, yv })
 {}
 
-Particle::Particle(int type, float x, float y) :
+Particle::Particle(unsigned int type, float x, float y) :
     Particle(type, Vector2 { x, y })
 {}
 

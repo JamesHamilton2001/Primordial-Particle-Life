@@ -25,7 +25,7 @@ App::App(int width, int height, int fpsTarget, const Settings& settings, long lo
     drawGrid (true),
     drawGhosts (true),
     camera { Vector2 { float(width/2), float(height/2) },
-             Vector2 { 0, 0 }, 0.0f, 25.0f             }
+             Vector2 { float(settings.size), float(settings.size) }, 0.0f, 24.0f }
 {
     // generate particle texture (64x64 white circle on transparent background)
     Image img = GenImageColor(64, 64, BLANK);
@@ -54,6 +54,7 @@ bool App::update()
     if (pp != progressPercent) {
         progressPercent = pp;
         cout << "Progress: " << progressPercent << "%" << endl;
+        // if (pp % 8 == 0) TakeScreenshot((to_string(pp)+".png").c_str());
     }
 
     if (finalFrame > 0){
@@ -192,7 +193,7 @@ void App::handleInput()
     
     // save settings and run statistics on PRESS_ENTER
     if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_ENTER)) {
-        // particleLife.saveConfig(); // TODO: re-enable saving
+        // particleLife.save(); // TODO: re-enable saving
         saveData();
     }
     else if (IsKeyPressed(KEY_ENTER))

@@ -7,7 +7,7 @@
 #include <iostream>
 
 
-SpatialHash::SpatialHash(int size, int types) :
+SpatialHash::SpatialHash(unsigned int size, unsigned int types) :
     types(types),
     size(size),
     bounds(2.0f * size),
@@ -17,7 +17,7 @@ SpatialHash::SpatialHash(int size, int types) :
 {}
 
 
-int SpatialHash::hash(float coord) const
+unsigned int SpatialHash::hash(float coord) const
 {
     return coord/2 + 1;
 }
@@ -63,44 +63,44 @@ void SpatialHash::map(vector<Particle>& particles)
     } for (Particle& p : cornerWraps[3]) grid[size+1][0].emplace_back(&p);
 
     // B wraps to T
-    for (int c = 1; c <= size; c++) {
+    for (unsigned int c = 1; c <= size; c++) {
         for (Particle* ptr : grid[size][c]) {   // T <- B : ↑
             Particle p = *ptr;
             p.pos.y -= bounds;
             edgeWraps[0][c-1].emplace_back(p);
         }
-    } for (int c = 1; c <= size; c++)
+    } for (unsigned int c = 1; c <= size; c++)
         for (Particle& p : edgeWraps[0][c-1]) grid[0][c].emplace_back(&p);
     // L wraps to R
-    for (int r = 1; r <= size; r++) {
+    for (unsigned int r = 1; r <= size; r++) {
         for (Particle* ptr : grid[r][1]) {      // R <- L : →
             Particle p = *ptr;
             p.pos.x += bounds;
             edgeWraps[1][r-1].emplace_back(p);
         }
-    } for (int r = 1; r <= size; r++)
+    } for (unsigned int r = 1; r <= size; r++)
         for (Particle& p : edgeWraps[1][r-1]) grid[r][size+1].emplace_back(&p);
     // T wraps to B
-    for (int c = 1; c <= size; c++) {
+    for (unsigned int c = 1; c <= size; c++) {
         for (Particle* ptr : grid[1][c]) {      // B <- T : ↓
             Particle p = *ptr;
             p.pos.y += bounds;
             edgeWraps[2][c-1].emplace_back(p);
         }
-    } for (int c = 1; c <= size; c++)
+    } for (unsigned int c = 1; c <= size; c++)
         for (Particle& p : edgeWraps[2][c-1]) grid[size+1][c].emplace_back(&p);
     // R wraps to L
-    for (int r = 1; r <= size; r++) {
+    for (unsigned int r = 1; r <= size; r++) {
         for (Particle* ptr : grid[r][size]) {   // L <- R : ←
             Particle p = *ptr;
             p.pos.x -= bounds;
             edgeWraps[3][r-1].emplace_back(p);
         }
-    } for (int r = 1; r <= size; r++)
+    } for (unsigned int r = 1; r <= size; r++)
         for (Particle& p : edgeWraps[3][r-1]) grid[r][0].emplace_back(&p);
 }
 
-vector<Particle*>& SpatialHash::getCell(int row, int col)
+vector<Particle*>& SpatialHash::getCell(unsigned int row, unsigned int col)
 {
     return grid[row][col];
 }
@@ -109,7 +109,7 @@ void SpatialHash::drawGrid() const
 {
     rlBegin(RL_LINES);
         rlColor4ub(80, 80, 80, 255);
-        for (int i = -1; i <= size+1; i++)
+        for (int i = -1; i <= static_cast<int>(size)+1; i++)
             rlVertex2f(i*2.0f, -2.0f),  rlVertex2f(i*2.0f, bounds+2.0f),
             rlVertex2f(-2.0f, i*2.0f),  rlVertex2f(bounds+2.0f, i*2.0f);
     rlEnd();
