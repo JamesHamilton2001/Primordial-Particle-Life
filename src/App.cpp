@@ -14,7 +14,7 @@
 
 
 
-App::App(int width, int height, int fpsTarget, Settings& settings, long long unsigned int finalFrame) :
+App::App(int width, int height, int fpsTarget, const Settings& settings, long long unsigned int finalFrame) :
     width (width),
     height (height),
     fpsTarget (fpsTarget),
@@ -42,21 +42,26 @@ App::~App()
 bool App::update()
 {
     // handle user input and update gui
-    userInput();
+    handleInput();
 
     // update simulation if not paused
     if (!paused) particleLife.update();
 
-    // draw simulation
-    draw();
+    // render simulation
+    render();
 
-    int pp = int(100 * particleLife.getFrameCount() / finalFrame);
+    unsigned int pp = int(100 * particleLife.getFrameCount() / finalFrame);
     if (pp != progressPercent) {
         progressPercent = pp;
         cout << "Progress: " << progressPercent << "%" << endl;
     }
 
-    return (particleLife.getFrameCount() < finalFrame);
+    if (finalFrame > 0){
+        if (particleLife.getFrameCount() >= finalFrame) {
+            saveData();
+            return false;
+        }
+    } return true;
 }
 
 void App::saveData() const
@@ -145,7 +150,7 @@ void App::saveData() const
     file.close();
 }
 
-void App::draw() const
+void App::render() const
 {
     BeginDrawing();
         ClearBackground(BLACK);
@@ -159,7 +164,7 @@ void App::draw() const
     EndDrawing();
 }
 
-void App::userInput()
+void App::handleInput()
 {
     // camera zoom on MOUSE_WHEEL
     float wheel = GetMouseWheelMove();

@@ -41,8 +41,6 @@ int main()
         }
     }
 
-    app.saveData();
-
     CloseWindow();
 
     return EXIT_SUCCESS;

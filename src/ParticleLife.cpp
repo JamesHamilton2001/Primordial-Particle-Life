@@ -10,17 +10,17 @@
 #include <filesystem>
 
 
-ParticleLife::ParticleLife(Settings& settings) :
+ParticleLife::ParticleLife(const Settings& settings) :
     settings    (settings),
     frameCount  (0),
     types       (settings.types),
     size        (settings.size),
-    bounds      (2.0f * settings.size),
     count       (settings.count),
-    resistance  (settings.resistance),
     innerRadius (settings.innerRadius),
+    resistance  (settings.resistance),
     step        (settings.step),
     attractions (settings.attractions),
+    bounds      (2.0f * settings.size),
     particles   (settings.particles),
     spatialHash (settings.size, settings.types)
 {}
@@ -32,13 +32,13 @@ void ParticleLife::update()
     spatialHash.map(particles);
 
     // for each cell...
-    for (int row = 1; row <= size; row++) {
-        for (int col = 1; col <= size; col++) {
+    for (unsigned int row = 1; row <= size; row++) {
+        for (unsigned int col = 1; col <= size; col++) {
             auto& cell = spatialHash.getCell(row, col);
 
             // ...and each neighbour (including itself)
-            for (int r = row-1; r <= row+1; r++) {
-                for (int c = col-1; c <= col+1; c++) {
+            for (unsigned int r = row-1; r <= row+1; r++) {
+                for (unsigned int c = col-1; c <= col+1; c++) {
                     auto& neighbour = spatialHash.getCell(r, c);
                     
                     // interact particles within neighbourhood
@@ -222,9 +222,9 @@ void ParticleLife::saveConfig() const
     file << to_string(resistance) << '\n';  // resistance
     file << to_string(step) << '\n';        // step
 
-    for (int i = 0; i < types; i++) {           // attractions
+    for (unsigned int i = 0; i < types; i++) {           // attractions
         file << to_string(attractions[i][0]);
-        for (int j = 1; j < types; j++)
+        for (unsigned int j = 1; j < types; j++)
             file << ',' << to_string(attractions[i][j]);
         file << '\n';
     }
@@ -242,10 +242,10 @@ void ParticleLife::saveConfig() const
 
 void ParticleLife::randomisePositions()
 {
-    int ct = 0;
+    unsigned int ct = 0;
     while (ct < count) {
-        for (int t = 0; t < types; t++) {
-            for (int j = 0; j < settings.typeRatio[t] && ct < count; j++) {
+        for (unsigned int t = 0; t < types; t++) {
+            for (unsigned int j = 0; j < static_cast<unsigned int>(settings.typeRatio[t]) && ct < count; j++) {
                 particles[ct++] = Particle(
                     t,
                     Vector2 {
@@ -284,16 +284,16 @@ ostream& operator << (ostream& os, const ParticleLife& particleLife)
           "| step : " << particleLife.step << endl;
     
     os << "| attractions : " << endl;
-    for (int i = 0; i < particleLife.types; i++) {
+    for (unsigned int i = 0; i < particleLife.types; i++) {
         os << "| | " << particleLife.attractions[i][0];
-        for (int j = 1; j < particleLife.types; j++)
+        for (unsigned int j = 1; j < particleLife.types; j++)
             os << ", " << particleLife.attractions[i][j];
         os << endl;
     }
 
     vector<int> typeCounts = particleLife.countTypes();
     os << "| particles : " << particleLife.particles.size() << "(" << typeCounts[0];
-    for (int i = 1; i < particleLife.types; i++)
+    for (unsigned int i = 1; i < particleLife.types; i++)
         os << ":" << typeCounts[i];
     os << ")" << endl;
     if (particleLife.particles.size() < 128)

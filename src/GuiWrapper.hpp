@@ -192,13 +192,13 @@ class Lsv : public Wdgt
     friend ostream& operator <<(ostream& os, const Lsv& lsv);
 };
 
-class FLsv : public Lsv
+class Flsv : public Lsv
 {
   public:
 
     const char* dirPath;
 
-    FLsv(const char* dirPath) :
+    Flsv(const char* dirPath) :
         Lsv(),
         dirPath(dirPath)
         { updateContents(); };

@@ -56,8 +56,8 @@ Launcher::Launcher() :
 
     btnCopyPreloadedSettings("Copy"),
 
-    btnValidateCustomSettings("Validate"),
-    btnSaveCustomSettings    ("Save"),
+    btnValidateCustomisedSettings("Validate"),
+    btnSaveCustomisedSettings    ("Save"),
 
     grpErrors("Errors"),
     lsvErrors(""),
@@ -88,7 +88,7 @@ Launcher::Launcher() :
     btnWidth          ( 4* U  )
 
 {
-    // read preloaded default and custom settings
+    // read preloadedTab default and custom settings
     readPreloadedSettings(flsvSelectDefaultSettings, defaultSettings);
     readPreloadedSettings(flsvSelectCustomSettings, customSettings);
     readPreloadedSettings(flsvCopyDefaultSettings, defaultSettings);
@@ -107,8 +107,8 @@ bool Launcher::run()
 
     bool submitted = false;
     switch (tglgrpSettingsTab.activeToggle) {
-        case 0: submitted = preloaded(); break;
-        case 1: submitted = customised(); break;
+        case 0: submitted = preloadedTab(); break;
+        case 1: submitted = customisedTab(); break;
         default: break;
     }
 
@@ -141,13 +141,13 @@ void Launcher::header()
     tglgrpSettingsTab.update(r);
 }
 
-bool Launcher::preloaded()
+bool Launcher::preloadedTab()
 {
     // set body position
     bodyRec.x = headerRec.x;
     bodyRec.y = headerRec.y + headerRec.height + M;
 
-    // set preloaded settings groupbox dimensions
+    // set preloadedTab settings groupbox dimensions
     Rectangle preloadedSettingsRec = {
         bodyRec.x,
         bodyRec.y,
@@ -178,7 +178,7 @@ bool Launcher::preloaded()
     // // DrawRectangleRec(preloadedSettingsRec, Color{ C, 0, 0, A });
     // DrawRectangleRec(footerRec,            Color{ 0, 0, 0, A });
 
-    // preloaded settings groupbox
+    // preloadedTab settings groupbox
     grpPreloadedSettings.update(preloadedSettingsRec);
 
     Rectangle r;
@@ -205,7 +205,7 @@ bool Launcher::preloaded()
     return btnExecute.update(r);
 }
 
-bool Launcher::customised()
+bool Launcher::customisedTab()
 {
     // widget related counts
     int T = clamp(ibxTypes.value, PARTICLELIFE_MIN_TYPES, PARTICLELIFE_MAX_TYPES);
@@ -404,24 +404,24 @@ bool Launcher::customised()
 
     // validate button
     r.x = footerRec.x + (midGap - btnWidth) / 2;
-    if (btnValidateCustomSettings.update(r))
-        validateInputSettings();
+    if (btnValidateCustomisedSettings.update(r))
+        validateCustomisedSettings();
 
     // save button
     r.x = footerRec.x + midGap;
-    if (btnSaveCustomSettings.update(r))
+    if (btnSaveCustomisedSettings.update(r))
         saveCustomisedSettings();
 
     // execute button, return true on valid input to execute
     r.x = footerRec.x + footerRec.width - (midGap + btnWidth) / 2;
     if (btnExecute.update(r))
-        return validateInputSettings();
+        return validateCustomisedSettings();
 
     // continue running launcher
     return false;
 }
 
-void Launcher::readPreloadedSettings(FLsv& flsv, vector<Settings>& settings)
+void Launcher::readPreloadedSettings(Flsv& flsv, vector<Settings>& settings)
 {
     settings.clear();
     for (const auto& dirEntry : filesystem::directory_iterator(flsv.dirPath)) {
@@ -437,7 +437,7 @@ void Launcher::readPreloadedSettings(FLsv& flsv, vector<Settings>& settings)
     flsv.updateContents();
 }
 
-bool Launcher::validateInputSettings()
+bool Launcher::validateCustomisedSettings()
 {
     // current input errors
     vector<string> errors;
@@ -611,7 +611,7 @@ bool Launcher::validateInputSettings()
 bool Launcher::saveCustomisedSettings()
 {
     // validate settings
-    if (!validateInputSettings()) return false;
+    if (!validateCustomisedSettings()) return false;
 
     // create and/or open settings file, log error if failed
     ofstream file(Settings::customSettingsDir + userCustomisedSettings.name + ".txt");
@@ -639,7 +639,7 @@ bool Launcher::saveCustomisedSettings()
         file << '\n';
     }
 
-    file << s.seed << '\n';                         // seed (-1 for preloaded particles)
+    file << s.seed << '\n';                         // seed (-1 for preloadedTab particles)
 
     if (s.seed != -1) {                             // type ratios
         for (int i = 0; i < s.types; i++)

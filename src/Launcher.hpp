@@ -14,9 +14,6 @@
 /*
 TODO:
  - add warnings widget for seed/ratio/particles shenanigans
- - copy to customised settings
- - create widget for custom seed
- - update particle life setting object to contatin type ratios
 */
 
 
@@ -39,7 +36,7 @@ class Launcher
     vector<Settings> defaultSettings;    // hard copy of all default settings
     vector<Settings> customSettings;     // hard copy of all custom settings
 
-    Settings userCustomisedSettings;  // user customised settings
+    Settings userCustomisedSettings;  // user customisedTab settings
 
     // HEADER WIDGETS
 
@@ -51,31 +48,31 @@ class Launcher
     Grp grpPreloadedSettings;
 
     TglGrp tglgrpSelectPreloadedSettings;
-    FLsv flsvSelectDefaultSettings;
-    FLsv flsvSelectCustomSettings;
+    Flsv flsvSelectDefaultSettings;
+    Flsv flsvSelectCustomSettings;
 
     // CUSTOMISED SETTINGS TAB WIDGETS
 
-    Grp grpCustomisedSettings;                                         // customised settings group
-    Lbl lblName;        Tbx tbxName;                                   // name text box
-    Lbl lblTypes;       Ibx ibxTypes;                                  // types int box
-    Lbl lblSize;        Ibx ibxSize;                                   // size int box
-    Lbl lblCount;       Ibx ibxCount;                                  // count int box
-    Lbl lblInnerRadius; Fbx fbxInnerRadius;                            // inner radius float box
-    Lbl lblResistance;  Fbx fbxResistance;                             // resistance float box
-    Lbl lblStep;        Fbx fbxStep;                                   // step float box
-    Lbl lblSeed;        Ibx ibxSeed;                                   // seed int box
-    Lbl lblAttractions; vector<vector<Fbx>> fbxAttractions;  // attractions matrix float boxes
-    Lbl lblTypeRatios;  vector<Ibx> fbxTypeRatios;                // type ratios int boxes
+    Grp grpCustomisedSettings;                                  // customisedTab settings group
+    Lbl lblName;        Tbx tbxName;                            // name text box
+    Lbl lblTypes;       Ibx ibxTypes;                           // types int box
+    Lbl lblSize;        Ibx ibxSize;                            // size int box
+    Lbl lblCount;       Ibx ibxCount;                           // count int box
+    Lbl lblInnerRadius; Fbx fbxInnerRadius;                     // inner radius float box
+    Lbl lblResistance;  Fbx fbxResistance;                      // resistance float box
+    Lbl lblStep;        Fbx fbxStep;                            // step float box
+    Lbl lblSeed;        Ibx ibxSeed;                            // seed int box
+    Lbl lblAttractions; vector<vector<Fbx>> fbxAttractions;     // attractions matrix float boxes
+    Lbl lblTypeRatios;  vector<Ibx> fbxTypeRatios;              // type ratios int boxes
 
-    Grp grpCopyPreloadedSettings;       // copy preloaded settings group
+    Grp grpCopyPreloadedSettings;       // copy preloadedTab settings group
     TglGrp tglgrpCopyPreloadedSettings; // toggle default/custom settings to copy
-    FLsv flsvCopyDefaultSettings;       // file list view to copy default settings for customisation
-    FLsv flsvCopyCustomSettings;        // copy custom settings file list view
-    Btn btnCopyPreloadedSettings;       // copy preloaded settings into customised settings button
+    Flsv flsvCopyDefaultSettings;       // file list view to copy default settings for customisation
+    Flsv flsvCopyCustomSettings;        // copy custom settings file list view
+    Btn btnCopyPreloadedSettings;       // copy preloadedTab settings into customisedTab settings button
 
-    Btn btnValidateCustomSettings; // validate settings button
-    Btn btnSaveCustomSettings;     // save settings button
+    Btn btnValidateCustomisedSettings;  // validate settings button
+    Btn btnSaveCustomisedSettings;      // save settings button
 
     Grp grpErrors;  // errors group box
     Lsv lsvErrors;  // list view of current errors
@@ -107,15 +104,15 @@ class Launcher
 
     // GUI HANDLER METHODS
 
-    void header();      // handles header widgets
-    bool preloaded();   // handles preloaded tab widgets, returns true on click execute preloaded settings, otherwise false
-    bool customised();  // handles customise tab widgets, returns true execution of valid custom settings, otherwise false
+    void header();          // handles header widgets
+    bool preloadedTab();    // handles preloadedTab tab widgets, returns true on click execute preloadedTab settings, otherwise false
+    bool customisedTab();   // handles customise tab widgets, returns true execution of valid custom settings, otherwise false
 
     // UTIL METHODS
 
-    void readPreloadedSettings(FLsv& flsv, vector<Settings>& settings);
+    void readPreloadedSettings(Flsv& flsv, vector<Settings>& settings);
 
-    bool validateInputSettings();
+    bool validateCustomisedSettings();
     bool saveCustomisedSettings();
     void copyToCustomisedSettings(const Settings& settings);
     

@@ -17,7 +17,7 @@ class ParticleLife
 {
   public:
 
-    ParticleLife(Settings& settings);
+    ParticleLife(const Settings& settings);
 
     const Settings settings;
 
@@ -43,14 +43,14 @@ class ParticleLife
 
     long long unsigned int frameCount;
     
-    const int types;
-    const int size;
-    const float bounds;
-    const int count;
-    const float resistance;
+    const unsigned int types;
+    const unsigned int size;
+    const unsigned int count;
     const float innerRadius;
+    const float resistance;
     const float step;
     const vector<vector<float>> attractions;
+    const float bounds;
 
     vector<Particle> particles;
 

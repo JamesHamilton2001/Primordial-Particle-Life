@@ -169,7 +169,7 @@ ostream& operator <<(ostream& os, const Lsv& lsv)
     return os << lsv.scrollIdx << ", " << lsv.activeIdx << ", " << lsv.text;
 }
 
-void FLsv::updateContents()
+void Flsv::updateContents()
 {
     struct dirent* entry;
     DIR* dir = opendir(dirPath);
