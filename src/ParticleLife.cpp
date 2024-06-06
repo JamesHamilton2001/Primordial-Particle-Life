@@ -27,9 +27,9 @@ ParticleLife::ParticleLife(const Settings& settings) :
 
 void ParticleLife::update()
 {
-    frameCount++;
+    frameCount++;  // increment frame count
 
-    spatialHash.map(particles);
+    spatialHash.map(particles);  // map particles into the spatial hash
 
     // for each cell...
     for (unsigned int row = 1; row <= size; row++) {
@@ -41,7 +41,7 @@ void ParticleLife::update()
                 for (unsigned int c = col-1; c <= col+1; c++) {
                     auto& neighbour = spatialHash.getCell(r, c);
                     
-                    // interact particles within neighbourhood
+                    // compute particle interactions within neighbourhood
                     for (Particle* p1 : cell)
                         for (Particle* p2 : neighbour)
                             if (p1 != p2)
@@ -63,7 +63,7 @@ void ParticleLife::update()
         p.pos.x += step * p.vel.x;
         p.pos.y += step * p.vel.y;
 
-        // wrap arouind bounds
+        // wrap position around bounds
         if (p.pos.x < 0.0f)         p.pos.x += bounds;
         else if (p.pos.x > bounds)  p.pos.x -= bounds;
         if (p.pos.y < 0.0f)         p.pos.y += bounds;

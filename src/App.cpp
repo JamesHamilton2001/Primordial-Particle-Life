@@ -74,7 +74,7 @@ bool App::update()
 
 void App::saveData() const
 {
-    string fileName = particleLife.settings.name + "(" + to_string(particleLife.getFrameCount()) + ")";
+    string fileName = particleLife.settings.name +"_"+ to_string(particleLife.settings.seed) +"("+ to_string(particleLife.getFrameCount()) +")";
 
     // TAKE SCREENSHOT
     TakeScreenshot((particleLife.settings.simulationScreenshotsDir + fileName + ".png").c_str());
