@@ -38,6 +38,10 @@ constexpr const char* PARTICLELIFE_CUSTOM_SETTINGS_DIR    = "./settings/custom/"
 constexpr const char* PARTICLELIFE_STATS_DATA_DIR         = "./statistics/data/";
 constexpr const char* PARTICLELIFE_STATS_SCREENSHOTS_DIR  = "./statistics/screenshots/";
 
+/*                                                          RED  GRN  BLU  YLW  MGT  CYN  ORG  PRP  WHT */
+constexpr const unsigned char R[PARTICLELIFE_MAX_TYPES] = { 255, 000, 000, 255, 255, 000, 255, 127, 255 };
+constexpr const unsigned char G[PARTICLELIFE_MAX_TYPES] = { 000, 255, 000, 255, 000, 255, 127, 000, 255 };
+constexpr const unsigned char B[PARTICLELIFE_MAX_TYPES] = { 000, 000, 255, 000, 255, 255, 000, 127, 255 };
 
 
 
