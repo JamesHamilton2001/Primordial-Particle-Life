@@ -25,6 +25,7 @@ class App
     unsigned int fpsTarget;
     const long long unsigned int finalFrame;
     unsigned int progressPercent;
+    unsigned int ssCount;
 
     ParticleLife particleLife;
 
