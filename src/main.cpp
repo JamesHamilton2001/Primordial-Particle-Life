@@ -8,8 +8,8 @@
 
 int main()
 {
-    int width = 500;
-    int height = 500;
+    int width = 900;
+    int height = 900;
     long long unsigned int finalFrame = 125000;
 
     cout << endl;
@@ -23,13 +23,13 @@ int main()
             CloseWindow();
             return EXIT_SUCCESS;
         }
-    }
+    } cout << endl;
 
     App app(width, height, 0, launcher.getSettings(), finalFrame);
-
-    cout << endl;
     SetWindowSize(width, height);
     SetTargetFPS(0);
+
+    cout << endl;
     cout << "INITIATION SETTINGS:" << endl;
     cout << launcher.getSettings() << endl;
     cout << endl;

@@ -23,10 +23,11 @@ App::App(int width, int height, int fpsTarget, const Settings& settings, long lo
     ssCount(0),
     particleLife (settings),
     paused (false),
-    drawGrid (true),
+    drawGrid (false),
+    // drawGrid (true),
     drawGhosts (true),
     camera { Vector2 { float(width/2), float(height/2) },
-             Vector2 { float(settings.size), float(settings.size) }, 0.0f, 24.0f }
+             Vector2 { float(settings.size), float(settings.size) }, 0.0f, 16.0f }
 {
     // generate particle texture (64x64 white circle on transparent background)
     Image img = GenImageColor(64, 64, BLANK);
@@ -54,15 +55,15 @@ bool App::update()
     unsigned int frame = particleLife.getFrameCount()-1;
     unsigned int pp = int(100 * frame / finalFrame);
 
+    if ((pp != progressPercent && pp % 2 == 0) || frame == 1) {
+        string ssName = "Screenshot_"+to_string(++ssCount)+"___Frame_"+to_string(frame)+".png";
+        TakeScreenshot(ssName.c_str());
+    }
+
     if (pp != progressPercent){
         cout << "Progress: " << pp << "%" << endl;
         progressPercent = pp;
     }
-
-    // if (pp % 4 == 0 || frame == 1) {
-        // string ssName = "Screenshot_"+to_string(++ssCount)+"___Frame_"+to_string(frame)+".png";
-        // TakeScreenshot(ssName.c_str());
-    // }
 
     if (finalFrame > 0){
         if (particleLife.getFrameCount() >= finalFrame) {
@@ -74,7 +75,9 @@ bool App::update()
 
 void App::saveData() const
 {
-    string fileName = particleLife.settings.name +"(F"+ to_string(particleLife.getFrameCount()) +")";
+    particleLife.save();
+    
+    string fileName = particleLife.settings.name +"(f"+ to_string(particleLife.getFrameCount()) +")";
 
     // TAKE SCREENSHOT
     TakeScreenshot((particleLife.settings.simulationScreenshotsDir + fileName + ".png").c_str());

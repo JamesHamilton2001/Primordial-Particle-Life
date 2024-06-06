@@ -10,7 +10,7 @@ import matplotlib.patches as mpatches
 
 DIR_NAME = "./data/"
 
-JSON_NAME = "small_boy_seeded(30000).json"
+JSON_NAME = "big_boy(s1234)(f125000).json"
 
 RAW_DATA = pd.read_json(DIR_NAME+JSON_NAME)
 
@@ -352,7 +352,7 @@ def visualise_interdists_overlayed(t_interdists, interdist_stats, inter_range_st
 
 def main():
 
-    isPrintingData = False
+    isPrintingData = True
     isPrintingStats = True
     isPlotting = True
 
@@ -369,11 +369,11 @@ def main():
         print("\nSimulation Stats:")
         print_simulation_stats(simulation_state_stats)
 
-    if isPlotting:
+    # if isPlotting:
 
         # visualise_speeds(simulation_state_data.result.typed_speeds, simulation_state_stats.result.speeds)
         # visualise_intercounts(simulation_state_data.result.typed_interdists, simulation_state_stats.result.interdists)
-        visualise_interdists_overlayed(simulation_state_data.result.typed_interdists, simulation_state_stats.result.interdists)
+        # visualise_interdists_overlayed(simulation_state_data.result.typed_interdists, simulation_state_stats.result.interdists)
         # visualise_interdists_overlayed(simulation_state_data.result.typed_interdists, simulation_state_stats.result.inner_interdists, "inner")
         # visualise_interdists_overlayed(simulation_state_data.result.typed_interdists, simulation_state_stats.result.outer_interdists, "outer")
 

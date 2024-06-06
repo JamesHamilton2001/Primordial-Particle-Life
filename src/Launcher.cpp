@@ -114,6 +114,9 @@ bool Launcher::run()
 
     EndDrawing();
 
+    if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyDown(KEY_LEFT_ALT) && IsKeyPressed(KEY_S))
+        TakeScreenshot("screenshot.png");
+
     return !submitted;
 }
 
