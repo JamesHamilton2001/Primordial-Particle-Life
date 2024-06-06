@@ -114,31 +114,3 @@ const vector<vector<vector<Particle>>>& SpatialHash::getEdgeWraps() const
 {
     return edgeWraps;
 }
-
-/* 
-void SpatialHash::drawGrid() const
-{
-    rlBegin(RL_LINES);
-        rlColor4ub(80, 80, 80, 255);
-        for (int i = -1; i <= static_cast<int>(size)+1; i++)
-            rlVertex2f(i*2.0f, -2.0f),  rlVertex2f(i*2.0f, bounds+2.0f),
-            rlVertex2f(-2.0f, i*2.0f),  rlVertex2f(bounds+2.0f, i*2.0f);
-    rlEnd();
-}
-void SpatialHash::drawGhosts(unsigned int texID) const
-{
-    // draw particles in overlapping cells
-    rlSetTexture(texID);
-    rlBegin(RL_QUADS);
-        for (auto const& corner : cornerWraps)
-            for (Particle const& p : corner)
-                p.draw();
-        for (auto const& edge : edgeWraps)
-            for (auto const& cell : edge)
-                for (Particle const& p : cell)
-                    p.draw();
-    rlSetTexture(0);
-    rlEnd();
-}
-
- */

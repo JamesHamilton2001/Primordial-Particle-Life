@@ -23,9 +23,8 @@ App::App(int width, int height, int fpsTarget, const Settings& settings, long lo
     ssCount(0),
     particleLife (settings),
     paused (false),
-    drawGrid (false),
-    // drawGrid (true),
-    drawGhosts (true),
+    gridOn (false),
+    ghostsOn (true),
     camera { Vector2 { float(width/2), float(height/2) },
              Vector2 { float(settings.size), float(settings.size) }, 0.0f, 16.0f }
 {
@@ -167,8 +166,8 @@ void App::render() const
         ClearBackground(BLACK);
         BeginMode2D(camera);
             particleLife.draw(particleTexture.id);
-            if (drawGrid)   particleLife.drawGrid();
-            if (drawGhosts) particleLife.drawGhosts(particleTexture.id);
+            if (gridOn)   particleLife.drawGrid();
+            if (ghostsOn) particleLife.drawGhosts(particleTexture.id);
             particleLife.drawSoftBorder();
         EndMode2D();
         DrawFPS(GetScreenWidth()-100, 10);
@@ -195,11 +194,11 @@ void App::handleInput()
 
     // toggle grid on PRESS_G
     if (IsKeyPressed(KEY_G))
-        drawGrid = !drawGrid;
+        gridOn = !gridOn;
 
     // toggle ghosts on PRESS_C
     if (IsKeyPressed(KEY_C))
-        drawGhosts = !drawGhosts;
+        ghostsOn= !ghostsOn;
     
     // save settings and run statistics on PRESS_ENTER
     if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_ENTER)) {

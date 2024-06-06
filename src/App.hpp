@@ -30,8 +30,8 @@ class App
     ParticleLife particleLife;
 
     bool paused;
-    bool drawGrid;
-    bool drawGhosts;
+    bool gridOn;
+    bool ghostsOn;
     
     Camera2D camera;
     Texture2D particleTexture;
@@ -39,6 +39,10 @@ class App
     void handleInput();
     void render() const;
     void saveData() const;
+
+    // void drawGrid() const;
+    // void drawGhosts() const;
+    // void drawSoftBorder() const;
 
 };
 

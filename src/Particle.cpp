@@ -6,13 +6,6 @@
 
 
 
-// RED, BLUE, YELLOW, PURPLE, GREEN, ORANGE, PINK, BEIGE, RAYWHITE
-const unsigned char Particle::R[9] = { 255, 50,  255, 255, 0,   255, 255, 210, 255 };
-const unsigned char Particle::G[9] = { 50,  100, 255, 127, 255, 127, 200, 170, 255 };
-const unsigned char Particle::B[9] = { 50,  255, 0,   255, 50,  0,   200, 130, 255 };
-
-
-
 Particle::Particle(unsigned int type, Vector2 pos, Vector2 vel) :
     type(type),
     pos(pos),
