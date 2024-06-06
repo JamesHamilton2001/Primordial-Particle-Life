@@ -105,6 +105,17 @@ vector<Particle*>& SpatialHash::getCell(unsigned int row, unsigned int col)
     return grid[row][col];
 }
 
+const vector<vector<Particle>>& SpatialHash::getCornerWraps() const
+{
+    return cornerWraps;
+}
+
+const vector<vector<vector<Particle>>>& SpatialHash::getEdgeWraps() const
+{
+    return edgeWraps;
+}
+
+/* 
 void SpatialHash::drawGrid() const
 {
     rlBegin(RL_LINES);
@@ -114,7 +125,6 @@ void SpatialHash::drawGrid() const
             rlVertex2f(-2.0f, i*2.0f),  rlVertex2f(bounds+2.0f, i*2.0f);
     rlEnd();
 }
-
 void SpatialHash::drawGhosts(unsigned int texID) const
 {
     // draw particles in overlapping cells
@@ -130,3 +140,5 @@ void SpatialHash::drawGhosts(unsigned int texID) const
     rlSetTexture(0);
     rlEnd();
 }
+
+ */

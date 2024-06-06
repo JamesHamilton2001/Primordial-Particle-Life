@@ -75,8 +75,13 @@ void ParticleLife::draw(unsigned int pTexID) const
 {
     rlSetTexture(pTexID);
     rlBegin(RL_QUADS);
-        for (Particle const& p : particles)
-            p.draw();
+    for (Particle const& p : particles)
+        rlColor4ub(R[p.type], G[p.type], B[p.type], 255),
+        rlNormal3f(0.0f, 0.0f, 1.0f),
+        rlTexCoord2f(0.0f, 0.0f), rlVertex2f(p.pos.x-0.05f, p.pos.y-0.05f), // top left
+        rlTexCoord2f(0.0f, 1.0f), rlVertex2f(p.pos.x-0.05f, p.pos.y+0.05f), // bottom left
+        rlTexCoord2f(1.0f, 1.0f), rlVertex2f(p.pos.x+0.05f, p.pos.y+0.05f), // bottom right
+        rlTexCoord2f(1.0f, 0.0f), rlVertex2f(p.pos.x+0.05f, p.pos.y-0.05f); // top right
     rlSetTexture(0);
     rlEnd();
 }
@@ -196,12 +201,37 @@ void ParticleLife::drawSoftBorder() const
 
 void ParticleLife::drawGrid() const
 {
-    spatialHash.drawGrid();
+    rlBegin(RL_LINES);
+    rlColor4ub(79, 79, 79, 255);
+    for (int i = -1; i < static_cast<int>(size)+1; i++)
+        rlVertex2f(i*2.0f, -2.0f),  rlVertex2f(i*2.0f, bounds+2.0f),
+        rlVertex2f(-2.0f, i*2.0f),  rlVertex2f(bounds+2.0f, i*2.0f);
+    rlEnd();
 }
 
 void ParticleLife::drawGhosts(unsigned int pTexID) const
 {
-    spatialHash.drawGhosts(pTexID);
+    rlSetTexture(pTexID);
+    rlBegin(RL_QUADS);
+    for (const auto& corner : spatialHash.getCornerWraps()) 
+        for (const Particle& p : corner)
+            rlColor4ub(R[p.type], G[p.type], B[p.type], 255),
+            rlNormal3f(0.0f, 0.0f, 1.0f),
+            rlTexCoord2f(0.0f, 0.0f), rlVertex2f(p.pos.x-0.05f, p.pos.y-0.05f), // top left
+            rlTexCoord2f(0.0f, 1.0f), rlVertex2f(p.pos.x-0.05f, p.pos.y+0.05f), // bottom left
+            rlTexCoord2f(1.0f, 1.0f), rlVertex2f(p.pos.x+0.05f, p.pos.y+0.05f), // bottom right
+            rlTexCoord2f(1.0f, 0.0f), rlVertex2f(p.pos.x+0.05f, p.pos.y-0.05f); // top right
+    for (const auto& edge : spatialHash.getEdgeWraps())
+        for (const auto& cell : edge)
+            for (const Particle& p : cell)
+                rlColor4ub(R[p.type], G[p.type], B[p.type], 255),
+                rlNormal3f(0.0f, 0.0f, 1.0f),
+                rlTexCoord2f(0.0f, 0.0f), rlVertex2f(p.pos.x-0.05f, p.pos.y-0.05f), // top left
+                rlTexCoord2f(0.0f, 1.0f), rlVertex2f(p.pos.x-0.05f, p.pos.y+0.05f), // bottom left
+                rlTexCoord2f(1.0f, 1.0f), rlVertex2f(p.pos.x+0.05f, p.pos.y+0.05f), // bottom right
+                rlTexCoord2f(1.0f, 0.0f), rlVertex2f(p.pos.x+0.05f, p.pos.y-0.05f); // top right
+    rlSetTexture(0);
+    rlEnd();
 }
 
 

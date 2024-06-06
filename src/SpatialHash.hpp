@@ -20,8 +20,8 @@ class SpatialHash
 
     vector<Particle*>& getCell(unsigned int row, unsigned int col);
 
-    void drawGrid() const;
-    void drawGhosts(unsigned int texID) const;
+    const vector<vector<Particle>>& getCornerWraps() const;
+    const vector<vector<vector<Particle>>>& getEdgeWraps() const;
 
  private:
 
