@@ -11,8 +11,8 @@
 
 
 SpatialHash::SpatialHash(unsigned int size, vector<Particle>& particles) :
-    size(size),
-    bounds(PARTICLELIFE_DIAMETER * size),
+    S(size),
+    B(PARTICLELIFE_DIAMETER * size),
     particles(particles),
     taureanGrid(size+2, vector<vector<Particle*>>(size+2, vector<Particle*>())),
     cornerWrapCells(4, vector<Particle>()),
@@ -48,14 +48,14 @@ void SpatialHash::map()
     // taurean edges
 
     for (unsigned int r = 0; r < 4; r++) {
-        for (unsigned int c = 1; c <= size; c++) {
+        for (unsigned int c = 1; c <= S; c++) {
             for (Particle* ptr : taureanGrid[(this->*inEdgeIdx[r][0])(c)]
                                             [(this->*inEdgeIdx[r][1])(c)]) {
                 Particle p = *ptr;
                 (this->*offsetEdgeParticle[r])(p);
                 edgeWrapCells[r][c-1].emplace_back(p);
             }
-        }for (unsigned int c = 1; c <= size; c++)
+        }for (unsigned int c = 1; c <= S; c++)
             for (Particle& p : edgeWrapCells[r][c-1])
                 taureanGrid[(this->*outEdgeIdx[r][0])(c)]
                            [(this->*outEdgeIdx[r][1])(c)].emplace_back(&p);

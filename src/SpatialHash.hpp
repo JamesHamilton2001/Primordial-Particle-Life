@@ -8,6 +8,10 @@
 #include <iostream>
 
 
+#define taureanEdgeIndex(name) inline const unsigned int name(unsigned int c) const
+
+
+
 class SpatialHash
 {
   public:
@@ -22,8 +26,8 @@ class SpatialHash
 
   private:
 
-    const unsigned int size;   // number of cells in one dimension
-    const float bounds;
+    const unsigned int S;   // number of cells in one dimension
+    const float B;
 
     vector<Particle>& particles;
 
@@ -33,55 +37,45 @@ class SpatialHash
 
     vector<vector<vector<Particle>>> edgeWrapCells;  // T[size],  R[size],  B[size],  L[size]
 
-    unsigned int hash(float coord) const;   // hash y for row, x for col
+    unsigned int hash(float coord) const;            // hash y for row, x for col
 
-    const unsigned int  inCornerIdx[4][2] = { {   size,   size}, {   size,      1}, {      1,      1}, {      1,   size} };
-    const unsigned int outCornerIdx[4][2] = { {      0,      0}, {      0, size+1}, { size+1, size+1}, { size+1,      0} };
-    const float         xyCornerOff[4][2] = { {-bounds,-bounds}, { bounds,-bounds}, { bounds, bounds}, {-bounds, bounds} };
+    const unsigned int  inCornerIdx[4][2] = { {   S,   S }, {   S,   1 }, {   1,   1 }, {   1,   S } };
+    const unsigned int outCornerIdx[4][2] = { {   0,   0 }, {   0, S+1 }, { S+1, S+1 }, { S+1,   0 } };
+    const float         xyCornerOff[4][2] = { {  -B,  -B }, {   B,  -B }, {   B,   B }, {  -B,   B } };
 
-    inline const unsigned int inEdgeRow0(unsigned int c) const { return size; }
-    inline const unsigned int inEdgeRow1(unsigned int c) const { return c;    }
-    inline const unsigned int inEdgeRow2(unsigned int c) const { return 1U;   }
-    inline const unsigned int inEdgeRow3(unsigned int c) const { return c;    }
+    taureanEdgeIndex(inEdgeRow0) { return S;  }  taureanEdgeIndex(inEdgeCol0) { return c;  }
+    taureanEdgeIndex(inEdgeRow1) { return c;  }  taureanEdgeIndex(inEdgeCol1) { return 1U; }
+    taureanEdgeIndex(inEdgeRow2) { return 1U; }  taureanEdgeIndex(inEdgeCol2) { return c;  }
+    taureanEdgeIndex(inEdgeRow3) { return c;  }  taureanEdgeIndex(inEdgeCol3) { return S;  }
 
-    inline const unsigned int inEdgeCol0(unsigned int c) const { return c;    }
-    inline const unsigned int inEdgeCol1(unsigned int c) const { return 1U;   }
-    inline const unsigned int inEdgeCol2(unsigned int c) const { return c;    }
-    inline const unsigned int inEdgeCol3(unsigned int c) const { return size; }
+    taureanEdgeIndex(outEdgeRow0) { return 0U;  }  taureanEdgeIndex(outEdgeCol0) { return c;   }
+    taureanEdgeIndex(outEdgeRow1) { return c;   }  taureanEdgeIndex(outEdgeCol1) { return S+1; }
+    taureanEdgeIndex(outEdgeRow2) { return S+1; }  taureanEdgeIndex(outEdgeCol2) { return c;   }
+    taureanEdgeIndex(outEdgeRow3) { return c;   }  taureanEdgeIndex(outEdgeCol3) { return 0U;  }    
 
-    inline const unsigned int outEdgeRow0(unsigned int c) const { return 0U;     }
-    inline const unsigned int outEdgeRow1(unsigned int c) const { return c;      }
-    inline const unsigned int outEdgeRow2(unsigned int c) const { return size+1; }
-    inline const unsigned int outEdgeRow3(unsigned int c) const { return c;      }
+    inline void offsetEdgeParticle0(Particle& p) const { p.pos.y -= B; }
+    inline void offsetEdgeParticle1(Particle& p) const { p.pos.x += B; }
+    inline void offsetEdgeParticle2(Particle& p) const { p.pos.y += B; }
+    inline void offsetEdgeParticle3(Particle& p) const { p.pos.x -= B; }
 
-    inline const unsigned int outEdgeCol0(unsigned int c) const { return c;      }
-    inline const unsigned int outEdgeCol1(unsigned int c) const { return size+1; }
-    inline const unsigned int outEdgeCol2(unsigned int c) const { return c;      }
-    inline const unsigned int outEdgeCol3(unsigned int c) const { return 0U;     }
+    using tareanEdgeFuncPtr = const unsigned int (SpatialHash::*)(unsigned int) const;
+    using offsetParticleFuncPtr = void (SpatialHash::*)(Particle&) const;
 
-    inline void offsetEdgeParticle0(Particle& p) const { p.pos.y -= bounds; }
-    inline void offsetEdgeParticle1(Particle& p) const { p.pos.x += bounds; }
-    inline void offsetEdgeParticle2(Particle& p) const { p.pos.y += bounds; }
-    inline void offsetEdgeParticle3(Particle& p) const { p.pos.x -= bounds; }
+    tareanEdgeFuncPtr inEdgeIdx[4][2] = { { &SpatialHash::inEdgeRow0, &SpatialHash::inEdgeCol0 }, 
+                                          { &SpatialHash::inEdgeRow1, &SpatialHash::inEdgeCol1 },
+                                          { &SpatialHash::inEdgeRow2, &SpatialHash::inEdgeCol2 },
+                                          { &SpatialHash::inEdgeRow3, &SpatialHash::inEdgeCol3 }, };
 
-    const unsigned int (SpatialHash::*inEdgeIdx[4][2])(unsigned int) const = {
-        { &SpatialHash::inEdgeRow0, &SpatialHash::inEdgeCol0 }, 
-        { &SpatialHash::inEdgeRow1, &SpatialHash::inEdgeCol1 },
-        { &SpatialHash::inEdgeRow2, &SpatialHash::inEdgeCol2 },
-        { &SpatialHash::inEdgeRow3, &SpatialHash::inEdgeCol3 },
-    };
-    const unsigned int (SpatialHash::*outEdgeIdx[4][2])(unsigned int) const = {
-        { &SpatialHash::outEdgeRow0, &SpatialHash::outEdgeCol0 }, 
-        { &SpatialHash::outEdgeRow1, &SpatialHash::outEdgeCol1 },
-        { &SpatialHash::outEdgeRow2, &SpatialHash::outEdgeCol2 },
-        { &SpatialHash::outEdgeRow3, &SpatialHash::outEdgeCol3 },
-    };
-    void (SpatialHash::*offsetEdgeParticle[4])(Particle&) const = {
-        &SpatialHash::offsetEdgeParticle0,
-        &SpatialHash::offsetEdgeParticle1,
-        &SpatialHash::offsetEdgeParticle2,
-        &SpatialHash::offsetEdgeParticle3,
-    };
+    tareanEdgeFuncPtr outEdgeIdx[4][2] = { { &SpatialHash::outEdgeRow0, &SpatialHash::outEdgeCol0 }, 
+                                           { &SpatialHash::outEdgeRow1, &SpatialHash::outEdgeCol1 },
+                                           { &SpatialHash::outEdgeRow2, &SpatialHash::outEdgeCol2 },
+                                           { &SpatialHash::outEdgeRow3, &SpatialHash::outEdgeCol3 }, };
+
+    offsetParticleFuncPtr offsetEdgeParticle[4] = { &SpatialHash::offsetEdgeParticle0,
+                                                    &SpatialHash::offsetEdgeParticle1,
+                                                    &SpatialHash::offsetEdgeParticle2,
+                                                    &SpatialHash::offsetEdgeParticle3, };
+
 };
 
 

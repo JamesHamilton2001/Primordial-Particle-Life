@@ -54,10 +54,10 @@ bool App::update()
     unsigned int frame = particleLife.getFrameCount()-1;
     unsigned int pp = int(100 * frame / finalFrame);
 
-    if ((pp != progressPercent && pp % 2 == 0) || frame == 1) {
-        string ssName = "Screenshot_"+to_string(++ssCount)+"___Frame_"+to_string(frame)+".png";
-        TakeScreenshot(ssName.c_str());
-    }
+    // if ((pp != progressPercent && pp % 2 == 0) || frame == 1) {
+    //     string ssName = "Screenshot_"+to_string(++ssCount)+"___Frame_"+to_string(frame)+".png";
+    //     TakeScreenshot(ssName.c_str());
+    // }
 
     if (pp != progressPercent){
         cout << "Progress: " << pp << "%" << endl;
