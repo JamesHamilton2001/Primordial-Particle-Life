@@ -10,7 +10,7 @@
 
 #define taureanEdgeIndex(name) inline const unsigned int name(unsigned int c) const
 
-
+#define taureanEdgeIdx(name, ret) inline const unsigned int name(unsigned int c) const { return ret; }
 
 class SpatialHash
 {
@@ -43,15 +43,15 @@ class SpatialHash
     const unsigned int outCornerIdx[4][2] = { {   0,   0 }, {   0, S+1 }, { S+1, S+1 }, { S+1,   0 } };
     const float         xyCornerOff[4][2] = { {  -B,  -B }, {   B,  -B }, {   B,   B }, {  -B,   B } };
 
-    taureanEdgeIndex(inEdgeRow0) { return S;  }  taureanEdgeIndex(inEdgeCol0) { return c;  }
-    taureanEdgeIndex(inEdgeRow1) { return c;  }  taureanEdgeIndex(inEdgeCol1) { return 1U; }
-    taureanEdgeIndex(inEdgeRow2) { return 1U; }  taureanEdgeIndex(inEdgeCol2) { return c;  }
-    taureanEdgeIndex(inEdgeRow3) { return c;  }  taureanEdgeIndex(inEdgeCol3) { return S;  }
+    taureanEdgeIdx(innerEdgeRow0, S)  taureanEdgeIdx(innerEdgeCol0, c)
+    taureanEdgeIdx(innerEdgeRow1, c)  taureanEdgeIdx(innerEdgeCol1, 1)
+    taureanEdgeIdx(innerEdgeRow2, 1)  taureanEdgeIdx(innerEdgeCol2, c)
+    taureanEdgeIdx(innerEdgeRow3, c)  taureanEdgeIdx(innerEdgeCol3, S)
 
-    taureanEdgeIndex(outEdgeRow0) { return 0U;  }  taureanEdgeIndex(outEdgeCol0) { return c;   }
-    taureanEdgeIndex(outEdgeRow1) { return c;   }  taureanEdgeIndex(outEdgeCol1) { return S+1; }
-    taureanEdgeIndex(outEdgeRow2) { return S+1; }  taureanEdgeIndex(outEdgeCol2) { return c;   }
-    taureanEdgeIndex(outEdgeRow3) { return c;   }  taureanEdgeIndex(outEdgeCol3) { return 0U;  }    
+    taureanEdgeIdx(outerEdgeRow0,   0)  taureanEdgeIdx(outerEdgeCol0,   c)
+    taureanEdgeIdx(outerEdgeRow1,   c)  taureanEdgeIdx(outerEdgeCol1, S+1)
+    taureanEdgeIdx(outerEdgeRow2, S+1)  taureanEdgeIdx(outerEdgeCol2,   c)
+    taureanEdgeIdx(outerEdgeRow3,   c)  taureanEdgeIdx(outerEdgeCol3,   0)
 
     inline void offsetEdgeParticle0(Particle& p) const { p.pos.y -= B; }
     inline void offsetEdgeParticle1(Particle& p) const { p.pos.x += B; }
@@ -61,15 +61,15 @@ class SpatialHash
     using tareanEdgeFuncPtr = const unsigned int (SpatialHash::*)(unsigned int) const;
     using offsetParticleFuncPtr = void (SpatialHash::*)(Particle&) const;
 
-    tareanEdgeFuncPtr inEdgeIdx[4][2] = { { &SpatialHash::inEdgeRow0, &SpatialHash::inEdgeCol0 }, 
-                                          { &SpatialHash::inEdgeRow1, &SpatialHash::inEdgeCol1 },
-                                          { &SpatialHash::inEdgeRow2, &SpatialHash::inEdgeCol2 },
-                                          { &SpatialHash::inEdgeRow3, &SpatialHash::inEdgeCol3 }, };
+    tareanEdgeFuncPtr innerEdgeIdx[4][2] = { { &SpatialHash::innerEdgeRow0, &SpatialHash::innerEdgeCol0 }, 
+                                             { &SpatialHash::innerEdgeRow1, &SpatialHash::innerEdgeCol1 },
+                                             { &SpatialHash::innerEdgeRow2, &SpatialHash::innerEdgeCol2 },
+                                             { &SpatialHash::innerEdgeRow3, &SpatialHash::innerEdgeCol3 }, };
 
-    tareanEdgeFuncPtr outEdgeIdx[4][2] = { { &SpatialHash::outEdgeRow0, &SpatialHash::outEdgeCol0 }, 
-                                           { &SpatialHash::outEdgeRow1, &SpatialHash::outEdgeCol1 },
-                                           { &SpatialHash::outEdgeRow2, &SpatialHash::outEdgeCol2 },
-                                           { &SpatialHash::outEdgeRow3, &SpatialHash::outEdgeCol3 }, };
+    tareanEdgeFuncPtr outerEdgeIdx[4][2] = { { &SpatialHash::outerEdgeRow0, &SpatialHash::outerEdgeCol0 }, 
+                                             { &SpatialHash::outerEdgeRow1, &SpatialHash::outerEdgeCol1 },
+                                             { &SpatialHash::outerEdgeRow2, &SpatialHash::outerEdgeCol2 },
+                                             { &SpatialHash::outerEdgeRow3, &SpatialHash::outerEdgeCol3 }, };
 
     offsetParticleFuncPtr offsetEdgeParticle[4] = { &SpatialHash::offsetEdgeParticle0,
                                                     &SpatialHash::offsetEdgeParticle1,
