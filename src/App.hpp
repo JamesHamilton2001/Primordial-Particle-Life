@@ -18,7 +18,7 @@ class App
 
     bool update();
 
- private:
+ private: 
 
     unsigned int width;
     unsigned int height;

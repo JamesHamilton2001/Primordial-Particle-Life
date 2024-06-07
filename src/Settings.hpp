@@ -33,6 +33,8 @@ constexpr int   PARTICLELIFE_MAX_SEED            = INT_MAX;
 constexpr int   PARTICLELIFE_MIN_RATIO           = 1;
 constexpr int   PARTICLELIFE_MAX_RATIO           = PARTICLELIFE_MAX_COUNT;
 
+constexpr const float PARTICLELIFE_DIAMETER = 2.0f;
+
 constexpr const char* PARTICLELIFE_DEFAULT_SETTINGS_DIR   = "./settings/default/";
 constexpr const char* PARTICLELIFE_CUSTOM_SETTINGS_DIR    = "./settings/custom/";
 constexpr const char* PARTICLELIFE_STATS_DATA_DIR         = "./statistics/data/";

@@ -22,14 +22,14 @@ ParticleLife::ParticleLife(const Settings& settings) :
     attractions (settings.attractions),
     bounds      (2.0f * settings.size),
     particles   (settings.particles),
-    spatialHash (settings.size, settings.types)
+    spatialHash (settings.size, particles)
 {}
 
 void ParticleLife::update()
 {
     frameCount++;  // increment frame count
 
-    spatialHash.map(particles);  // map particles into the spatial hash
+    spatialHash.map();  // map particles into the spatial hash
 
     // for each cell...
     for (unsigned int row = 1; row <= size; row++) {
