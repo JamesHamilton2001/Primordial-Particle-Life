@@ -5,12 +5,11 @@
 
 #define RAYGUI_IMPLEMENTATION
 
-
 int main()
 {
     int width = 900;
     int height = 900;
-    long long unsigned int finalFrame = 125000;
+    long long unsigned int finalFrame = 0;
 
     cout << endl;
     InitWindow(width, height, "Particle Life");

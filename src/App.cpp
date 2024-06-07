@@ -18,7 +18,7 @@ App::App(int width, int height, int fpsTarget, const Settings& settings, long lo
     width (width),
     height (height),
     fpsTarget (fpsTarget),
-    finalFrame(finalFrame),
+    finalFrame(0),
     progressPercent (0),
     ssCount(0),
     particleLife (settings),
@@ -197,14 +197,12 @@ void App::handleInput()
         gridOn = !gridOn;
 
     // toggle ghosts on PRESS_C
+    if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_S))
+        TakeScreenshot((particleLife.settings.name +"(f"+ to_string(particleLife.getFrameCount()) + ").png").c_str());
+        
     if (IsKeyPressed(KEY_C))
-        ghostsOn= !ghostsOn;
-    
-    // save settings and run statistics on PRESS_ENTER
-    if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_ENTER)) {
-        // particleLife.save(); // TODO: re-enable saving
-        saveData();
-    }
-    else if (IsKeyPressed(KEY_ENTER))
-        saveData();
+        ghostsOn = !ghostsOn;
+
+    if (IsKeyPressed(KEY_F))
+        ToggleFullscreen();
 }

@@ -10,7 +10,7 @@ import matplotlib.patches as mpatches
 
 DIR_NAME = "./data/"
 
-JSON_NAME = "big_boy(s1234)(f125000).json"
+JSON_NAME = "small_boy(s1234)(f125000).json"
 
 RAW_DATA = pd.read_json(DIR_NAME+JSON_NAME)
 
@@ -125,8 +125,6 @@ def print_simulation_data(simulation_data):
     print("|Result:")
     print_state_data(simulation_data.result)
 
-
-
 def get_stats(lst):
     
     slen = len(lst)
@@ -194,8 +192,6 @@ def print_simulation_stats(simulation_stats):
     print("|Result:")
     print_state_stats(simulation_stats.result)
     print()
-
-
 
 def visualise_speeds(t_speeds, speed_stats):
     
@@ -349,7 +345,6 @@ def visualise_interdists_overlayed(t_interdists, interdist_stats, inter_range_st
     plt.show()
 
 
-
 def main():
 
     isPrintingData = True
@@ -369,14 +364,13 @@ def main():
         print("\nSimulation Stats:")
         print_simulation_stats(simulation_state_stats)
 
-    # if isPlotting:
+    if isPlotting:
 
-        # visualise_speeds(simulation_state_data.result.typed_speeds, simulation_state_stats.result.speeds)
-        # visualise_intercounts(simulation_state_data.result.typed_interdists, simulation_state_stats.result.interdists)
-        # visualise_interdists_overlayed(simulation_state_data.result.typed_interdists, simulation_state_stats.result.interdists)
-        # visualise_interdists_overlayed(simulation_state_data.result.typed_interdists, simulation_state_stats.result.inner_interdists, "inner")
-        # visualise_interdists_overlayed(simulation_state_data.result.typed_interdists, simulation_state_stats.result.outer_interdists, "outer")
-
+        visualise_speeds(simulation_state_data.result.typed_speeds, simulation_state_stats.result.speeds)
+        visualise_intercounts(simulation_state_data.result.typed_interdists, simulation_state_stats.result.interdists)
+        visualise_interdists_overlayed(simulation_state_data.result.typed_interdists, simulation_state_stats.result.interdists)
+        visualise_interdists_overlayed(simulation_state_data.result.typed_interdists, simulation_state_stats.result.inner_interdists, "inner")
+        visualise_interdists_overlayed(simulation_state_data.result.typed_interdists, simulation_state_stats.result.outer_interdists, "outer")
 
 if __name__ == "__main__":
     main()
