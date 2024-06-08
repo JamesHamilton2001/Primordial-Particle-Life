@@ -5,3 +5,4 @@ main
 *.dsym
 main
 statistics/temp.py
+/*.png
