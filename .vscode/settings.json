@@ -71,5 +71,6 @@
         "cstring": "cpp",
         "bitset": "cpp",
         "regex": "cpp"
-    }
+    },
+    "cSpell.enabled": false
 }

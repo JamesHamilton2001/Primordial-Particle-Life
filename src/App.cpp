@@ -18,7 +18,7 @@ App::App(int width, int height, int fpsTarget, const Settings& settings, long lo
     width (width),
     height (height),
     fpsTarget (fpsTarget),
-    finalFrame(0),
+    finalFrame(finalFrame),
     progressPercent (0),
     ssCount(0),
     particleLife (settings),
@@ -51,25 +51,29 @@ bool App::update()
     // render simulation
     render();
 
-    unsigned int frame = particleLife.getFrameCount()-1;
-    unsigned int pp = int(100 * frame / finalFrame);
+    if (finalFrame != 0) {
+        unsigned int frame = particleLife.getFrameCount()-1;
+        unsigned int pp = int(100 * frame / finalFrame);
 
-    // if ((pp != progressPercent && pp % 2 == 0) || frame == 1) {
-    //     string ssName = "Screenshot_"+to_string(++ssCount)+"___Frame_"+to_string(frame)+".png";
-    //     TakeScreenshot(ssName.c_str());
-    // }
+        if ((pp != progressPercent && pp % 2 == 0) || frame == 1) {
+            string ssName = "Screenshot_"+to_string(++ssCount)+"___Frame_"+to_string(frame)+".png";
+            TakeScreenshot(ssName.c_str());
+        }
 
-    if (pp != progressPercent){
-        cout << "Progress: " << pp << "%" << endl;
-        progressPercent = pp;
+        if (pp != progressPercent){
+            cout << "Progress: " << pp << "%" << endl;
+            progressPercent = pp;
+        }
+
+        if (finalFrame > 0){
+            if (particleLife.getFrameCount() >= finalFrame) {
+                saveData();
+                return false;
+            }
+        }
     }
 
-    if (finalFrame > 0){
-        if (particleLife.getFrameCount() >= finalFrame) {
-            saveData();
-            return false;
-        }
-    } return true;
+    return true;
 }
 
 void App::saveData() const

@@ -9,7 +9,7 @@ int main()
 {
     int width = 900;
     int height = 900;
-    long long unsigned int finalFrame = 0;
+    long long unsigned int finalFrame = 50000;
 
     cout << endl;
     InitWindow(width, height, "Particle Life");
@@ -32,7 +32,7 @@ int main()
     cout << "INITIATION SETTINGS:" << endl;
     cout << launcher.getSettings() << endl;
     cout << endl;
-    
+
     while (app.update()) {
         if (WindowShouldClose()) {
             CloseWindow();

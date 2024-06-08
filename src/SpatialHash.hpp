@@ -26,13 +26,14 @@ class SpatialHash
 
   private:
 
-    const unsigned int S;   // number of cells in one dimension
-    const float B;
 
+    const unsigned int S;   // (size) number of cells in one dimension
+    const float B;          // (bounds) size of simulation space in units
+ 
     vector<Particle>& particles;
 
     vector<vector<vector<Particle*>>> taureanGrid;
-    
+
     vector<vector<Particle>> cornerWrapCells;        // TL, TR, BR, BL
 
     vector<vector<vector<Particle>>> edgeWrapCells;  // T[size],  R[size],  B[size],  L[size]
@@ -43,10 +44,10 @@ class SpatialHash
     const unsigned int outCornerIdx[4][2] = { {   0,   0 }, {   0, S+1 }, { S+1, S+1 }, { S+1,   0 } };
     const float         xyCornerOff[4][2] = { {  -B,  -B }, {   B,  -B }, {   B,   B }, {  -B,   B } };
 
-    taureanEdgeIdx(innerEdgeRow0, S)  taureanEdgeIdx(innerEdgeCol0, c)
-    taureanEdgeIdx(innerEdgeRow1, c)  taureanEdgeIdx(innerEdgeCol1, 1)
-    taureanEdgeIdx(innerEdgeRow2, 1)  taureanEdgeIdx(innerEdgeCol2, c)
-    taureanEdgeIdx(innerEdgeRow3, c)  taureanEdgeIdx(innerEdgeCol3, S)
+    taureanEdgeIdx(innerEdgeRow0, S)    taureanEdgeIdx(innerEdgeCol0, c)    // func name, return value, one uint arg
+    taureanEdgeIdx(innerEdgeRow1, c)    taureanEdgeIdx(innerEdgeCol1, 1)
+    taureanEdgeIdx(innerEdgeRow2, 1)    taureanEdgeIdx(innerEdgeCol2, c)
+    taureanEdgeIdx(innerEdgeRow3, c)    taureanEdgeIdx(innerEdgeCol3, S)
 
     taureanEdgeIdx(outerEdgeRow0,   0)  taureanEdgeIdx(outerEdgeCol0,   c)
     taureanEdgeIdx(outerEdgeRow1,   c)  taureanEdgeIdx(outerEdgeCol1, S+1)
