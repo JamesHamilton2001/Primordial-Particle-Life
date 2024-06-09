@@ -1,266 +1,329 @@
 #include "ParticleLife.hpp"
 
 #include <raylib.h>
-#include <raymath.h>
 #include <rlgl.h>
-
-
 #include <vector>
-#include <iostream>
-
 #include <cmath>
+#include <iostream>
+#include <string>
+#include <fstream>
+#include <filesystem>
 
 
-void ParticleLife::init(Settings settings)
-{
-    this->typeCount   = settings.typeCount;
-    this->count       = settings.count;
-    this->innerRadius = settings.innerRadius;
-    this->resistance  = settings.resistance;
-    this->step        = settings.step;
-    this->gridSize    = settings.gridSize;
-    this->attractions = settings.attractions;
-
-    this->bounds = nextafterf(2 * settings.gridSize, 0.0f);
-
-    types.resize(count, 0);
-    velocities.resize(count, { 0.0f, 0.0f });
-    positions.resize(count, { 0.0f, 0.0f });
-    randomisePositions();
-    
-    initColours();
-    initTexture();
-    initGrid();
-
-}
+ParticleLife::ParticleLife(const Settings& settings) :
+    settings    (settings),
+    frameCount  (0),
+    types       (settings.types),
+    size        (settings.size),
+    count       (settings.count),
+    innerRadius (settings.innerRadius),
+    resistance  (settings.resistance),
+    step        (settings.step),
+    attractions (settings.attractions),
+    bounds      (2.0f * settings.size),
+    particles   (settings.particles),
+    spatialHash (settings.size, particles)
+{}
 
 void ParticleLife::update()
 {
-    // ========================================= PARTICLE INTERACTION
-    // for each particle
-    for (int i = 0; i < count; i++) {
+    frameCount++;  // increment frame count
 
-        // cache particle variables
-        const int type = types[i];
-        const float xPos = positions[i].x;
-        const float yPos = positions[i].y;
-        const std::vector<float>& attractionArray = attractions[type];
-        const int row = gridHash(positions[i].y);
-        const int col = gridHash(positions[i].x);
+    spatialHash.map();  // map particles into the spatial hash
 
-        // accumulative increment to particle velocity
-        float xVelInc = 0.0f;
-        float yVelInc = 0.0f;
+    // for each cell...
+    for (unsigned int row = 1; row <= size; row++) {
+        for (unsigned int col = 1; col <= size; col++) {
+            auto& cell = spatialHash.getCell(row, col);
 
-        // iterate over neighboring row and collumn
-        for (int j = -1; j <= 1; j++) {
-            const int r = (row + j + gridSize) % gridSize;
-            for (int k = -1; k <= 1; k++) {
-                const int c = (col + k + gridSize) % gridSize;
-
-                // get ids from neighbor cell
-                for (int l = 0; l < gridCounts[r][c]; l++) {
-                    const int id = gridIds[r][c][l];
-
-                    if (j == 0 && k == 0 && i == id) continue;
-
-                    // get distance from other particle
-                    const float xDist = positions[id].x - xPos;
-                    const float yDist = positions[id].y - yPos;
-                    const float sqDist = xDist*xDist + yDist*yDist;
-
-                    // if  within acting range
-                    if (sqDist <= 4.0f) {
-                        const float distance = sqrtf(sqDist);
-
-                        // repulse if within inner radius, otherwise apply attraction
-                        const float coef = (distance <= innerRadius)
-                            ? 1.0f - innerRadius / distance
-                            : attractionArray[types[id]] * (distance - innerRadius) / 2.0f;
-
-                        // increment normalised force
-                        xVelInc += coef * (xDist / distance);
-                        yVelInc += coef * (yDist / distance);
-                    }
+            // ...and each neighbour (including itself)
+            for (unsigned int r = row-1; r <= row+1; r++) {
+                for (unsigned int c = col-1; c <= col+1; c++) {
+                    auto& neighbour = spatialHash.getCell(r, c);
+                    
+                    // compute particle interactions within neighbourhood
+                    for (Particle* p1 : cell)
+                        for (Particle* p2 : neighbour)
+                            if (p1 != p2)
+                                particleInteraction(*p1, *p2);
                 }
             }
         }
-
-        // apply accumulated force to original particle
-        velocities[i].x += xVelInc;
-        velocities[i].y += yVelInc;
-
     }
-    
-    // for each particle again
-    const float invResistance = 1.0f - resistance;
-    for (int i = 0; i < count; i++) {
 
-        // cache velocity and position
-        float xVel = velocities[i].x;
-        float yVel = velocities[i].y;
-        float xPos = positions[i].x;
-        float yPos = positions[i].y;
+    // for each particle
+    const float invResistance = 1.0f - resistance;
+    for (Particle& p : particles) {
 
         // apply resistance
-        xVel *= invResistance;
-        yVel *= invResistance;
- 
-        // apply step and velocity
-        xPos += step * xVel;
-        yPos += step * yVel;
-
-        // bounce on boundaries
-        if (xPos < 0.0f)   xPos = 0.0f,   xVel *= -1.0f;
-        if (xPos > bounds) xPos = bounds, xVel *= -1.0f;
-        if (yPos < 0.0f)   yPos = 0.0f,   yVel *= -1.0f;
-        if (yPos > bounds) yPos = bounds, yVel *= -1.0f;
+        p.vel.x *= invResistance;
+        p.vel.y *= invResistance;
         
-        // update particle
-        positions[i] = { xPos, yPos };
-        velocities[i] = { xVel, yVel };
+        // update position
+        p.pos.x += step * p.vel.x;
+        p.pos.y += step * p.vel.y;
+
+        // wrap position around bounds
+        if (p.pos.x < 0.0f)         p.pos.x += bounds;
+        else if (p.pos.x > bounds)  p.pos.x -= bounds;
+        if (p.pos.y < 0.0f)         p.pos.y += bounds;
+        else if (p.pos.y > bounds)  p.pos.y -= bounds;
     }
-
-    // map spatial hash
-    mapGrid();
-
 }
 
-void ParticleLife::draw()
+void ParticleLife::draw(unsigned int pTexID) const
 {
-    rlSetTexture(particleTexture.id);
+    rlSetTexture(pTexID);
     rlBegin(RL_QUADS);
+    for (Particle const& p : particles)
+        rlColor4ub(R[p.type], G[p.type], B[p.type], 255),
+        rlNormal3f(0.0f, 0.0f, 1.0f),
+        rlTexCoord2f(0.0f, 0.0f), rlVertex2f(p.pos.x-0.05f, p.pos.y-0.05f), // top left
+        rlTexCoord2f(0.0f, 1.0f), rlVertex2f(p.pos.x-0.05f, p.pos.y+0.05f), // bottom left
+        rlTexCoord2f(1.0f, 1.0f), rlVertex2f(p.pos.x+0.05f, p.pos.y+0.05f), // bottom right
+        rlTexCoord2f(1.0f, 0.0f), rlVertex2f(p.pos.x+0.05f, p.pos.y-0.05f); // top right
+    rlSetTexture(0);
+    rlEnd();
+}
 
-        for (int i = 0; i < count; i++) {
-            Vector2 pos = positions[i];
-            Color colour = colours[types[i]];
+long long unsigned int ParticleLife::getFrameCount() const
+{
+    return frameCount;
+}
 
-            rlColor4ub(colour.r, colour.g, colour.b, 255);
-            rlNormal3f(0.0f, 0.0f, 1.0f);
+const vector<Particle>& ParticleLife::getParticles() const
+{
+    return particles;
+}
 
-            rlTexCoord2f(0.0f, 0.0f); rlVertex2f(pos.x-0.05f, pos.y-0.05f);
-            rlTexCoord2f(0.0f, 1.0f); rlVertex2f(pos.x-0.05f, pos.y+0.05f);
-            rlTexCoord2f(1.0f, 1.0f); rlVertex2f(pos.x+0.05f, pos.y+0.05f);
-            rlTexCoord2f(1.0f, 0.0f); rlVertex2f(pos.x+0.05f, pos.y-0.05f);
+void ParticleLife::drawSoftBorder() const
+{
+    const float b = bounds;
 
-        }
+    rlSetTexture(1);
+    rlBegin(RL_QUADS);
+        rlNormal3f(0.0f, 0.0f, 1.0f);
+        rlColor4ub(0,0,0,255);
 
+        // SOFT top left corner
+        rlTexCoord2f(0.0f, 0.0f); rlVertex2f(-2, -2);   // top left
+        rlTexCoord2f(0.0f, 1.0f); rlVertex2f(-2, 0);    // bottom left
+        rlColor4ub(0,0,0,0);
+        rlTexCoord2f(1.0f, 1.0f); rlVertex2f(0, 0);     // bottom right
+        rlColor4ub(0,0,0,255);
+        rlTexCoord2f(1.0f, 0.0f); rlVertex2f(0,-2);     // top right
+
+        // SOFT top right corner
+        rlTexCoord2f(1.0f, 0.0f); rlVertex2f(b+2, -2);  // top right
+        rlTexCoord2f(0.0f, 0.0f); rlVertex2f(b, -2);    // top left
+        rlColor4ub(0,0,0,0);
+        rlTexCoord2f(0.0f, 1.0f); rlVertex2f(b, 0);     // bottom left
+        rlColor4ub(0,0,0,255);
+        rlTexCoord2f(1.0f, 1.0f); rlVertex2f(b+2, 0);   // bottom right
+        
+        // SOFT bottom right corner
+        rlColor4ub(0,0,0,0);
+        rlTexCoord2f(0.0f, 0.0f); rlVertex2f(b, b);     // top left
+        rlColor4ub(0,0,0,255);
+        rlTexCoord2f(0.0f, 1.0f); rlVertex2f(b, b+2);   // bottom left
+        rlTexCoord2f(1.0f, 1.0f); rlVertex2f(b+2, b+2); // bottom right
+        rlTexCoord2f(1.0f, 0.0f); rlVertex2f(b+2, b);   // top right
+
+        // SOFT bottom left corner
+        rlColor4ub(0,0,0,0);
+        rlTexCoord2f(1.0f, 0.0f); rlVertex2f(0, b);     // top right
+        rlColor4ub(0,0,0,255);
+        rlTexCoord2f(0.0f, 0.0f); rlVertex2f(-2, b);    // top left
+        rlTexCoord2f(0.0f, 1.0f); rlVertex2f(-2, b+2);  // bottom left
+        rlTexCoord2f(1.0f, 1.0f); rlVertex2f(0, b+2);   // bottom right
+
+        // SOFT top edge
+        rlTexCoord2f(0.0f, 0.0f); rlVertex2f(0, -2);    // top left
+        rlColor4ub(0,0,0,0);
+        rlTexCoord2f(0.0f, 1.0f); rlVertex2f(0, 0);     // bottom left
+        rlTexCoord2f(1.0f, 1.0f); rlVertex2f(b, 0);     // bottom right
+        rlColor4ub(0,0,0,255);
+        rlTexCoord2f(1.0f, 0.0f); rlVertex2f(b, -2);    // top right
+
+        // SOFT bottom edge
+        rlColor4ub(0,0,0,0);
+        rlTexCoord2f(0.0f, 0.0f); rlVertex2f(0, b);     // top left
+        rlColor4ub(0,0,0,255);
+        rlTexCoord2f(0.0f, 1.0f); rlVertex2f(0, b+2);   // bottom left
+        rlTexCoord2f(1.0f, 1.0f); rlVertex2f(b, b+2);   // bottom right
+        rlColor4ub(0,0,0,0);
+        rlTexCoord2f(1.0f, 0.0f); rlVertex2f(b, b);     // top right
+        rlColor4ub(0,0,0,255);
+
+        // SOFT left edge
+        rlColor4ub(0,0,0,255);
+        rlTexCoord2f(0.0f, 0.0f); rlVertex2f(-2, 0);    // top left
+        rlTexCoord2f(0.0f, 1.0f); rlVertex2f(-2, b);    // bottom left
+        rlColor4ub(0,0,0,0);
+        rlTexCoord2f(1.0f, 1.0f); rlVertex2f(0, b);     // bottom right
+        rlTexCoord2f(1.0f, 0.0f); rlVertex2f(0, 0);     // top right
+
+        // SOFT right edge
+        rlColor4ub(0,0,0,0);
+        rlTexCoord2f(0.0f, 0.0f); rlVertex2f(b, 0);     // top left
+        rlTexCoord2f(0.0f, 1.0f); rlVertex2f(b, b);     // bottom left
+        rlColor4ub(0,0,0,255);
+        rlTexCoord2f(1.0f, 1.0f); rlVertex2f(b+2, b);   // bottom right
+        rlTexCoord2f(1.0f, 0.0f); rlVertex2f(b+2, 0);   // top right
+    
+        // HARD top edge
+        rlTexCoord2f(0.0f, 0.0f); rlVertex2f(-3, -3);   // top left
+        rlTexCoord2f(0.0f, 1.0f); rlVertex2f(-3, -2);   // bottom left
+        rlTexCoord2f(1.0f, 1.0f); rlVertex2f(b+3, -2);  // bottom right
+        rlTexCoord2f(1.0f, 0.0f); rlVertex2f(b+3, -3);  // top right
+
+        // HARD bottom edge
+        rlTexCoord2f(0.0f, 0.0f); rlVertex2f(-3, b+2);  // top left
+        rlTexCoord2f(0.0f, 1.0f); rlVertex2f(-3, b+3);  // bottom left
+        rlTexCoord2f(1.0f, 1.0f); rlVertex2f(b+3, b+3); // bottom right
+        rlTexCoord2f(1.0f, 0.0f); rlVertex2f(b+3, b+2); // top right
+
+        // HARD left edge
+        rlTexCoord2f(0.0f, 0.0f); rlVertex2f(-3, -3);   // top left
+        rlTexCoord2f(0.0f, 1.0f); rlVertex2f(-3, b+3);  // bottom left
+        rlTexCoord2f(1.0f, 1.0f); rlVertex2f(-2, b+3);  // bottom right
+        rlTexCoord2f(1.0f, 0.0f); rlVertex2f(-2, -3);   // top right
+
+        // HARD right edge
+        rlTexCoord2f(0.0f, 0.0f); rlVertex2f(b+2, -3);// top left
+        rlTexCoord2f(0.0f, 1.0f); rlVertex2f(b+2, b+3);// bottom left
+        rlTexCoord2f(1.0f, 1.0f); rlVertex2f(b+3, b+3);// bottom right
+        rlTexCoord2f(1.0f, 0.0f); rlVertex2f(b+3, -3);// top right
+
+    rlEnd();
+    rlSetTexture(0);
+}
+
+void ParticleLife::drawGrid() const
+{
+    rlBegin(RL_LINES);
+    rlColor4ub(79, 79, 79, 255);
+    for (int i = -1; i < static_cast<int>(size)+1; i++)
+        rlVertex2f(i*2.0f, -2.0f),  rlVertex2f(i*2.0f, bounds+2.0f),
+        rlVertex2f(-2.0f, i*2.0f),  rlVertex2f(bounds+2.0f, i*2.0f);
+    rlEnd();
+}
+
+void ParticleLife::drawGhosts(unsigned int pTexID) const
+{
+    rlSetTexture(pTexID);
+    rlBegin(RL_QUADS);
+    for (auto& cell : spatialHash.getWrapCellPtrs())
+        for (const Particle& p : *cell)
+                rlColor4ub(R[p.type], G[p.type], B[p.type], 255),
+                rlNormal3f(0.0f, 0.0f, 1.0f),
+                rlTexCoord2f(0.0f, 0.0f), rlVertex2f(p.pos.x-0.05f, p.pos.y-0.05f), // top left
+                rlTexCoord2f(0.0f, 1.0f), rlVertex2f(p.pos.x-0.05f, p.pos.y+0.05f), // bottom left
+                rlTexCoord2f(1.0f, 1.0f), rlVertex2f(p.pos.x+0.05f, p.pos.y+0.05f), // bottom right
+                rlTexCoord2f(1.0f, 0.0f), rlVertex2f(p.pos.x+0.05f, p.pos.y-0.05f); // top right
     rlSetTexture(0);
     rlEnd();
 }
 
 
-
-int ParticleLife::getTypeCount() const { return typeCount; }
-
-int ParticleLife::getCount() const { return count; }
-
-float ParticleLife::getResistance() const { return resistance; }
-
-float ParticleLife::getInnerRadius() const { return innerRadius; }
-
-float ParticleLife::getStep() const { return step; }
-
-int ParticleLife::getGridSize() const { return bounds/2.0f; }
-
-
-
-inline int ParticleLife::gridHash(float coord)
+void ParticleLife::save() const
 {
-    return coord / 2.0f;
-}
-
-void ParticleLife::mapGrid()
-{
-    // reset counts
-    for (int r = 0; r < gridSize; r++)
-        for (int c = 0; c < gridSize; c++)
-            gridCounts[r][c] = 0;
-
-    // remap ids and recaculate counts
-    for (int i = 0; i < count; i++) {
-        const int r = gridHash(positions[i].y);
-        const int c = gridHash(positions[i].x);
-
-        // if capacity reached, resize gridId vector
-        if (gridCounts[r][c] >= (int)(gridIds[r][c].capacity()))
-             gridIds[r][c].resize((int)(1.5 * gridIds[r][c].capacity()));
-
-        // add map id and increment counter
-        gridIds[r][c][gridCounts[r][c]++] = i;
+    // open settings file
+    ofstream file(PARTICLELIFE_CUSTOM_SETTINGS_DIR + settings.name +"(f"+ to_string(frameCount) +").txt", ofstream::out);
+    if (!file.is_open()) {
+        throw runtime_error("Failed to open config file");
     }
-}
 
+    // write settings to file
 
-void ParticleLife::randomisePositions()
-{
-    for (int i = 0; i < count; i++) 
-        types[i] = (i % typeCount),
-        velocities[i] = { 0.0f, 0.0f },
-        positions[i] = { GetRandomValue(0, 100*bounds) / 100.0f,
-                         GetRandomValue(0, 100*bounds) / 100.0f };
-    std::cout << "Randomise Positions" << std::endl << std::endl;
-}
+    file << to_string(types) << '\n';       // types
+    file << to_string(size) << '\n';        // size
+    file << to_string(count) << '\n';       // count
+    file << to_string(innerRadius) << '\n'; // innerRadius
+    file << to_string(resistance) << '\n';  // resistance
+    file << to_string(step) << '\n';        // step
 
-void ParticleLife::randomiseAttractions()
-{
-    for (int i = 0; i < typeCount; i ++)
-        for (int j = 0; j < typeCount; j ++)
-            attractions[i][j] = GetRandomValue(-10, 10) / 10.0f;
-
-    std::cout << "Randomise Attractions" << std::endl;
-    for (std::vector<float>& set : attractions) {
-        for (float val : set)
-            std::cout << val << ", ";
-        std::cout << std::endl;
+    for (unsigned int i = 0; i < types; i++) {           // attractions
+        file << to_string(attractions[i][0]);
+        for (unsigned int j = 1; j < types; j++)
+            file << ',' << to_string(attractions[i][j]);
+        file << '\n';
     }
-    std::cout << std::endl;
+
+    file << "-1" << '\n';                       // seed (-1 for preloaded)
+
+    for (const Particle& p : particles)         // particles
+        file << to_string(p.type)  << ',' <<
+                to_string(p.pos.x) << ',' << to_string(p.pos.y) << ',' <<
+                to_string(p.vel.x) << ',' << to_string(p.vel.y) << '\n';
+    
+    file.close();
 }
 
-void ParticleLife::randomiseAll()
+vector<int> ParticleLife::countTypes() const
 {
-    randomisePositions();
-    randomiseAttractions();
+    vector<int> typeCounts(types, 0);
+    for (const Particle& p : particles)
+        typeCounts[p.type]++;
+    return typeCounts;
 }
 
-void ParticleLife::printCell(int r, int c)
+ostream& operator << (ostream& os, const ParticleLife& particleLife)
 {
-    std::cout << "Cell["<< r <<"]["<< c <<"]"<< std::endl;
-    for (int i = 0; i < gridCounts[r][c]; i++)
-        std::cout << types[gridIds[r][c][i]] << ", " << positions[i].x << ", " << positions[i].y << std::endl;
-    std::cout << std::endl;
-}
-
-
-
-void ParticleLife::initGrid()
-{
-    gridCounts = new int*[gridSize];
-    gridIds = new std::vector<int>*[gridSize];
-
-    for (int i = 0; i < gridSize; i++) {
-        gridCounts[i] = new int[gridSize];
-        gridIds[i] = new std::vector<int>[gridSize];
-
-        for (int j = 0; j < gridSize; j++) {
-            gridCounts[i][j] = 0;
-            gridIds[i][j].resize((int)(1.5f * count/gridSize));
-        }
+    string initiation;
+    if (particleLife.settings.seed == -1) initiation = "preloaded";
+    else if (particleLife.settings.seed == 0) initiation = "pseudo random";
+    else initiation = "seeded random";
+    
+    os << particleLife.settings.name << " : " <<
+          initiation << endl <<
+          "| types : " << particleLife.types <<
+          "| size : " << particleLife.size <<
+          "| count : " << particleLife.count <<
+          "| innerRadius : " << particleLife.innerRadius <<
+          "| resistance : " << particleLife.resistance <<
+          "| step : " << particleLife.step << endl;
+    
+    os << "| attractions : " << endl;
+    for (unsigned int i = 0; i < particleLife.types; i++) {
+        os << "| | " << particleLife.attractions[i][0];
+        for (unsigned int j = 1; j < particleLife.types; j++)
+            os << ", " << particleLife.attractions[i][j];
+        os << endl;
     }
+
+    vector<int> typeCounts = particleLife.countTypes();
+    os << "| particles : " << particleLife.particles.size() << "(" << typeCounts[0];
+    for (unsigned int i = 1; i < particleLife.types; i++)
+        os << ":" << typeCounts[i];
+    os << ")" << endl;
+    if (particleLife.particles.size() < 128)
+        for (const Particle& p : particleLife.particles)
+            os << "| | " << p << endl;
+    else os << "| | lots..." << endl;
+
+    return os;
 }
 
-void ParticleLife::initColours()
-{
-    Color defaultColours[9] = { RED, BLUE, YELLOW, PURPLE, GREEN, ORANGE, PINK, RAYWHITE, LIGHTGRAY };
-    colours.resize(typeCount, WHITE);
-    for (int i = 0; i < typeCount; i++)
-        colours[i] = defaultColours[i];
-}
 
-void ParticleLife::initTexture()
+void ParticleLife::particleInteraction(Particle& p1, Particle& p2) const
 {
-    Image temp = GenImageColor(64, 64, BLANK);
-    ImageDrawCircle(&temp, 32, 32, 32, WHITE);
-    particleTexture = LoadTextureFromImage(temp);
-    UnloadImage(temp);
+    // calculate the square distance between the particles
+    const float dx = p2.pos.x - p1.pos.x;
+    const float dy = p2.pos.y - p1.pos.y;
+    const float sqDist = dx*dx + dy*dy;
+
+    // if square distance is less than 2^2 then interact
+    if (sqDist <= 4.0f) {
+        const float dist = sqrtf(sqDist);
+
+        // if particles are within inner radius then repel, otherwise attract
+        const float coef = (dist <= innerRadius)
+            ? 1.0f - innerRadius / dist
+            : attractions[p1.type][p2.type] * (dist - innerRadius) / 2.0f;
+
+        // apply interaction force to particle velocity
+        p1.vel.x += coef * (dx / dist);
+        p1.vel.y += coef * (dy / dist);
+    }
 }

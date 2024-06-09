@@ -1,3 +1,8 @@
 *.exe
 *.dsym
 main
+*.exe
+*.dsym
+main
+statistics/temp.py
+/*.png

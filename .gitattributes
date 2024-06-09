@@ -1,2 +1,5 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# file types to ignore in language statistics
+Makefile linguist-vendored
