@@ -3,3 +3,4 @@
 
 # file types to ignore in language statistics
 Makefile linguist-vendored
+*.c linguist-vendored

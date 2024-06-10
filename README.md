@@ -2,7 +2,8 @@
 
 A 2D particle physics simulation, modelled in an infinite, that aims to displaying emergent properties akin to Conway's Game of Life, using physics in a continuous domain.
 
-This was my 3rd year final project, now it's actually just my project, my Progress Report and Final Report are attached as part of the documentation.
+Once upon a time, this was my 3rd year final project, now it's actually just my project, my Progress Report and Final Report are attached as part of the documentation. Though now that I'm no longer working in an academic context, they'll soon be outdated - no more arbuitary justifications, I can just have fun with my toy!
+
 
 ## Things You Should Know
 
@@ -10,12 +11,24 @@ This was my 3rd year final project, now it's actually just my project, my Progre
 
 To keep results deterministic, the time frame of the simulation is dependant on the framerate. It can be standardised by capping the framerate.
 
-### 
-
-
 ### Force Applied to Particle Velocities
 
-equation
+![Particle Physics](/docs/particle-motion-law.png)
+
+The equation works with arrays of properties, instead of an array of particle objects. I didn't see how I could feasibly denote a class/object with mathematical notation.
+
+Don't be too intimidated if it seems complicated. Depending on your background, the actual code implementation is most likely far easier to follow!
+
+### Iminent Changes
+
+* Format for settings files will be changed to JSON *very* soon.
+* Launcher reopening on exiting a simulation
+* Parameters for frame limit and statistical analysis/visualisations
+* GUI integration for statistics module
+* Help tab to show keybindings and explain parameters
+* Thread pool, 
+* Issue tracker will actually be used/updated
+
 
 ## Run/Debug the Project
 
@@ -23,7 +36,7 @@ equation
 
 Provided you're also working with vscode, and you have raylib setup with w64devkit. It should be as simple as cloning the repository, opening it in vscode and pressing F5.
 
-I've used a vscode template as a foundation. I have modified it to use C++17 instead of C++11, and only been tested with Windows 10 and 11. See the link below for the original template.
+I've used a vscode template as a foundation. I have modified it to use C++17 instead of C++11, and I've added an extra profile for the Python statistics module. It's only been tested with Windows 10 and 11. See the link below for the original template.
 
 <p align="center">
     <a href="https://github.com/educ8s/Raylib-CPP-Starter-Template-for-VSCODE-V2/">educ8s's Original Template</a>
@@ -31,38 +44,8 @@ I've used a vscode template as a foundation. I have modified it to use C++17 ins
 
 ### Statistics Module
 
+As I've mentioned above, for vscode, the tasks.json has a profile for debuggig the statistics module. It was written in Python 3.11.9, though will most likely work in any release from the last five years or so. If you're using any other tooling, note that the current working directory will have to be the statistics directory.
 
 
+## Interesting Examples
 
-<!-- https://github.com/educ8s/Raylib-CPP-Starter-Template-for-VSCODE-V2/ -->
-
-
-# Raylib-CPP-Starter-Template-for-VSCODE-V2
-Raylib C++ Starter Template for Visual Studio Code on Windows.
-This demo project contains a bouncing ball raylib example program.
-It works with raylib version 4.5. Tested on both Windows 10 and Windows 11.
-
-# How to use this template
-1. Double click on the main.code-workspace file. This will open the template in VS Code.
-2. From the Explorer Window of VS Code navigate to the src folder and double click on the main.cpp file.
-3. Press F5 on the keyboard to compile and run the program.
-
-# What's changed
-The template now uses folders for better organizion of the files. So, all the source code now lives in the src folder.
-
-# Video Tutorial
-
-<p align="center">
-  <img src="preview.jpg" alt="" width="800">
-</p>
-
-<p align="center">
-🎥 <a href="https://www.youtube.com/watch?v=PaAcVk5jUd8">Video Tutorial on YouTube</a>
-</p>
-
-<br>
-<br>
-<p align="center">
-| 📺 <a href="https://www.youtube.com/channel/UC3ivOTE5EgpmF2DHLBmWIWg">My YouTube Channel</a>
-| 🌍 <a href="http://www.educ8s.tv">My Website</a> | <br>
-</p>

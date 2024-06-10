@@ -200,9 +200,13 @@ void App::handleInput()
     if (IsKeyPressed(KEY_G))
         gridOn = !gridOn;
 
-    // toggle ghosts on PRESS_C
+    // take screenshot on PRESS_S
     if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_S))
         TakeScreenshot((particleLife.settings.name +"(f"+ to_string(particleLife.getFrameCount()) + ").png").c_str());
+
+    // save current state to settings on CTRL + S
+    if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_S))
+        particleLife.save();
 
     if (IsKeyPressed(KEY_C))
         ghostsOn = !ghostsOn;
