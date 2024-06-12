@@ -1,8 +1,9 @@
 #include "Particle.hpp"
 
 #include <raylib.h>
+#include <rlgl.h>
 #include <iostream>
-#include <iomanip>
+// #include <iomanip>
 
 
 
@@ -41,5 +42,11 @@ Particle::Particle(const Particle& p) :
 
 ostream& operator<<(ostream& os, const Particle& p)
 {
-    return os << p.type <<", ("<< p.pos.x <<", "<< p.pos.y <<"), ("<< p.vel.x <<", "<< p.vel.y <<")";
+    return os << "{ \"t\": " << p.type
+              << ", \"x\": " << p.pos.x
+              << ", \"y\": " << p.pos.y
+              << ", \"vx\": " << p.vel.x
+              << ", \"vy\": " << p.vel.y
+              << " }";
 }
+

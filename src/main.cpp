@@ -7,6 +7,17 @@
 
 int main()
 {
+//     Settings test1;
+//     test1.name = "test1";
+//     test1.save();
+// 
+//     Settings test2;
+//     test2.name = "test2";
+//     test2.seed = 123;
+//     test2.particles.clear();
+//     test2.typeRatio[0]=1; test2.typeRatio[1]=1; test2.typeRatio[1]=1; 
+//     test2.save();
+
     int width = 900;
     int height = 900;
     // long long unsigned int finalFrame = 50000;

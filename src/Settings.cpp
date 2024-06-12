@@ -172,7 +172,65 @@ void Settings::generateParticleData()
                 ct++;
             }
         }
-    }    
+    }
+}
+
+void Settings::save() const
+{
+    const string filePath = PARTICLELIFE_CUSTOM_SETTINGS_DIR + name + ".json";
+    ofstream f (filePath);
+    if (!f.is_open()) {
+        cerr << "Failed to create/open \""+filePath+"\" for writing settings." << endl;
+        return;
+    }
+    const string M = "    ";
+
+    f << "{\n";
+
+        f << M << "\"SimulationSettings\":\n"
+          << M << "{\n";
+
+            f << M+M << "\"name\": "        << "\""+name+"\"" << ",\n"
+              << M+M << "\"types\": "       << types << ",\n"
+              << M+M << "\"size\": "        << size << ",\n"
+              << M+M << "\"count\": "       << count << ",\n"
+              << M+M << "\"innerRadius\": " << innerRadius << ",\n"
+              << M+M << "\"resistance\": "  << resistance << ",\n"
+              << M+M << "\"step\": "        << step  << ",\n";
+
+            f << M+M << "\"attractions\": [ ";
+            for (int i = 0; i < types; i++) {
+                if (i != 0) f << M+M << "                 ";
+                f << '[' << attractions[i][0];
+                for (int j = 1; j < types; j++) {
+                    f << ", " << attractions[i][j];
+                } f << ']';
+                // if (i != types-1) f << ',';
+                // else f << " ],";
+                // f << '\n';
+                if (i == types-1) f << " ]";
+                f << ",\n";
+            }
+
+            f << M+M << "\"seed\": " << seed << ",\n";
+
+            f << M+M << "\"typeRatio\": [" << typeRatio[0];
+            for (int i = 1; i < types; i++) {
+                f << ", " << typeRatio[i];
+            } f << " ],\n";
+
+            f << M+M << "\"particles\": [ ";
+            if (!particles.empty()) {
+                f << particles[0];
+                for (int i = 1; i < count; i++)
+                    f << ",\n" << M+M << "               " << particles[i];
+            } f << " ]\n";
+
+        f << M << "}\n";
+
+    f << "}" << endl;
+
+    f.close();
 }
 
 ostream& operator <<(ostream& os, const Settings& settings)
