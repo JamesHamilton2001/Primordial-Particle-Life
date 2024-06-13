@@ -446,16 +446,21 @@ ostream& operator <<(ostream& os, const Settings& settings)
 
 const string Settings::getNextString(ifstream& file, string& line, unsigned long long int& lno) const
 {
-    while (true) {
+    while (true)
+    {
         size_t qStart = line.find('"');
         if (qStart != string::npos) {
             size_t qEnd = line.find('"', qStart+1);
+
             if (qEnd == string::npos)
                 throw invalid_argument("line:" + to_string(lno) + " string not closed");
+
             string str = line.substr(qStart+1, qEnd-qStart-1);
             line = line.substr(qEnd+1);
             return str;
-        } if (!getline(file, line))
+
+        }
+        if (!getline(file, line))
             throw invalid_argument("line:" + to_string(lno) + " end of file reached before string read");
         lno++;
     }
@@ -464,7 +469,29 @@ const string Settings::getNextString(ifstream& file, string& line, unsigned long
 
 const int Settings::getNextInt(ifstream& file, string& line, unsigned long long int& lno) const
 {
-    return 0;
+    while (true)
+    {
+        for (long long unsigned int i = 0ULL; i < line.size(); i++) {
+            char c1 = line[i];
+
+            if (isdigit(c1) || c1 == '-' || c1 == '+') {
+                for (long long unsigned int j = i+1; j < line.size(); j++) {
+                    char c2 = line[j];
+
+                    if (isdigit(c2)) continue;
+                    switch (c2) {
+                        case ',': case ']': case '}': case ' ':
+                            return stoi(line.substr(i, j-i));
+                        default:
+                            throw invalid_argument("line:" +to_string(lno)+ " invalid char following int");
+                    }
+                }
+            }
+        }
+        if (!getline(file, line))
+            throw invalid_argument("line:" + to_string(lno) + " end of file reached before int read");
+        lno++;
+    }
 }
 
 const float Settings::getNextFloat(ifstream& file, string& line, unsigned long long int& lno) const

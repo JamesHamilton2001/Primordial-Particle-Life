@@ -78,20 +78,6 @@ struct Settings
 
   private:
 
-    // unordered_map<string, function<void(ifstream&, string&, unsigned long long int&)>> readers = {
-    //     { "name", [this](ifstream& file, string& line, unsigned long long int& lno)         { name = getNextString(file, line, lno); } },
-    //     { "types", [this](ifstream& file, string& line, unsigned long long int& lno)        { types = getNextInt(file, line, lno); } },
-    //     { "size", [this](ifstream& file, string& line, unsigned long long int& lno)         { size = getNextInt(file, line, lno); } },
-    //     { "count", [this](ifstream& file, string& line, unsigned long long int& lno)        { count = getNextInt(file, line, lno); } },
-    //     { "innerRadius", [this](ifstream& file, string& line, unsigned long long int& lno)  { innerRadius = getNextFloat(file, line, lno); } },
-    //     { "resistance", [this](ifstream& file, string& line, unsigned long long int& lno)   { resistance = getNextFloat(file, line, lno); } },
-    //     { "step", [this](ifstream& file, string& line, unsigned long long int& lno)         { step = getNextFloat(file, line, lno); } },
-    //     { "attractions", [this](ifstream& file, string& line, unsigned long long int& lno)  { readFloatMatrix(file, line, lno, attractions); } },
-    //     { "seed", [this](ifstream& file, string& line, unsigned long long int& lno)         { seed = getNextInt(file, line, lno); } },
-    //     { "typeRatio", [this](ifstream& file, string& line, unsigned long long int& lno)    { readIntVector(file, line, lno, typeRatio); } },
-    //     { "particles", [this](ifstream& file, string& line, unsigned long long int& lno)    { readParticleVector(file, line, lno, particles); } },
-    // };
-
     unordered_map<string, void (Settings::*)(ifstream&, string&, unsigned long long int&)> attributteParsers = {
         { "name", &Settings::parseName },
         { "types", &Settings::parseTypes },
