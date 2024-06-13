@@ -301,9 +301,10 @@ Settings::Settings(string filePath)
 
     string line;
     long long unsigned int lno = 0LLU;
+    long long unsigned int i = 0LLU;
     unsigned int attributesRead = 0U;
 
-    while (getNextString(file, line, lno) != "SimulationSettings");
+    while (getNextString(file, line, lno, i) != "SimulationSettings");
 
     while (attributesRead < TOTAL_ATTRIBUTES) {
         if (!getline(file, line))
@@ -311,10 +312,10 @@ Settings::Settings(string filePath)
         lno++;
         if (line.empty()) continue;
 
-        const string attributeName = getNextString(file, line, lno);
+        const string attributeName = getNextString(file, line, lno, i);
         if (attributteParsers.find(attributeName) == attributteParsers.end())
             throw invalid_argument("line:" + to_string(lno) + " Unreadable attribute name: " + attributeName);
-        (this->*attributteParsers.at(attributeName))(file, line, lno);
+        (this->*attributteParsers.at(attributeName))(file, line, lno, i);
         attributesRead++;
 
         cout << "line:" << lno << " reading: " << attributeName << endl;
@@ -444,7 +445,7 @@ ostream& operator <<(ostream& os, const Settings& settings)
     return os;
 }
 
-const string Settings::getNextString(ifstream& file, string& line, unsigned long long int& lno) const
+const string Settings::getNextString(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i) const
 {
     while (true)
     {
@@ -458,7 +459,6 @@ const string Settings::getNextString(ifstream& file, string& line, unsigned long
             string str = line.substr(qStart+1, qEnd-qStart-1);
             line = line.substr(qEnd+1);
             return str;
-
         }
         if (!getline(file, line))
             throw invalid_argument("line:" + to_string(lno) + " end of file reached before string read");
@@ -467,7 +467,7 @@ const string Settings::getNextString(ifstream& file, string& line, unsigned long
 }
 
 
-const int Settings::getNextInt(ifstream& file, string& line, unsigned long long int& lno) const
+const int Settings::getNextInt(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i) const
 {
     while (true)
     {
@@ -494,63 +494,63 @@ const int Settings::getNextInt(ifstream& file, string& line, unsigned long long 
     }
 }
 
-const float Settings::getNextFloat(ifstream& file, string& line, unsigned long long int& lno) const
+const float Settings::getNextFloat(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i) const
 {
     return 0.0f;
 }
 
 
-void Settings::parseName(ifstream& file, string& line, unsigned long long int& lno)
+void Settings::parseName(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i)
 {
-    name = getNextString(file, line, lno);
+    name = getNextString(file, line, lno, i);
 }
 
-void Settings::parseTypes(ifstream& file, string& line, unsigned long long int& lno)
+void Settings::parseTypes(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i)
 {
-    types = getNextInt(file, line, lno);
+    types = getNextInt(file, line, lno, i);
 }
 
-void Settings::parseSize(ifstream& file, string& line, unsigned long long int& lno)
+void Settings::parseSize(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i)
 {
-    size = getNextInt(file, line, lno);
+    size = getNextInt(file, line, lno, i);
 }
 
-void Settings::parseCount(ifstream& file, string& line, unsigned long long int& lno)
+void Settings::parseCount(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i)
 {
-    count = getNextInt(file, line, lno);
+    count = getNextInt(file, line, lno, i);
 }
 
-void Settings::parseInnerRadius(ifstream& file, string& line, unsigned long long int& lno)
+void Settings::parseInnerRadius(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i)
 {
-    innerRadius = getNextFloat(file, line, lno);
+    innerRadius = getNextFloat(file, line, lno, i);
 }
 
-void Settings::parseResistance(ifstream& file, string& line, unsigned long long int& lno)
+void Settings::parseResistance(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i)
 {
-    resistance = getNextFloat(file, line, lno);
+    resistance = getNextFloat(file, line, lno, i);
 }
 
-void Settings::parseStep(ifstream& file, string& line, unsigned long long int& lno)
+void Settings::parseStep(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i)
 {
-    step = getNextFloat(file, line, lno);
+    step = getNextFloat(file, line, lno, i);
 }
 
-void Settings::parseAttractions(ifstream& file, string& line, unsigned long long int& lno)
+void Settings::parseAttractions(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i)
 {
     attractions = vector<vector<float>>();
 }
 
-void Settings::parseSeed(ifstream& file, string& line, unsigned long long int& lno)
+void Settings::parseSeed(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i)
 {
-    seed = getNextInt(file, line, lno);
+    seed = getNextInt(file, line, lno, i);
 }
 
-void Settings::parseTypeRatio(ifstream& file, string& line, unsigned long long int& lno)
+void Settings::parseTypeRatio(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i)
 {
     typeRatio = vector<int>();
 }
 
-void Settings::parseParticles(ifstream& file, string& line, unsigned long long int& lno)
+void Settings::parseParticles(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i)
 {
     particles = vector<Particle>();
 }

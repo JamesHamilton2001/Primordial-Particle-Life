@@ -78,7 +78,9 @@ struct Settings
 
   private:
 
-    unordered_map<string, void (Settings::*)(ifstream&, string&, unsigned long long int&)> attributteParsers = {
+    #define ULL_T unsigned long long int
+
+    unordered_map<string, void (Settings::*)(ifstream&, string&, unsigned long long int&, unsigned long long int&)> attributteParsers = {
         { "name", &Settings::parseName },
         { "types", &Settings::parseTypes },
         { "size", &Settings::parseSize },
@@ -92,21 +94,21 @@ struct Settings
         { "particles", &Settings::parseParticles },
     };
 
-    const string getNextString(ifstream& file, string& line, unsigned long long int& lno) const;
-    const int getNextInt(ifstream& file, string& line, unsigned long long int& lno) const;
-    const float getNextFloat(ifstream& file, string& line, unsigned long long int& lno) const;
+    const string getNextString(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i) const;
+    const int getNextInt(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i) const;
+    const float getNextFloat(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i) const;
 
-    void parseName(ifstream& file, string& line, unsigned long long int& lno);
-    void parseTypes(ifstream& file, string& line, unsigned long long int& lno);
-    void parseSize(ifstream& file, string& line, unsigned long long int& lno);
-    void parseCount(ifstream& file, string& line, unsigned long long int& lno);
-    void parseInnerRadius(ifstream& file, string& line, unsigned long long int& lno);
-    void parseResistance(ifstream& file, string& line, unsigned long long int& lno);
-    void parseStep(ifstream& file, string& line, unsigned long long int& lno);
-    void parseAttractions(ifstream& file, string& line, unsigned long long int& lno);
-    void parseSeed(ifstream& file, string& line, unsigned long long int& lno);
-    void parseTypeRatio(ifstream& file, string& line, unsigned long long int& lno);
-    void parseParticles(ifstream& file, string& line, unsigned long long int& lno);
+    void parseName(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i);
+    void parseTypes(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i);
+    void parseSize(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i);
+    void parseCount(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i);
+    void parseInnerRadius(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i);
+    void parseResistance(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i);
+    void parseStep(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i);
+    void parseAttractions(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i);
+    void parseSeed(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i);
+    void parseTypeRatio(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i);
+    void parseParticles(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i);
 };
 
 
