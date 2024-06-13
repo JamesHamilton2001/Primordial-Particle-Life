@@ -18,6 +18,8 @@ int main()
 //     test2.typeRatio[0]=1; test2.typeRatio[1]=1; test2.typeRatio[1]=1; 
 //     test2.save();
 
+    Settings test1("./settings/custom/test1.json");
+
     int width = 900;
     int height = 900;
     // long long unsigned int finalFrame = 50000;

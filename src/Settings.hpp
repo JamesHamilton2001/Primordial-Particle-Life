@@ -65,6 +65,7 @@ struct Settings
 
     Settings();
     Settings(const filesystem::directory_entry& dirEntry);
+    Settings(string filePath);
 
     void generateParticleData();
 

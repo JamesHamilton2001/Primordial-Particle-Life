@@ -3,6 +3,8 @@
 #include <fstream>
 #include <filesystem>
 #include <algorithm>
+#include <unordered_map>
+#include <functional>
 
 
 
@@ -148,6 +150,145 @@ Settings::Settings(const filesystem::directory_entry& dirEntry)
     file.close();
 }
 
+Settings::Settings(string filePath)
+{
+    ifstream file(filePath);
+    if (!file.is_open()) {
+        cerr << "Failed to open \""+filePath+"\" for reading settings." << endl;
+        return;
+    }
+
+    const function<bool(string&)> hasdigit = [](string& s) { return any_of(s.begin(), s.end(), [](unsigned char c) { return isdigit(c); }); };
+
+    const function<void(string&, string&)> readOneLineString = [](string& line, string& dest) {
+        int len = static_cast<int>(line.size());
+        int i, j;
+        for (i = 0; line[i] != ':' && i < len; i++);
+        for (; line[i] != '\"' && i < len-1; i++);
+        for (j = i+1; line[j] != '\"' && j < len; j++);
+        dest = line.substr(i+1, j-i-1);
+    };
+
+    const function<void(string&, int*)> readOneLineInt = [this](string& line, int* ptr) {
+        int len = static_cast<int>(line.size());
+        int i, j; 
+        for (i = 0; line[i] != ':' && i < len; i++);
+        for (; !isdigit(line[i]) && line[i] != '-' && i < len-1; i++);
+        for (j = i+1; line[j] != ',' && line[j] != ' ' && j < len; j++);
+        *ptr = stoi(line.substr(i, j-i));
+    };
+
+    const function<void(string&, float*)> readOneLineFloat = [this](string& line, float* ptr) {
+        int len = static_cast<int>(line.size());
+        int i, j;
+        for (i = 0; line[i] != ':' && i < len; i++);
+        for (; !isdigit(line[i]) && line[i]!='-' && line[i]!='+' && line[i] != '.' && i < len-1; i++);
+        for (j = i+1; line[j] != ',' && line[j] != ' ' && j < len; j++);
+        *ptr = stof(line.substr(i, j-i));
+    };
+
+    const function<void(string&, vector<int>&)> readIntVector = [this, &hasdigit, &file](string& line, vector<int>& dest) {
+        dest = vector<int>();
+        bool opened = false, closed = false;
+        while (!opened) {
+            opened = line.find('[') != string::npos;
+            if (!opened && !getline(file, line)) break;
+        }
+        while (opened && !closed) {
+            closed = line.find(']') != string::npos;
+            if (!hasdigit(line)) {
+                if (!getline(file, line)) break;
+                else continue;
+            };
+            int len = static_cast<int>(line.size());
+            int i = 0, j, k;
+            while (i < len) {
+                for (j = i+1; !isdigit(line[j]) && line[j] != '-' && line[j] != '+' && j < len-1; j++);
+                for (k = j+1; line[k] != ',' && line[k] != ' ' && k < len; k++);
+                string intString = line.substr(j, k-j);
+                if (hasdigit(intString))
+                    dest.emplace_back(stoi(intString));
+                else if (!getline(file, line))
+                    break;
+                i = k;
+            }
+            if (!closed && !getline(file, line)) break;
+        }
+    };
+
+    const function<void(string&, vector<vector<float>>&)> readFloatMatrix = [this, &file](string& line, vector<vector<float>>& dest) {
+        dest = vector<vector<float>>();
+        int i, len, opens = 0, closes = 0;
+
+        while (opens == 0) {
+            for (i = 0, len = static_cast<int>(line.size()); i < len; i++) {
+                if (line[i] == '[') {
+                    opens++;
+                    break;
+                }
+            } if (opens == 0 && !getline(file, line)) break;
+        } i++;
+        line = line.substr(i, len-i);
+
+        while (opens != closes) {
+            i = 0;
+            string floatString = "";
+            while (i < static_cast<int>(line.size())) {
+                unsigned char c = line[i];
+                if (c=='-' || c=='+' || c=='.' || isdigit(c)) {
+                    floatString += c;
+                } else {
+                    if (!floatString.empty()) {
+                        dest.back().emplace_back(stof(floatString));
+                        floatString = "";
+                    } if (c == '[') {
+                        opens++;
+                        dest.emplace_back(vector<float>());
+                    } else if (c == ']') closes++;
+                } i++;
+            } if (opens != closes && !getline(file, line)) break;
+        }
+    };
+
+    const unordered_map<string, function<void(string&)>> readAttribute = {
+        { "name", [this, &readOneLineString](string& line)        { readOneLineString(line, name); } },
+        { "types", [this, &readOneLineInt](string& line)          { readOneLineInt(line, &types); }},
+        { "size", [this, &readOneLineInt](string& line)           { readOneLineInt(line, &size); }},
+        { "count", [this, &readOneLineInt](string& line)          { readOneLineInt(line, &count); }},
+        { "innerRadius", [this, &readOneLineFloat](string& line)  { readOneLineFloat(line, &innerRadius); }},
+        { "resistance", [this, &readOneLineFloat](string& line)   { readOneLineFloat(line, &resistance); }},
+        { "step", [this, &readOneLineFloat](string& line)         { readOneLineFloat(line, &step); }},
+        { "attractions", [this, &readFloatMatrix](string& line)   { readFloatMatrix(line, attractions); }},
+        { "seed", [this, &readOneLineInt](string& line)           { readOneLineInt(line, &seed); }},
+        { "typeRatio", [this, &readIntVector](string& line)       { readIntVector(line, typeRatio); }},
+        { "particles", [this, &readOneLineFloat](string& line)    {  }},
+    };
+
+    string line;
+    long long unsigned int i, j;
+    while (getline(file, line)) {
+
+        // get attribute name and starting index of value
+        for (i = 1; line[i-1] != '\"' && i < line.size()-1; i++);
+        for (j = i+1; line[j] != '\"' && j < line.size(); j++);
+        string attributeName = line.substr(i, j-i);
+
+        if (readAttribute.find(attributeName) == readAttribute.end()) {
+            cerr << "Unreadable attribute name: " << attributeName << endl;
+            continue;
+        }
+        cout << "Reading attribute: " << attributeName << endl;
+        readAttribute.at(attributeName)(line);
+    }
+
+    file.close();
+
+    for (int tr : typeRatio) cout << tr << " ";
+    cout << endl;
+
+    cout << *this << endl;
+}
+
 void Settings::generateParticleData()
 {
     // dont overwrite for preloading particles, recalculate ratio
@@ -205,9 +346,6 @@ void Settings::save() const
                 for (int j = 1; j < types; j++) {
                     f << ", " << attractions[i][j];
                 } f << ']';
-                // if (i != types-1) f << ',';
-                // else f << " ],";
-                // f << '\n';
                 if (i == types-1) f << " ]";
                 f << ",\n";
             }
