@@ -150,6 +150,7 @@ Settings::Settings(const filesystem::directory_entry& dirEntry)
     file.close();
 }
 
+/*
 Settings::Settings(string filePath)
 {
     ifstream file(filePath);
@@ -288,6 +289,39 @@ Settings::Settings(string filePath)
 
     cout << *this << endl;
 }
+*/
+
+Settings::Settings(string filePath)
+{
+    ifstream file(filePath);
+    if (!file.is_open())
+        throw invalid_argument("Failed to open \""+filePath+"\" for reading settings.");
+
+    const unsigned int TOTAL_ATTRIBUTES = 11U;
+
+    string line;
+    long long unsigned int lno = 0LLU;
+    unsigned int attributesRead = 0U;
+
+    while (getNextString(file, line, lno) != "SimulationSettings");
+
+    while (attributesRead < TOTAL_ATTRIBUTES) {
+        if (!getline(file, line))
+            throw invalid_argument("line:" + to_string(lno) + " end of file reached before all attributes read");
+        lno++;
+        if (line.empty()) continue;
+
+        const string attributeName = getNextString(file, line, lno);
+        if (attributteParsers.find(attributeName) == attributteParsers.end())
+            throw invalid_argument("line:" + to_string(lno) + " Unreadable attribute name: " + attributeName);
+        (this->*attributteParsers.at(attributeName))(file, line, lno);
+        attributesRead++;
+
+        cout << "line:" << lno << " reading: " << attributeName << endl;
+    }
+
+    cout << *this << endl;
+}
 
 void Settings::generateParticleData()
 {
@@ -408,4 +442,88 @@ ostream& operator <<(ostream& os, const Settings& settings)
     else os << "| | lots..." << endl;
 
     return os;
+}
+
+const string Settings::getNextString(ifstream& file, string& line, unsigned long long int& lno) const
+{
+    while (true) {
+        size_t qStart = line.find('"');
+        if (qStart != string::npos) {
+            size_t qEnd = line.find('"', qStart+1);
+            if (qEnd == string::npos)
+                throw invalid_argument("line:" + to_string(lno) + " string not closed");
+            string str = line.substr(qStart+1, qEnd-qStart-1);
+            line = line.substr(qEnd+1);
+            return str;
+        } if (!getline(file, line))
+            throw invalid_argument("line:" + to_string(lno) + " end of file reached before string read");
+        lno++;
+    }
+}
+
+
+const int Settings::getNextInt(ifstream& file, string& line, unsigned long long int& lno) const
+{
+    return 0;
+}
+
+const float Settings::getNextFloat(ifstream& file, string& line, unsigned long long int& lno) const
+{
+    return 0.0f;
+}
+
+
+void Settings::parseName(ifstream& file, string& line, unsigned long long int& lno)
+{
+    name = getNextString(file, line, lno);
+}
+
+void Settings::parseTypes(ifstream& file, string& line, unsigned long long int& lno)
+{
+    types = getNextInt(file, line, lno);
+}
+
+void Settings::parseSize(ifstream& file, string& line, unsigned long long int& lno)
+{
+    size = getNextInt(file, line, lno);
+}
+
+void Settings::parseCount(ifstream& file, string& line, unsigned long long int& lno)
+{
+    count = getNextInt(file, line, lno);
+}
+
+void Settings::parseInnerRadius(ifstream& file, string& line, unsigned long long int& lno)
+{
+    innerRadius = getNextFloat(file, line, lno);
+}
+
+void Settings::parseResistance(ifstream& file, string& line, unsigned long long int& lno)
+{
+    resistance = getNextFloat(file, line, lno);
+}
+
+void Settings::parseStep(ifstream& file, string& line, unsigned long long int& lno)
+{
+    step = getNextFloat(file, line, lno);
+}
+
+void Settings::parseAttractions(ifstream& file, string& line, unsigned long long int& lno)
+{
+    attractions = vector<vector<float>>();
+}
+
+void Settings::parseSeed(ifstream& file, string& line, unsigned long long int& lno)
+{
+    seed = getNextInt(file, line, lno);
+}
+
+void Settings::parseTypeRatio(ifstream& file, string& line, unsigned long long int& lno)
+{
+    typeRatio = vector<int>();
+}
+
+void Settings::parseParticles(ifstream& file, string& line, unsigned long long int& lno)
+{
+    particles = vector<Particle>();
 }

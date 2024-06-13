@@ -5,6 +5,9 @@
 #include <string>
 #include <vector>
 #include <filesystem>
+#include <fstream>
+#include <unordered_map>
+#include <functional>
 
 using namespace std;
 
@@ -73,6 +76,51 @@ struct Settings
 
     friend ostream& operator <<(ostream& os, const Settings& settings);
 
+  private:
+
+    // unordered_map<string, function<void(ifstream&, string&, unsigned long long int&)>> readers = {
+    //     { "name", [this](ifstream& file, string& line, unsigned long long int& lno)         { name = getNextString(file, line, lno); } },
+    //     { "types", [this](ifstream& file, string& line, unsigned long long int& lno)        { types = getNextInt(file, line, lno); } },
+    //     { "size", [this](ifstream& file, string& line, unsigned long long int& lno)         { size = getNextInt(file, line, lno); } },
+    //     { "count", [this](ifstream& file, string& line, unsigned long long int& lno)        { count = getNextInt(file, line, lno); } },
+    //     { "innerRadius", [this](ifstream& file, string& line, unsigned long long int& lno)  { innerRadius = getNextFloat(file, line, lno); } },
+    //     { "resistance", [this](ifstream& file, string& line, unsigned long long int& lno)   { resistance = getNextFloat(file, line, lno); } },
+    //     { "step", [this](ifstream& file, string& line, unsigned long long int& lno)         { step = getNextFloat(file, line, lno); } },
+    //     { "attractions", [this](ifstream& file, string& line, unsigned long long int& lno)  { readFloatMatrix(file, line, lno, attractions); } },
+    //     { "seed", [this](ifstream& file, string& line, unsigned long long int& lno)         { seed = getNextInt(file, line, lno); } },
+    //     { "typeRatio", [this](ifstream& file, string& line, unsigned long long int& lno)    { readIntVector(file, line, lno, typeRatio); } },
+    //     { "particles", [this](ifstream& file, string& line, unsigned long long int& lno)    { readParticleVector(file, line, lno, particles); } },
+    // };
+
+    unordered_map<string, void (Settings::*)(ifstream&, string&, unsigned long long int&)> attributteParsers = {
+        { "name", &Settings::parseName },
+        { "types", &Settings::parseTypes },
+        { "size", &Settings::parseSize },
+        { "count", &Settings::parseCount },
+        { "innerRadius", &Settings::parseInnerRadius },
+        { "resistance", &Settings::parseResistance },
+        { "step", &Settings::parseStep },
+        { "attractions", &Settings::parseAttractions },
+        { "seed", &Settings::parseSeed },
+        { "typeRatio", &Settings::parseTypeRatio },
+        { "particles", &Settings::parseParticles },
+    };
+
+    const string getNextString(ifstream& file, string& line, unsigned long long int& lno) const;
+    const int getNextInt(ifstream& file, string& line, unsigned long long int& lno) const;
+    const float getNextFloat(ifstream& file, string& line, unsigned long long int& lno) const;
+
+    void parseName(ifstream& file, string& line, unsigned long long int& lno);
+    void parseTypes(ifstream& file, string& line, unsigned long long int& lno);
+    void parseSize(ifstream& file, string& line, unsigned long long int& lno);
+    void parseCount(ifstream& file, string& line, unsigned long long int& lno);
+    void parseInnerRadius(ifstream& file, string& line, unsigned long long int& lno);
+    void parseResistance(ifstream& file, string& line, unsigned long long int& lno);
+    void parseStep(ifstream& file, string& line, unsigned long long int& lno);
+    void parseAttractions(ifstream& file, string& line, unsigned long long int& lno);
+    void parseSeed(ifstream& file, string& line, unsigned long long int& lno);
+    void parseTypeRatio(ifstream& file, string& line, unsigned long long int& lno);
+    void parseParticles(ifstream& file, string& line, unsigned long long int& lno);
 };
 
 
