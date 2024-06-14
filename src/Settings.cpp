@@ -304,13 +304,14 @@ Settings::Settings(string filePath)
     long long unsigned int i = 0LLU;
     unsigned int attributesRead = 0U;
 
-    while (getNextString(file, line, lno, i) != "SimulationSettings");
+    parseChar(file, line, lno, i, '{');
+    string str = getNextString(file, line, lno, i);
+    if (str != "SimulationSettings")
+        throw invalid_argument("line:" + to_string(lno) + " SimulationSettings declaration not found");
+    parseChar(file, line, lno, i, ':');
+    parseChar(file, line, lno, i, '{');
 
     while (attributesRead < TOTAL_ATTRIBUTES) {
-        if (!getline(file, line))
-            throw invalid_argument("line:" + to_string(lno) + " end of file reached before all attributes read");
-        lno++;
-        if (line.empty()) continue;
 
         const string attributeName = getNextString(file, line, lno, i);
         if (attributteParsers.find(attributeName) == attributteParsers.end())
@@ -320,6 +321,8 @@ Settings::Settings(string filePath)
 
         cout << "line:" << lno << " reading: " << attributeName << endl;
     }
+    parseChar(file, line, lno, i, '}');
+    parseChar(file, line, lno, i, '}');
 
     cout << *this << endl;
 }
@@ -445,30 +448,63 @@ ostream& operator <<(ostream& os, const Settings& settings)
     return os;
 }
 
-const string Settings::getNextString(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i) const
+void Settings::nextline(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i) const
+{
+    if (!getline(file, line))
+        throw invalid_argument("line:" + to_string(lno) + " end of file reached before next line read");
+    lno++;
+    i = 0;
+    cout << "\nLINE:" << lno <<'\n'<< line << endl;
+}
+
+void Settings::parseChar(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i, char pc) const
 {
     while (true)
     {
-        size_t qStart = line.find('"');
-        if (qStart != string::npos) {
-            size_t qEnd = line.find('"', qStart+1);
-
-            if (qEnd == string::npos)
-                throw invalid_argument("line:" + to_string(lno) + " string not closed");
-
-            string str = line.substr(qStart+1, qEnd-qStart-1);
-            line = line.substr(qEnd+1);
-            return str;
+        for (char c = line[i]; i < line.size(); c = line[i++]) {
+            if (c == pc) {
+                cout <<lno<<','<<i<< " parsed char \'" << pc << '\'' << endl;
+                i++;
+                return;
+            }
+            else if (c != ' ') {
+                i++;
+                throw invalid_argument("line:" + to_string(lno) + " invalid char \'"+c+"\' before \'" + pc);
+            }
         }
-        if (!getline(file, line))
-            throw invalid_argument("line:" + to_string(lno) + " end of file reached before string read");
-        lno++;
+        nextline(file, line, lno, i);
+    }
+}
+
+const string Settings::getNextString(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i) const
+{
+    long long unsigned int len = line.size();
+    while (true)
+    {
+        for (char c = line[i]; i < len; c = line[i++]) {
+            if (c == ' ') continue;
+
+            if (c == '"') {
+                unsigned int start = i;
+
+                for (c = line[i]; i < len; c = line[i++]) {
+                    if (c == '"' && line[i-1] != '\\') {
+                        return line.substr(start, i-start-1);
+                    }
+                }
+                throw invalid_argument("line:"+to_string(lno)+','+to_string(i)+" string not closed");
+            }
+            throw invalid_argument("line:"+to_string(lno)+','+to_string(i)+" invalid char \'"+c+"\' before string start");
+        }
+        nextline(file, line, lno, i);
     }
 }
 
 
 const int Settings::getNextInt(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i) const
 {
+    return 0;
+    
     while (true)
     {
         for (long long unsigned int i = 0ULL; i < line.size(); i++) {

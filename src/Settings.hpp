@@ -94,6 +94,9 @@ struct Settings
         { "particles", &Settings::parseParticles },
     };
 
+    void nextline(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& ) const;
+    void parseChar(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i, char pc) const;
+
     const string getNextString(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i) const;
     const int getNextInt(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i) const;
     const float getNextFloat(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i) const;
