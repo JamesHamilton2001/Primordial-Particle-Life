@@ -95,11 +95,12 @@ struct Settings
     };
 
     void nextline(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& ) const;
+    bool charIsNext(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i, char pc) const;
     void parseChar(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i, char pc) const;
 
-    const string getNextString(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i) const;
-    const int getNextInt(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i) const;
-    const float getNextFloat(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i) const;
+    const string getParseString(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i) const;
+    const int getParseInt(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i) const;
+    const float getParseFloat(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i) const;
 
     void parseName(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i);
     void parseTypes(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i);

@@ -305,7 +305,7 @@ Settings::Settings(string filePath)
     unsigned int attributesRead = 0U;
 
     parseChar(file, line, lno, i, '{');
-    string str = getNextString(file, line, lno, i);
+    string str = getParseString(file, line, lno, i);
     if (str != "SimulationSettings")
         throw invalid_argument("line:" + to_string(lno) + " SimulationSettings declaration not found");
     parseChar(file, line, lno, i, ':');
@@ -313,7 +313,7 @@ Settings::Settings(string filePath)
 
     while (attributesRead < TOTAL_ATTRIBUTES) {
 
-        const string attributeName = getNextString(file, line, lno, i);
+        const string attributeName = getParseString(file, line, lno, i);
         if (attributteParsers.find(attributeName) == attributteParsers.end())
             throw invalid_argument("line:" + to_string(lno) + " Unreadable attribute name: " + attributeName);
         (this->*attributteParsers.at(attributeName))(file, line, lno, i);
@@ -321,8 +321,8 @@ Settings::Settings(string filePath)
 
         cout << "line:" << lno << " reading: " << attributeName << endl;
     }
-    parseChar(file, line, lno, i, '}');
-    parseChar(file, line, lno, i, '}');
+    charIsNext(file, line, lno, i, '}');
+    charIsNext(file, line, lno, i, '}');
 
     cout << *this << endl;
 }
@@ -457,31 +457,41 @@ void Settings::nextline(ifstream& file, string& line, unsigned long long int& ln
     cout << "\nLINE:" << lno <<'\n'<< line << endl;
 }
 
-void Settings::parseChar(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i, char pc) const
+bool Settings::charIsNext(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i, char pc) const
 {
     while (true)
     {
         for (char c = line[i]; i < line.size(); c = line[i++]) {
             if (c == pc) {
-                cout <<lno<<','<<i<< " parsed char \'" << pc << '\'' << endl;
                 i++;
-                return;
+                return true;
             }
-            else if (c != ' ') {
-                i++;
-                throw invalid_argument("line:" + to_string(lno) + " invalid char \'"+c+"\' before \'" + pc);
+            if (c != ' ') {
+                return false;
             }
         }
         nextline(file, line, lno, i);
     }
 }
 
-const string Settings::getNextString(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i) const
+void Settings::parseChar(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i, char pc) const
 {
-    long long unsigned int len = line.size();
+    cout <<'|'<<lno<<','<<i<< " parsing char \'" << pc << "\'... " << endl;
+    if (!charIsNext(file, line, lno, i, pc)) {
+        cout << endl;
+        throw invalid_argument("line:" + to_string(lno) + " expected char \'" + pc + "\' not found");
+    }
+    cout <<'|'<<lno<<','<<i<< "...parse char \'"<<pc<<"\' success" << endl;
+}
+
+const string Settings::getParseString(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i) const
+{
+    cout <<'|'<<lno<<','<<i<< " parsing string... " << endl;
     while (true)
     {
+        long long unsigned int len = line.size();
         for (char c = line[i]; i < len; c = line[i++]) {
+            // cout << c;
             if (c == ' ') continue;
 
             if (c == '"') {
@@ -489,6 +499,8 @@ const string Settings::getNextString(ifstream& file, string& line, unsigned long
 
                 for (c = line[i]; i < len; c = line[i++]) {
                     if (c == '"' && line[i-1] != '\\') {
+                        const string str = line.substr(start, i-start-1);
+                        cout <<'|'<<lno<<','<<i<< "...parse string success: " <<'"'<< str<<'"'<< endl;
                         return line.substr(start, i-start-1);
                     }
                 }
@@ -496,12 +508,13 @@ const string Settings::getNextString(ifstream& file, string& line, unsigned long
             }
             throw invalid_argument("line:"+to_string(lno)+','+to_string(i)+" invalid char \'"+c+"\' before string start");
         }
+        // cout << endl;
         nextline(file, line, lno, i);
     }
 }
 
 
-const int Settings::getNextInt(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i) const
+const int Settings::getParseInt(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i) const
 {
     return 0;
     
@@ -530,7 +543,7 @@ const int Settings::getNextInt(ifstream& file, string& line, unsigned long long 
     }
 }
 
-const float Settings::getNextFloat(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i) const
+const float Settings::getParseFloat(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i) const
 {
     return 0.0f;
 }
@@ -538,37 +551,37 @@ const float Settings::getNextFloat(ifstream& file, string& line, unsigned long l
 
 void Settings::parseName(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i)
 {
-    name = getNextString(file, line, lno, i);
+    name = getParseString(file, line, lno, i);
 }
 
 void Settings::parseTypes(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i)
 {
-    types = getNextInt(file, line, lno, i);
+    types = getParseInt(file, line, lno, i);
 }
 
 void Settings::parseSize(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i)
 {
-    size = getNextInt(file, line, lno, i);
+    size = getParseInt(file, line, lno, i);
 }
 
 void Settings::parseCount(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i)
 {
-    count = getNextInt(file, line, lno, i);
+    count = getParseInt(file, line, lno, i);
 }
 
 void Settings::parseInnerRadius(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i)
 {
-    innerRadius = getNextFloat(file, line, lno, i);
+    innerRadius = getParseFloat(file, line, lno, i);
 }
 
 void Settings::parseResistance(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i)
 {
-    resistance = getNextFloat(file, line, lno, i);
+    resistance = getParseFloat(file, line, lno, i);
 }
 
 void Settings::parseStep(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i)
 {
-    step = getNextFloat(file, line, lno, i);
+    step = getParseFloat(file, line, lno, i);
 }
 
 void Settings::parseAttractions(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i)
@@ -578,7 +591,7 @@ void Settings::parseAttractions(ifstream& file, string& line, unsigned long long
 
 void Settings::parseSeed(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i)
 {
-    seed = getNextInt(file, line, lno, i);
+    seed = getParseInt(file, line, lno, i);
 }
 
 void Settings::parseTypeRatio(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i)
