@@ -318,14 +318,24 @@ Settings::Settings(string filePath)
 Settings::Settings(string filePath)
 {
     string str = "";
-    
+
     JsonParser parser(filePath);
-    cout << parser << endl;
+
+    if (parser.curr != '{')
+        throw invalid_argument(parser.posString() + "Expected '{' to begin file");
+    parser.step();
+
+    str = parser.parseGetDeclaration();
+    if (str != "SimulationSettings")
+        throw invalid_argument(parser.posString() + "Expected \"SimulationSettings\" declaration");
     if (parser.curr != '{')
         throw invalid_argument(parser.posString() + "Expected '{' to begin settings");
     parser.step();
+
     str = parser.parseGetDeclaration();
-    cout << parser << endl;
+    cout << "Declaration: " << str << endl;
+    str = parser.parseGetString();
+    cout << "String: \"" << str << '\"' << endl;
 }
 
 Settings::JsonParser::JsonParser(string filePath)
@@ -372,25 +382,20 @@ string Settings::JsonParser::parseGetDeclaration()
 {
     long long unsigned int startRow = row;
 
-    // ensure first character is '"'
     if (curr != '"')
         throw invalid_argument(posString(row, col) + "Expected '\"' to begin declaration");
 
     step();
     long long unsigned int startCol = col;
 
-    // ensure first character is alpha and on the same line
     if (row != startRow) {
         throw invalid_argument(posString(row, col) + "Expected declaration to be on same line");
     } if (!isalpha(curr) && curr != '_'){
         throw invalid_argument(posString(row, col) + "Expected alpha character or \'_\' after '\"'");
     }
 
-    while (step())
+    while (step() && row == startRow)
     {
-        if (row != startRow) {
-            throw invalid_argument(posString() + "Expected declaration to be on same line");
-        }
         if (curr == '"') {
             string res = lines[startRow].substr(startCol, col-startCol);
             step();
@@ -405,7 +410,30 @@ string Settings::JsonParser::parseGetDeclaration()
             throw invalid_argument(posString() + "Expected alphanumeric character or \'_\' in declaration");
         }
     }
-    throw invalid_argument(posString() + "End of file reached before declaration end");
+    throw invalid_argument(posString() + "End of line reached before declaration end");
+}
+
+string Settings::JsonParser::parseGetString()
+{
+    long long unsigned int startRow = row;
+
+    if (curr != '"') {
+        throw invalid_argument(posString(row, col) + "Expected '\"' to begin string");
+    }
+
+    step();
+    long long unsigned int startCol = col;
+
+    while (step() && row == startRow)
+    {
+        if (curr == '"') {
+            string res = lines[startRow].substr(startCol, col-startCol);
+            step();
+            cout << posString() << "String: " << res << endl;
+            return res;
+        }
+    }
+    throw invalid_argument(posString() + "End of line reached before string end");
 }
 
 ostream &operator<<(ostream &os, const Settings::JsonParser &parser)

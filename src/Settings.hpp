@@ -92,21 +92,13 @@ struct Settings
 //     };
 // 
 
+    // currently does not handle special characters!
     class JsonParser
     {
       public:
 
         JsonParser(string filePath);
         ~JsonParser();
-
-        string parseGetDeclaration();
-        string parseGetString();
-        int parseGetInt(int& dest);
-        float parseGetFloat(float& dest);
-
-        friend ostream& operator <<(ostream& os, const JsonParser& parser);
-
-    //   private:
 
         ifstream file;
         vector<string> lines;
@@ -119,6 +111,13 @@ struct Settings
         unsigned long long int count;
 
         bool step();
+
+        string parseGetDeclaration();
+        string parseGetString();
+        int parseGetInt(int& dest);
+        float parseGetFloat(float& dest);
+
+        friend ostream& operator <<(ostream& os, const JsonParser& parser);
 
         string posString(int r, int c);
         string posString();
