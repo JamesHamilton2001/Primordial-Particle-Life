@@ -97,9 +97,10 @@ struct Settings
     {
       public:
 
-        JsonParser(string filePath);
+        JsonParser(string filePath, Settings settings);
         ~JsonParser();
 
+        Settings& settings;
         ifstream file;
         vector<string> lines;
         char prev;
@@ -109,13 +110,41 @@ struct Settings
         unsigned long long int col;
         unsigned long long int len;
         unsigned long long int count;
+// 
+//         unordered_map<string, void(JsonParser::*)()> parsers = {
+//             { "name", &JsonParser::parseIntoName },
+//             { "types", &JsonParser::parseIntoTypes },
+//             { "size", &JsonParser::parseIntoSize },
+//             { "count", &JsonParser::parseIntoCount },
+//             { "innerRadius", &JsonParser::parseIntoInnerRadius },
+//             { "resistance", &JsonParser::parseIntoResistance },
+//             { "step", &JsonParser::parseIntoStep },
+//             { "attractions", &JsonParser::parseIntoAttractions },
+//             { "seed", &JsonParser::parseIntoSeed },
+//             { "typeRatio", &JsonParser::parseIntoTypeRatio },
+//             { "particles", &JsonParser::parseIntoParticles },
+//         };
+
+        void parseIntoSettings();
 
         bool step();
 
         string parseGetDeclaration();
         string parseGetString();
-        int parseGetInt(int& dest);
-        float parseGetFloat(float& dest);
+//         int parseGetInt();
+//         float parseGetFloat();
+// 
+//         void parseIntoName();
+//         void parseIntoTypes();
+//         void parseIntoSize();
+//         void parseIntoCount();
+//         void parseIntoInnerRadius();
+//         void parseIntoResistance();
+//         void parseIntoStep();
+//         void parseIntoAttractions();
+//         void parseIntoSeed();
+//         void parseIntoTypeRatio();
+//         void parseIntoParticles();
 
         friend ostream& operator <<(ostream& os, const JsonParser& parser);
 

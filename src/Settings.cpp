@@ -317,28 +317,12 @@ Settings::Settings(string filePath)
 
 Settings::Settings(string filePath)
 {
-    string str = "";
-
-    JsonParser parser(filePath);
-
-    if (parser.curr != '{')
-        throw invalid_argument(parser.posString() + "Expected '{' to begin file");
-    parser.step();
-
-    str = parser.parseGetDeclaration();
-    if (str != "SimulationSettings")
-        throw invalid_argument(parser.posString() + "Expected \"SimulationSettings\" declaration");
-    if (parser.curr != '{')
-        throw invalid_argument(parser.posString() + "Expected '{' to begin settings");
-    parser.step();
-
-    str = parser.parseGetDeclaration();
-    cout << "Declaration: " << str << endl;
-    str = parser.parseGetString();
-    cout << "String: \"" << str << '\"' << endl;
+    JsonParser parser(filePath, *this);
+    parser.parseIntoSettings();
 }
 
-Settings::JsonParser::JsonParser(string filePath)
+Settings::JsonParser::JsonParser(string filePath, Settings settings) :
+    settings(settings)
 {
     file.open(filePath);
     if (!file.is_open())
@@ -373,6 +357,25 @@ Settings::JsonParser::JsonParser(string filePath)
     next = (col+1 < len) ? lines[row][col+1] : lines[row+1][0];
 }
 
+void Settings::JsonParser::parseIntoSettings()
+{
+    string str = "";
+
+    if (curr != '{')
+        throw invalid_argument(posString() + "Expected '{' to begin file");
+    step();
+
+    str = parseGetDeclaration();
+    if (str != "SimulationSettings")
+        throw invalid_argument(posString() + "Expected \"SimulationSettings\" declaration");
+    if (curr != '{')
+        throw invalid_argument(posString() + "Expected '{' to begin settings");
+    step();
+
+    str = parseGetDeclaration();
+    str = parseGetString();
+}
+
 Settings::JsonParser::~JsonParser()
 {
     file.close();
@@ -397,14 +400,13 @@ string Settings::JsonParser::parseGetDeclaration()
     while (step() && row == startRow)
     {
         if (curr == '"') {
-            string res = lines[startRow].substr(startCol, col-startCol);
+            string result = lines[startRow].substr(startCol, col-startCol);
             step();
             if (curr != ':') {
                 throw invalid_argument(posString() + "Expected ':' after declaration");
             }
             step();
-            cout << posString() << "Declaration: " << res << endl;
-            return res;
+            return result;
         }
         if (!isalnum(curr) && curr != '_') {
             throw invalid_argument(posString() + "Expected alphanumeric character or \'_\' in declaration");
@@ -427,10 +429,8 @@ string Settings::JsonParser::parseGetString()
     while (step() && row == startRow)
     {
         if (curr == '"') {
-            string res = lines[startRow].substr(startCol, col-startCol);
             step();
-            cout << posString() << "String: " << res << endl;
-            return res;
+            return lines[startRow].substr(startCol, col-startCol-1);
         }
     }
     throw invalid_argument(posString() + "End of line reached before string end");
