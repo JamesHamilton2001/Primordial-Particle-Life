@@ -150,210 +150,6 @@ Settings::Settings(const filesystem::directory_entry& dirEntry)
     file.close();
 }
 
-/*
-Settings::Settings(string filePath)
-{
-    ifstream file(filePath);
-    if (!file.is_open()) {
-        cerr << "Failed to open \""+filePath+"\" for reading settings." << endl;
-        return;
-    }
-
-    const function<bool(string&)> hasdigit = [](string& s) { return any_of(s.begin(), s.end(), [](unsigned char c) { return isdigit(c); }); };
-
-    const function<void(string&, string&)> readOneLineString = [](string& line, string& dest) {
-        int len = static_cast<int>(line.size());
-        int i, j;
-        for (i = 0; line[i] != ':' && i < len; i++);
-        for (; line[i] != '\"' && i < len-1; i++);
-        for (j = i+1; line[j] != '\"' && j < len; j++);
-        dest = line.substr(i+1, j-i-1);
-    };
-
-    const function<void(string&, int*)> readOneLineInt = [this](string& line, int* ptr) {
-        int len = static_cast<int>(line.size());
-        int i, j; 
-        for (i = 0; line[i] != ':' && i < len; i++);
-        for (; !isdigit(line[i]) && line[i] != '-' && i < len-1; i++);
-        for (j = i+1; line[j] != ',' && line[j] != ' ' && j < len; j++);
-        *ptr = stoi(line.substr(i, j-i));
-    };
-
-    const function<void(string&, float*)> readOneLineFloat = [this](string& line, float* ptr) {
-        int len = static_cast<int>(line.size());
-        int i, j;
-        for (i = 0; line[i] != ':' && i < len; i++);
-        for (; !isdigit(line[i]) && line[i]!='-' && line[i]!='+' && line[i] != '.' && i < len-1; i++);
-        for (j = i+1; line[j] != ',' && line[j] != ' ' && j < len; j++);
-        *ptr = stof(line.substr(i, j-i));
-    };
-
-    const function<void(string&, vector<int>&)> readIntVector = [this, &hasdigit, &file](string& line, vector<int>& dest) {
-        dest = vector<int>();
-        bool opened = false, closed = false;
-        while (!opened) {
-            opened = line.find('[') != string::npos;
-            if (!opened && !getline(file, line)) break;
-        }
-        while (opened && !closed) {
-            closed = line.find(']') != string::npos;
-            if (!hasdigit(line)) {
-                if (!getline(file, line)) break;
-                else continue;
-            };
-            int len = static_cast<int>(line.size());
-            int i = 0, j, k;
-            while (i < len) {
-                for (j = i+1; !isdigit(line[j]) && line[j] != '-' && line[j] != '+' && j < len-1; j++);
-                for (k = j+1; line[k] != ',' && line[k] != ' ' && k < len; k++);
-                string intString = line.substr(j, k-j);
-                if (hasdigit(intString))
-                    dest.emplace_back(stoi(intString));
-                else if (!getline(file, line))
-                    break;
-                i = k;
-            }
-            if (!closed && !getline(file, line)) break;
-        }
-    };
-
-    const function<void(string&, vector<vector<float>>&)> readFloatMatrix = [this, &file](string& line, vector<vector<float>>& dest) {
-        dest = vector<vector<float>>();
-        int i, len, opens = 0, closes = 0;
-
-        while (opens == 0) {
-            for (i = 0, len = static_cast<int>(line.size()); i < len; i++) {
-                if (line[i] == '[') {
-                    opens++;
-                    break;
-                }
-            } if (opens == 0 && !getline(file, line)) break;
-        } i++;
-        line = line.substr(i, len-i);
-
-        while (opens != closes) {
-            i = 0;
-            string floatString = "";
-            while (i < static_cast<int>(line.size())) {
-                unsigned char c = line[i];
-                if (c=='-' || c=='+' || c=='.' || isdigit(c)) {
-                    floatString += c;
-                } else {
-                    if (!floatString.empty()) {
-                        dest.back().emplace_back(stof(floatString));
-                        floatString = "";
-                    } if (c == '[') {
-                        opens++;
-                        dest.emplace_back(vector<float>());
-                    } else if (c == ']') closes++;
-                } i++;
-            } if (opens != closes && !getline(file, line)) break;
-        }
-    };
-
-    const unordered_map<string, function<void(string&)>> readAttribute = {
-        { "name", [this, &readOneLineString](string& line)        { readOneLineString(line, name); } },
-        { "types", [this, &readOneLineInt](string& line)          { readOneLineInt(line, &types); }},
-        { "size", [this, &readOneLineInt](string& line)           { readOneLineInt(line, &size); }},
-        { "count", [this, &readOneLineInt](string& line)          { readOneLineInt(line, &count); }},
-        { "innerRadius", [this, &readOneLineFloat](string& line)  { readOneLineFloat(line, &innerRadius); }},
-        { "resistance", [this, &readOneLineFloat](string& line)   { readOneLineFloat(line, &resistance); }},
-        { "step", [this, &readOneLineFloat](string& line)         { readOneLineFloat(line, &step); }},
-        { "attractions", [this, &readFloatMatrix](string& line)   { readFloatMatrix(line, attractions); }},
-        { "seed", [this, &readOneLineInt](string& line)           { readOneLineInt(line, &seed); }},
-        { "typeRatio", [this, &readIntVector](string& line)       { readIntVector(line, typeRatio); }},
-        { "particles", [this, &readOneLineFloat](string& line)    {  }},
-    };
-
-    string line;
-    long long unsigned int i, j;
-    while (getline(file, line)) {
-
-        // get attribute name and starting index of value
-        for (i = 1; line[i-1] != '\"' && i < line.size()-1; i++);
-        for (j = i+1; line[j] != '\"' && j < line.size(); j++);
-        string attributeName = line.substr(i, j-i);
-
-        if (readAttribute.find(attributeName) == readAttribute.end()) {
-            cerr << "Unreadable attribute name: " << attributeName << endl;
-            continue;
-        }
-        cout << "Reading attribute: " << attributeName << endl;
-        readAttribute.at(attributeName)(line);
-    }
-
-    file.close();
-
-    for (int tr : typeRatio) cout << tr << " ";
-    cout << endl;
-
-    cout << *this << endl;
-}
-*/
-
-Settings::Settings(string filePath)
-{
-    ifstream file(filePath);
-    if (!file.is_open())
-        throw invalid_argument("Failed to open \""+filePath+"\" for reading settings.");
-
-    const unsigned int TOTAL_ATTRIBUTES = 11U;
-
-    string line;
-    long long unsigned int lno = 0LLU;
-    long long unsigned int i = 0LLU;
-    unsigned int attributesRead = 0U;
-
-    parseChar(file, line, lno, i, '{');
-    string str = getParseString(file, line, lno, i);
-    if (str != "SimulationSettings")
-        throw invalid_argument("line:" + to_string(lno) + " SimulationSettings declaration not found");
-    parseChar(file, line, lno, i, ':');
-    parseChar(file, line, lno, i, '{');
-
-    while (attributesRead < TOTAL_ATTRIBUTES) {
-
-        const string attributeName = getParseString(file, line, lno, i);
-        if (attributteParsers.find(attributeName) == attributteParsers.end())
-            throw invalid_argument("line:" + to_string(lno) + " Unreadable attribute name: " + attributeName);
-        (this->*attributteParsers.at(attributeName))(file, line, lno, i);
-        attributesRead++;
-
-        cout << "line:" << lno << " reading: " << attributeName << endl;
-    }
-    charIsNext(file, line, lno, i, '}');
-    charIsNext(file, line, lno, i, '}');
-
-    cout << *this << endl;
-}
-
-void Settings::generateParticleData()
-{
-    // dont overwrite for preloading particles, recalculate ratio
-    if (seed == -1) {
-        typeRatio = vector<int>(types, 0);
-        for (Particle& p : particles)
-            typeRatio[p.type]++;
-        return;
-    }
-
-    SetRandomSeed(seed);
-    particles.clear();
-    int ct = 0;
-    while (ct < count) {
-        for (int t = 0; t < types; t++) {
-            for (int i = 0; i < typeRatio[t] && ct < count; i++) {
-                particles.emplace_back(Particle(
-                    t,
-                    GetRandomValue(0, static_cast<int>(2*size)) + GetRandomValue(0, 1000) / 1000.0f,
-                    GetRandomValue(0, static_cast<int>(2*size)) + GetRandomValue(0, 1000) / 1000.0f
-                ));
-                ct++;
-            }
-        }
-    }
-}
-
 void Settings::save() const
 {
     const string filePath = PARTICLELIFE_CUSTOM_SETTINGS_DIR + name + ".json";
@@ -448,158 +244,212 @@ ostream& operator <<(ostream& os, const Settings& settings)
     return os;
 }
 
-void Settings::nextline(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i) const
+void Settings::generateParticleData()
 {
-    if (!getline(file, line))
-        throw invalid_argument("line:" + to_string(lno) + " end of file reached before next line read");
-    lno++;
-    i = 0;
-    cout << "\nLINE:" << lno <<'\n'<< line << endl;
-}
+    // dont overwrite for preloading particles, recalculate ratio
+    if (seed == -1) {
+        typeRatio = vector<int>(types, 0);
+        for (Particle& p : particles)
+            typeRatio[p.type]++;
+        return;
+    }
 
-bool Settings::charIsNext(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i, char pc) const
-{
-    while (true)
-    {
-        for (char c = line[i]; i < line.size(); c = line[i++]) {
-            if (c == pc) {
-                i++;
-                return true;
-            }
-            if (c != ' ') {
-                return false;
+    SetRandomSeed(seed);
+    particles.clear();
+    int ct = 0;
+    while (ct < count) {
+        for (int t = 0; t < types; t++) {
+            for (int i = 0; i < typeRatio[t] && ct < count; i++) {
+                particles.emplace_back(Particle(
+                    t,
+                    GetRandomValue(0, static_cast<int>(2*size)) + GetRandomValue(0, 1000) / 1000.0f,
+                    GetRandomValue(0, static_cast<int>(2*size)) + GetRandomValue(0, 1000) / 1000.0f
+                ));
+                ct++;
             }
         }
-        nextline(file, line, lno, i);
-    }
-}
-
-void Settings::parseChar(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i, char pc) const
-{
-    cout <<'|'<<lno<<','<<i<< " parsing char \'" << pc << "\'... " << endl;
-    if (!charIsNext(file, line, lno, i, pc)) {
-        cout << endl;
-        throw invalid_argument("line:" + to_string(lno) + " expected char \'" + pc + "\' not found");
-    }
-    cout <<'|'<<lno<<','<<i<< "...parse char \'"<<pc<<"\' success" << endl;
-}
-
-const string Settings::getParseString(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i) const
-{
-    cout <<'|'<<lno<<','<<i<< " parsing string... " << endl;
-    while (true)
-    {
-        long long unsigned int len = line.size();
-        for (char c = line[i]; i < len; c = line[i++]) {
-            // cout << c;
-            if (c == ' ') continue;
-
-            if (c == '"') {
-                unsigned int start = i;
-
-                for (c = line[i]; i < len; c = line[i++]) {
-                    if (c == '"' && line[i-1] != '\\') {
-                        const string str = line.substr(start, i-start-1);
-                        cout <<'|'<<lno<<','<<i<< "...parse string success: " <<'"'<< str<<'"'<< endl;
-                        return line.substr(start, i-start-1);
-                    }
-                }
-                throw invalid_argument("line:"+to_string(lno)+','+to_string(i)+" string not closed");
-            }
-            throw invalid_argument("line:"+to_string(lno)+','+to_string(i)+" invalid char \'"+c+"\' before string start");
-        }
-        // cout << endl;
-        nextline(file, line, lno, i);
     }
 }
 
 
-const int Settings::getParseInt(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i) const
+
+
+
+
+
+/* 
+Settings::Settings(string filePath)
 {
-    return 0;
+    ifstream file(filePath);
+    if (!file.is_open())
+        throw invalid_argument("Failed to open \""+filePath+"\" for reading settings.");
+
+    const unsigned int TOTAL_ATTRIBUTES = 11U;
+
+    string line;
+    long long unsigned int lno = 0LLU;
+    long long unsigned int i = 0LLU;
+    unsigned int attributesRead = 0U;
+
+    parseChar(file, line, lno, i, '{');
+    string str = getParseString(file, line, lno, i);
+    if (str != "SimulationSettings")
+        throw invalid_argument("line:" + to_string(lno) + " SimulationSettings declaration not found");
+    parseChar(file, line, lno, i, ':');
+    parseChar(file, line, lno, i, '{');
+
+    while (attributesRead < TOTAL_ATTRIBUTES) {
+
+        const string attributeName = getParseString(file, line, lno, i);
+        if (attributteParsers.find(attributeName) == attributteParsers.end())
+            throw invalid_argument("line:" + to_string(lno) + " Unreadable attribute name: " + attributeName);
+        (this->*attributteParsers.at(attributeName))(file, line, lno, i);
+        attributesRead++;
+
+        cout << "line:" << lno << " reading: " << attributeName << endl;
+    }
+    charIsNext(file, line, lno, i, '}');
+    charIsNext(file, line, lno, i, '}');
+
+    cout << *this << endl;
+}
+ */
+
+Settings::Settings(string filePath)
+{
+    string str = "";
     
-    while (true)
-    {
-        for (long long unsigned int i = 0ULL; i < line.size(); i++) {
-            char c1 = line[i];
+    JsonParser parser(filePath);
+    cout << parser << endl;
+    if (parser.curr != '{')
+        throw invalid_argument(parser.posString() + "Expected '{' to begin settings");
+    parser.step();
+    str = parser.parseGetDeclaration();
+    cout << parser << endl;
+}
 
-            if (isdigit(c1) || c1 == '-' || c1 == '+') {
-                for (long long unsigned int j = i+1; j < line.size(); j++) {
-                    char c2 = line[j];
+Settings::JsonParser::JsonParser(string filePath)
+{
+    file.open(filePath);
+    if (!file.is_open())
+        throw invalid_argument("Failed to open \""+filePath+"\" for reading settings.");
 
-                    if (isdigit(c2)) continue;
-                    switch (c2) {
-                        case ',': case ']': case '}': case ' ':
-                            return stoi(line.substr(i, j-i));
-                        default:
-                            throw invalid_argument("line:" +to_string(lno)+ " invalid char following int");
-                    }
-                }
-            }
+    string rawLine;
+    bool quoted = false;
+    row = 0;
+    while (getline(file, rawLine)) {
+        col = 0;
+        len = rawLine.length();
+        string cleanBuffer = "";
+        for (char queryChar = rawLine[col]; col < len; queryChar = rawLine[++col]) {
+            if (queryChar == '"') {
+                if (col > 0 && rawLine[col-1] == '\\') continue;
+                quoted = !quoted;
+            } else if (queryChar == ' ' && !quoted) continue;
+            cleanBuffer += queryChar;
+        } if (!cleanBuffer.empty()) {
+            cout << cleanBuffer << endl;
+            lines.emplace_back(cleanBuffer);
         }
-        if (!getline(file, line))
-            throw invalid_argument("line:" + to_string(lno) + " end of file reached before int read");
-        lno++;
     }
+
+    row = 0LLU;
+    col = 0LLU;
+    len = lines[row].size();
+    count = lines.size();
+
+    prev = '\0';
+    curr = lines[row][col];
+    next = (col+1 < len) ? lines[row][col+1] : lines[row+1][0];
 }
 
-const float Settings::getParseFloat(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i) const
+Settings::JsonParser::~JsonParser()
 {
-    return 0.0f;
+    file.close();
 }
 
-
-void Settings::parseName(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i)
+string Settings::JsonParser::parseGetDeclaration()
 {
-    name = getParseString(file, line, lno, i);
+    long long unsigned int startRow = row;
+
+    // ensure first character is '"'
+    if (curr != '"')
+        throw invalid_argument(posString(row, col) + "Expected '\"' to begin declaration");
+
+    step();
+    long long unsigned int startCol = col;
+
+    // ensure first character is alpha and on the same line
+    if (row != startRow) {
+        throw invalid_argument(posString(row, col) + "Expected declaration to be on same line");
+    } if (!isalpha(curr) && curr != '_'){
+        throw invalid_argument(posString(row, col) + "Expected alpha character or \'_\' after '\"'");
+    }
+
+    while (step())
+    {
+        if (row != startRow) {
+            throw invalid_argument(posString() + "Expected declaration to be on same line");
+        }
+        if (curr == '"') {
+            string res = lines[startRow].substr(startCol, col-startCol);
+            step();
+            if (curr != ':') {
+                throw invalid_argument(posString() + "Expected ':' after declaration");
+            }
+            step();
+            cout << posString() << "Declaration: " << res << endl;
+            return res;
+        }
+        if (!isalnum(curr) && curr != '_') {
+            throw invalid_argument(posString() + "Expected alphanumeric character or \'_\' in declaration");
+        }
+    }
+    throw invalid_argument(posString() + "End of file reached before declaration end");
 }
 
-void Settings::parseTypes(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i)
+ostream &operator<<(ostream &os, const Settings::JsonParser &parser)
 {
-    types = getParseInt(file, line, lno, i);
+    cout << "JsonParser: { "
+         << "row: " << parser.row << ", col: " << parser.col
+         << ", len: " << parser.len << ", count: " << parser.count
+         << ", chars: ";
+    if (parser.prev != '\0') cout << '\'' << parser.prev << "\' => ";
+    else cout << "NULL => ";
+    if (parser.curr != '\0') cout << '\'' << parser.curr << "\' => ";
+    else cout << "NULL => ";
+    if (parser.next != '\0') cout << '\'' << parser.next << "\' ";
+    else cout << "NULL ";
+    cout << "}";
+    return os;
 }
 
-void Settings::parseSize(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i)
+bool Settings::JsonParser::step()
 {
-    size = getParseInt(file, line, lno, i);
+    if (col+1 >= len) {
+        if (row+1 >= count) {
+        // throw invalid_argument(posString(row, col) + "End of file reached");
+            return false;
+        }
+        row++;
+        col = 0;
+        len = lines[row].size();
+    } else col++;
+
+    prev = curr;
+    curr = next;
+    next = (col+1 < len) ? lines[row][col+1]
+                         : (row+1 < count) ? lines[row+1][0]
+                                           : '\0';
+    return true;
 }
 
-void Settings::parseCount(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i)
+string Settings::JsonParser::posString(int r, int c)
 {
-    count = getParseInt(file, line, lno, i);
+    return "line:" + to_string(r) + ',' + to_string(c) + "  ";
 }
 
-void Settings::parseInnerRadius(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i)
+string Settings::JsonParser::posString()
 {
-    innerRadius = getParseFloat(file, line, lno, i);
-}
-
-void Settings::parseResistance(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i)
-{
-    resistance = getParseFloat(file, line, lno, i);
-}
-
-void Settings::parseStep(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i)
-{
-    step = getParseFloat(file, line, lno, i);
-}
-
-void Settings::parseAttractions(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i)
-{
-    attractions = vector<vector<float>>();
-}
-
-void Settings::parseSeed(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i)
-{
-    seed = getParseInt(file, line, lno, i);
-}
-
-void Settings::parseTypeRatio(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i)
-{
-    typeRatio = vector<int>();
-}
-
-void Settings::parseParticles(ifstream& file, string& line, unsigned long long int& lno, unsigned long long int& i)
-{
-    particles = vector<Particle>();
+    return posString(row, col);
 }
