@@ -359,21 +359,40 @@ Settings::JsonParser::JsonParser(string filePath, Settings settings) :
 
 void Settings::JsonParser::parseIntoSettings()
 {
-    string str = "";
+    string attributeName;
 
     if (curr != '{')
         throw invalid_argument(posString() + "Expected '{' to begin file");
     step();
-
-    str = parseGetDeclaration();
-    if (str != "SimulationSettings")
+    attributeName = parseGetDeclaration();
+    if (attributeName != "SimulationSettings")
         throw invalid_argument(posString() + "Expected \"SimulationSettings\" declaration");
     if (curr != '{')
         throw invalid_argument(posString() + "Expected '{' to begin settings");
     step();
 
-    str = parseGetDeclaration();
-    str = parseGetString();
+    const long long unsigned int totalAttributes = 11LLU;
+    // for (long long unsigned int attributesRead = 0LLU; attributesRead < totalAttributes; attributesRead++) 
+
+    attributeName = parseGetDeclaration();
+    settings.name = parseGetString();
+    if (curr != ',')
+        throw invalid_argument(posString() + "Expected ',' after declaration");
+    step();
+
+    attributeName = parseGetDeclaration();
+    cout << *this << endl;
+    settings.types = parseGetInt();
+    cout << *this << endl;
+    if (curr != ',')
+        throw invalid_argument(posString() + "Expected ',' after declaration");
+    step();
+
+    // cout << endl << endl << settings << endl;
+
+    // if (curr != '}')
+        // throw invalid_argument(posString() + "Expected '}' to end file");
+
 }
 
 Settings::JsonParser::~JsonParser()
@@ -436,6 +455,30 @@ string Settings::JsonParser::parseGetString()
     throw invalid_argument(posString() + "End of line reached before string end");
 }
 
+int Settings::JsonParser::parseGetInt()
+{
+    long long unsigned int startRow = row;
+    long long unsigned int startCol = col;
+    if (!(isdigit(curr) && curr != '-')) {
+        throw invalid_argument(posString() + "Expected digit or '-' to begin integer");
+    }
+    step();
+
+    while (true) {
+        if (row != startRow)
+            throw invalid_argument(posString() + "Expected integer to be on same line");
+        if (isdigit(curr)) continue;
+
+        if (curr == ',' || curr == '}' || curr == ']') {
+            string result = lines[startRow].substr(startCol, col-startCol);
+            cout << "int: \"" << result << "\"" << endl;
+            return stoi(result);
+        }
+        step();
+    } 
+
+}
+
 ostream &operator<<(ostream &os, const Settings::JsonParser &parser)
 {
     cout << "JsonParser: { "
@@ -456,7 +499,6 @@ bool Settings::JsonParser::step()
 {
     if (col+1 >= len) {
         if (row+1 >= count) {
-        // throw invalid_argument(posString(row, col) + "End of file reached");
             return false;
         }
         row++;

@@ -76,22 +76,6 @@ struct Settings
 
     friend ostream& operator <<(ostream& os, const Settings& settings);
 
-// 
-//     unordered_map<string, void (Settings::*)(ifstream&, string&, unsigned long long int&, unsigned long long int&)> attributteParsers = {
-//         { "name", &Settings::parseName },
-//         { "types", &Settings::parseTypes },
-//         { "size", &Settings::parseSize },
-//         { "count", &Settings::parseCount },
-//         { "innerRadius", &Settings::parseInnerRadius },
-//         { "resistance", &Settings::parseResistance },
-//         { "step", &Settings::parseStep },
-//         { "attractions", &Settings::parseAttractions },
-//         { "seed", &Settings::parseSeed },
-//         { "typeRatio", &Settings::parseTypeRatio },
-//         { "particles", &Settings::parseParticles },
-//     };
-// 
-
     // currently does not handle special characters!
     class JsonParser
     {
@@ -110,7 +94,7 @@ struct Settings
         unsigned long long int col;
         unsigned long long int len;
         unsigned long long int count;
-// 
+
 //         unordered_map<string, void(JsonParser::*)()> parsers = {
 //             { "name", &JsonParser::parseIntoName },
 //             { "types", &JsonParser::parseIntoTypes },
@@ -131,8 +115,8 @@ struct Settings
 
         string parseGetDeclaration();
         string parseGetString();
-//         int parseGetInt();
-//         float parseGetFloat();
+        int parseGetInt();
+        // float parseGetFloat();
 // 
 //         void parseIntoName();
 //         void parseIntoTypes();
