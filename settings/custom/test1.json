@@ -5,9 +5,12 @@
         "types": 3,
         "size": 3,
         "count": 15,
-        "innerRadius": 0.5,
-        "resistance": 0.001,
-        "step": 0.001,
+        "innerRadius"
+        : -0.5,
+        "resistance":
+        -0.001,
+        "step": -0.001
+        ,
         "attractions": [ [0.005, 0.002, -0.002],
                          [-0.002, 0.005, 0.002],
                          [0.002, -0.002, 0.005] ],

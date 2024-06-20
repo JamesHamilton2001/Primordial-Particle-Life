@@ -364,69 +364,69 @@ void Settings::JsonParser::parseIntoSettings()
     if (curr != '{')
         throw invalid_argument(posString() + "Expected '{' to begin file");
     step();
-    attributeName = parseGetDeclaration();
+    attributeName = parseGetKey();
     if (attributeName != "SimulationSettings")
         throw invalid_argument(posString() + "Expected \"SimulationSettings\" declaration");
     if (curr != '{')
-        throw invalid_argument(posString() + "Expected '{' to begin settings");
+        throw invalid_argument(posString() + "Expected '{' to begin settings, got '"+curr+"' instead");
     step();
 
     // const long long unsigned int totalAttributes = 11LLU;
     // for (long long unsigned int attributesRead = 0LLU; attributesRead < totalAttributes; attributesRead++) 
 
     // NAME
-    attributeName = parseGetDeclaration();
+    attributeName = parseGetKey();
     settings.name = parseGetString();
     if (curr != ',')
-        throw invalid_argument(posString() + "Expected ',' after declaration");
+        throw invalid_argument(posString() + "Expected ',' after declaration, got '"+curr+"' instead");
     cout << "name: " << settings.name << endl;
     step();
 
     // TYPES
-    attributeName = parseGetDeclaration();
+    attributeName = parseGetKey();
     settings.types = parseGetInt();
     if (curr != ',')
-        throw invalid_argument(posString() + "Expected ',' after declaration");
+        throw invalid_argument(posString() + "Expected ',' after declaration, got '"+curr+"' instead");
     cout << "types: " << settings.types << endl;
     step();
 
     // SIZE
-    attributeName = parseGetDeclaration();
+    attributeName = parseGetKey();
     settings.size = parseGetInt();
     if (curr != ',')
-        throw invalid_argument(posString() + "Expected ',' after declaration");
+        throw invalid_argument(posString() + "Expected ',' after declaration, got '"+curr+"' instead");
     cout << "size: " << settings.size << endl;
     step();
 
     // COUNT
-    attributeName = parseGetDeclaration();
+    attributeName = parseGetKey();
     settings.count = parseGetInt();
     if (curr != ',')
-        throw invalid_argument(posString() + "Expected ',' after declaration");
+        throw invalid_argument(posString() + "Expected ',' after declaration, got '"+curr+"' instead");
     cout << "count: " << settings.count << endl;
     step();
 
     // INNER RADIUS
-    attributeName = parseGetDeclaration();
+    attributeName = parseGetKey();
     settings.innerRadius = parseGetFloat();
     if (curr != ',')
-        throw invalid_argument(posString() + "Expected ',' after declaration");
+        throw invalid_argument(posString() + "Expected ',' after declaration, got '"+curr+"' instead");
     cout << "innerRadius: " << settings.innerRadius << endl;
     step();
 
     // RESISTANCE
-    attributeName = parseGetDeclaration();
+    attributeName = parseGetKey();
     settings.resistance = parseGetFloat();
     if (curr != ',')
-        throw invalid_argument(posString() + "Expected ',' after declaration");
+        throw invalid_argument(posString() + "Expected ',' after declaration, got '"+curr+"' instead");
     cout << "resistance: " << settings.resistance << endl;
     step();
 
     // STEP
-    attributeName = parseGetDeclaration();
+    attributeName = parseGetKey();
     settings.step = parseGetFloat();
     if (curr != ',')
-        throw invalid_argument(posString() + "Expected ',' after declaration");
+        throw invalid_argument(posString() + "Expected ',' after declaration, got '"+curr+"' instead");
     cout << "step: " << settings.step << endl;
     step();
 
@@ -442,160 +442,130 @@ Settings::JsonParser::~JsonParser()
     file.close();
 }
 
-string Settings::JsonParser::parseGetDeclaration()
+string Settings::JsonParser::parseGetKey()
 {
-    long long unsigned int startRow = row;
-
-    if (curr != '"')
-        throw invalid_argument(posString(row, col) + "Expected '\"' to begin declaration");
-
-    step();
-    long long unsigned int startCol = col;
-
-    if (row != startRow)
-        throw invalid_argument(posString(row, col) + "Expected declaration to be on same line");
-    if (!isalpha(curr) && curr != '_')
-        throw invalid_argument(posString(row, col) + "Expected alpha character or \'_\' after '\"'");
-
-
-    while (step() && row == startRow)
-    {
-        if (curr == '"') {
-            string result = lines[startRow].substr(startCol, col-startCol);
-            step();
-            if (curr != ':') {
-                throw invalid_argument(posString() + "Expected ':' after declaration");
-            }
-            step();
-            return result;
-        }
-        if (!isalnum(curr) && curr != '_') {
-            throw invalid_argument(posString() + "Expected alphanumeric character or \'_\' in declaration");
-        }
-    }
-    throw invalid_argument(posString() + "End of line reached before attribute name end");
+    return parseGetString(true);
 }
 
 string Settings::JsonParser::parseGetString()
 {
-    long long unsigned int startRow = row;
+    return parseGetString(false);
+}
 
+string Settings::JsonParser::parseGetString(bool isKey)
+{
     if (curr != '"')
-        throw invalid_argument(posString(row, col) + "Expected '\"' to begin string");
+        throw invalid_argument(posString() + "Expected '\"' to begin string, got '"+curr+"' instead");
 
-    step();
-    long long unsigned int startCol = col;
+    const long long unsigned int startRow = row;
+    string str = "";
 
-    while (step() && row == startRow)
+    if (!step())
+        throw invalid_argument(posString() + "End of file reached before end of "+(isKey?"key":"string")+" ,got '"+curr+"' instead");
+
+    while (true)
     {
-        if (curr == '"') {
-            step();
-            return lines[startRow].substr(startCol, col-startCol-1);
+        if (row != startRow) {
+            throw invalid_argument(posString() + "Expected "+(isKey?"key":"string")+" to span only one line");
         }
+
+        if (curr == '"') {
+            if (!step()) {
+                throw invalid_argument(posString() + "File cannot end with "+(isKey?"key":"string"));
+            }
+            if (isKey) {
+                if (curr != ':') {
+                    throw invalid_argument(posString() + "Expected ':' after key");
+                } if (!step()) {
+                    throw invalid_argument(posString() + "File cannot end with key");
+                }
+            } else if (curr != ',' && curr != '}' && curr != ']') {
+                throw invalid_argument(posString() + "Expected ',' or '}' or ']' after string, got '"+curr+"' instead");
+            }
+            return str;
+        }
+
+        if (curr == '\\') {// TODO: handle escape characters
+            throw invalid_argument(posString() + "Escape character not yet supported in "+(isKey?"key":"string"));
+        } else str += curr;
+
+        if (!step())
+            throw invalid_argument(posString() + "File cannot end with "+(isKey?"key":"string"));
     }
-    throw invalid_argument(posString() + "End of line reached before string end");
+    throw logic_error(posString() + "Settings::JsonParser::parseGet"+(isKey?"Key":"String")+"() exited loop without returning");
 }
 
 int Settings::JsonParser::parseGetInt()
 {
     long long unsigned int startRow = row;
     long long unsigned int startCol = col;
-    bool hasSign = false;
+    unsigned int digits = 0U;
+    bool sign = 0;
 
     if (curr == '-') {
-        hasSign = true;
         step();
+        sign = 1;
     }
 
     while (true)
     {
-        if (row != startRow)
-            throw invalid_argument(posString() + "Expected integer to be on same line");
-
         if (curr == ',' || curr == '}' || curr == ']') {
-            if (col-startCol-hasSign < 1)
-                throw invalid_argument(posString() + "No numeric value given for integer");
-            return stoi(lines[startRow].substr(startCol, col-startCol));
-        } else if (!isdigit(curr))
-            throw invalid_argument(posString() + "Invalid char '" + curr + "' in integer value");
+            if (!digits) throw invalid_argument(posString() + "No numeric value given for integer");  
+            return stoi(lines[startRow].substr(startCol, startCol+sign+digits));
+        } else if (row != startRow) {
+            throw invalid_argument(posString() + "Expected integer to be on same line");
+        } else if (!isdigit(curr)) {
+            throw invalid_argument(posString() + "Invalid char '"+curr+"' in integer");
+        }
 
+        digits++;
         if (!step())
             throw invalid_argument(posString() + "File cannot end with integer value");
     }
-    throw logic_error("Settings::JsonParser::parseGetInt() exited loop without returning");
+    throw logic_error(posString() + "Settings::JsonParser::parseGetInt() exited loop without returning");
 }
 
 float Settings::JsonParser::parseGetFloat()
 {
     long long unsigned int startRow = row;
     long long unsigned int startCol = col;
-    bool hasPoint = false;
-    bool hasSign = false;
+    unsigned int intDigits = 0U;
+    unsigned int decDigits = 0U;
+    unsigned int* digitsPtr = &intDigits;
+    bool point = 0U;
+    bool sign = 0U;
 
     if (!isdigit(curr) && curr != '-' && curr == '+')
         throw invalid_argument(posString() + "Expected digit, '-', '+' or '.' to begin float");
 
     if (curr == '-') {
-        hasSign = true;
+        sign = 1U;
         step();
     }
 
     while(true)
     {
-        if (row != startRow)
-            throw invalid_argument(posString() + "Expected float to be on same line");
-
         if (curr == ',' || curr == '}' || curr == ']') {
-            if (hasPoint) {
-                if (col-startCol-hasSign < 3)
-                    throw invalid_argument(posString() + "Float with decimal point needs at least one digit before and after the point");
-                return stof(lines[startRow].substr(startCol, col-startCol));
-            } else if (col-startCol-hasSign < 1)
-                throw invalid_argument(posString() + "No numeric value given for float");
-         } else if (curr == '.' && !hasPoint) {
-            hasPoint = true;
-         } else if (!isdigit(curr)) 
+            if (!intDigits) throw invalid_argument(posString() + "No integer value given for float");
+            if (point) {
+                if (!decDigits) throw invalid_argument(posString() + "Float with decimal point needs at least one digit after the point");
+                return stof(lines[startRow].substr(startCol, startCol+sign+intDigits+point+decDigits));
+            }
+        } else if (row != startRow) {
+            throw invalid_argument(posString() + "Expected float to be on same line");
+        } else if (!point && intDigits && curr == '.') {
+            point = 1U;
+            digitsPtr = &decDigits;
+        } else if (!isdigit(curr)) 
             throw invalid_argument(posString() + "Invalid char '" + curr + "' in float value");
+        else {
+            (*digitsPtr)++;
+        }
 
         if (!step())
             throw invalid_argument(posString() + "File cannot end with float value");
     }
-    throw logic_error("Settings::JsonParser::parseGetFloat() exited loop without returning");
-
-//     bool hasPoint = false;
-//     while (!hasPoint)
-//     {
-//         if (row != startRow)
-//             throw invalid_argument(posString() + "Expected float to be on same line");
-// 
-//         if (!hasPoint && curr == '.') {
-//             hasPoint = true;
-//         } else if (curr == ',' || curr == '}' || curr == ']') {
-//             if (col == startCol)
-//                 throw invalid_argument(posString() + "No value given for float");
-//             return static_cast<float>(stoi(lines[startRow].substr(startCol, col-startCol)));
-//         } else if (!isdigit(curr))
-//             throw invalid_argument(posString() + "Invalid char '" + curr + "' in float value");
-// 
-//         if (!step())
-//             throw invalid_argument(posString() + "File cannot end with float value");
-//     }
-//     while (true)
-//     {
-//         if (row != startRow)
-//             throw invalid_argument(posString() + "Expected float to be on same line");
-// 
-//         if (curr == ',' || curr == '}' || curr == ']') {
-//             if (col == startCol)
-//                 throw invalid_argument(posString() + "No value given for float");
-//             return stof(lines[startRow].substr(startCol, col-startCol));
-//         } else if (!isdigit(curr))
-//             throw invalid_argument(posString() + "Invalid char '" + curr + "' in float value");
-// 
-//         if (!step())
-//             throw invalid_argument(posString() + "File cannot end with float value");
-//     }
-//     throw logic_error("Settings::JsonParser::parseGetFloat() exited loop without returning");
+    throw logic_error(posString() + "Settings::JsonParser::parseGetFloat() exited loop without returning");
 }
 
 ostream &operator<<(ostream &os, const Settings::JsonParser &parser)
@@ -635,7 +605,7 @@ bool Settings::JsonParser::step()
 
 string Settings::JsonParser::posString(int r, int c)
 {
-    return "line:" + to_string(r) + ',' + to_string(c) + "  ";
+    return "line:" + to_string(r+1) + ',' + to_string(c+1) + "  ";
 }
 
 string Settings::JsonParser::posString()

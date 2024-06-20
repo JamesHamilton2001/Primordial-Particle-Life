@@ -113,11 +113,12 @@ struct Settings
 
         bool step();
 
-        string parseGetDeclaration();
+        string parseGetKey();
         string parseGetString();
+        string parseGetString(bool isKey);
         int parseGetInt();
         float parseGetFloat();
-// 
+
 //         void parseIntoName();
 //         void parseIntoTypes();
 //         void parseIntoSize();
