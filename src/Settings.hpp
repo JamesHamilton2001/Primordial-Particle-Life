@@ -89,7 +89,6 @@ struct Settings
         vector<string> lines;
         char prev;
         char curr;
-        char next;
         unsigned long long int row;
         unsigned long long int col;
         unsigned long long int len;

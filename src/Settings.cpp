@@ -348,7 +348,6 @@ Settings::JsonParser::JsonParser(string filePath, Settings settings) :
 
     prev = '\0';
     curr = lines[row][col];
-    next = (col+1 < len) ? lines[row][col+1] : lines[row+1][0];
 }
 
 void Settings::JsonParser::parseIntoSettings()
@@ -470,28 +469,24 @@ string Settings::JsonParser::parseGetString(bool isKey)
 int Settings::JsonParser::parseGetInt()
 {
     // NOTE: remember true is 1, false is 0, and 0 is falsey, 1 and above is truthy
-    const long long unsigned int startRow = row;
-    const long long unsigned int startCol = col;
+    const long long unsigned int R = row;
+    const long long unsigned int C = col;
     const bool sign = curr == '-';
 
     if (sign && !step())
         throw invalid_argument(posString()+"File cannot end with integer value");
 
-    unsigned int digitCount = 0U;
+    unsigned int digs = 0U;
     while (true)
     {
+        if (row != R) throw invalid_argument(posString()+"Integer can only span one line");
+        if (!isdigit(curr)) throw invalid_argument(posString()+"Invalid char '"+curr+"' in integer");
+        if (!step()) throw invalid_argument(posString()+"File cannot end with integer value");
+        digs++;
         if (curr == ',' || curr == '}' || curr == ']') {
-            if (!digitCount) throw invalid_argument(posString()+"No numeric value given for integer");  
-            return stoi(lines[startRow].substr(startCol, startCol+sign+digitCount));
+            if (digs) return stoi(lines[R].substr(C, C+sign+digs));
+            throw invalid_argument(posString()+"No numeric value given for integer");
         }
-        if (row != startRow)
-            throw invalid_argument(posString()+"Integer can only span one line");
-        if (!isdigit(curr))
-            throw invalid_argument(posString()+"Invalid char '"+curr+"' in integer");
-        if (!step())
-            throw invalid_argument(posString()+"File cannot end with integer value");
-
-        digitCount++;
     }
     throw logic_error(posString()+"Settings::JsonParser::parseGetInt() exited loop without returning");
 }
@@ -499,35 +494,27 @@ int Settings::JsonParser::parseGetInt()
 float Settings::JsonParser::parseGetFloat()
 {
     // NOTE: remember true is 1, false is 0, and 0 is falsey, 1 and above is truthy
-    const long long unsigned int startRow = row;
-    const long long unsigned int startCol = col;
-    const bool sign = curr == '-';
+    const long long unsigned int R = row;
+    const long long unsigned int C = col;
 
-    if (sign && !step())
-        throw invalid_argument(posString()+"File cannot end with float value, also no digit after '-'");
-
-    unsigned int digitCounts[2] = { 0U, 0U };
     bool point = false;
-    while(true)
+    unsigned int digits = 0U;
+    unsigned int chars = curr == '-';
+    if (chars) step();
+    while(row == R && step())
     {
-        if (curr == ',' || curr == '}' || curr == ']') {
-            if (!digitCounts[0])
-                throw invalid_argument(posString()+"No integer value given for float");
-            if (point && !digitCounts[1])
-                throw invalid_argument(posString()+"Float with decimal point needs at least one digit after the point");
-            return stof(lines[startRow].substr(startCol, startCol+sign+digitCounts[0]+point+digitCounts[1]));
+        chars++;
+        if (!point && digits && prev == '.') {
+            point = true;
+            digits = 0U;
+        } else if (isdigit(prev)) {
+            digits++;
+            if (curr == ',' || curr == '}' || curr == ']') {
+                if (digits) return stof(lines[R].substr(C, C+chars));
+                break;
+            }
         }
-
-        if (row != startRow || !step())
-            throw invalid_argument(posString()+"Float can only span one line");
-        if (!point && digitCounts[0] && prev == '.' && (point = true))
-            continue;
-        if (!isdigit(prev))
-            throw invalid_argument(posString(row, col-1)+"Invalid char '"+prev+"' in float value");
-
-        digitCounts[point]++;
-    }
-    throw logic_error(posString()+"Settings::JsonParser::parseGetFloat() exited loop without returning");
+    } throw invalid_argument(posString()+"1Invalid char '"+curr+"' in float");
 }
 
 ostream &operator<<(ostream &os, const Settings::JsonParser &parser)
@@ -540,28 +527,23 @@ ostream &operator<<(ostream &os, const Settings::JsonParser &parser)
     else cout << "NULL => ";
     if (parser.curr != '\0') cout << '\'' << parser.curr << "\' => ";
     else cout << "NULL => ";
-    if (parser.next != '\0') cout << '\'' << parser.next << "\' ";
-    else cout << "NULL ";
     cout << "}";
     return os;
 }
 
 bool Settings::JsonParser::step()
 {
-    if (col+1 >= len) {
-        if (row+1 >= count) {
-            return false;
-        }
-        row++;
-        col = 0;
-        len = lines[row].size();
-    } else col++;
-
+    col++;
     prev = curr;
-    curr = next;
-    next = (col+1 < len) ? lines[row][col+1]
-                         : (row+1 < count) ? lines[row+1][0]
-                                           : '\0';
+    if (col >= len) {
+        row++;
+        if (row == count) {
+            len = 0;
+            curr = '\0';
+            return false;
+        } col = 0;
+        len = lines[row].size();
+    } curr = lines[row][col];
     return true;
 }
 
