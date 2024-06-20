@@ -1,13 +1,17 @@
-{
-    "SimulationSettings":
+{"SimulationSettings"
+:
     {
-        "name": "test1",
-        "types": 3,
-        "size": 3,
-        "count": 15,
+        "name":
+         "test1"
+         , "types"
+        : -3,
+        "size": 
+        -3,
+        "count": -15
+        ,
         "innerRadius"
         : -0.5,
-        "resistance":
+        "resistance": 
         -0.001,
         "step": -0.001
         ,
