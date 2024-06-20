@@ -189,28 +189,37 @@ void App::handleInput()
             camera.zoom = 2.0f;
     }
     // camera pan on HOLD_RIGHT_CLICK + DRAG
-    if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
+    if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
         camera.target = Vector2Add(camera.target, Vector2Scale(GetMouseDelta(), -1.0f / camera.zoom));
+    }
 
-    // toggle pause on PRESS_SPACE
-    if (IsKeyPressed(KEY_SPACE))
+    if (IsKeyPressed(KEY_SPACE)) {
         paused = !paused;
-
-    // toggle grid on PRESS_G
-    if (IsKeyPressed(KEY_G))
+        cout << "Toggled Pause: " << (paused?"ON":"OFF") << endl;
+    }
+    if (IsKeyPressed(KEY_G)) {
         gridOn = !gridOn;
-
-    // take screenshot on PRESS_S
-    if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_S))
-        TakeScreenshot((particleLife.settings.name +"(f"+ to_string(particleLife.getFrameCount()) + ").png").c_str());
-
-    // save current state to settings on CTRL + S
-    if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_S))
+        cout << "Toggled Grid: " << (gridOn?"ON":"OFF") << endl;
+    }
+    if (IsKeyPressed(KEY_S)) {
+        string ssName = particleLife.settings.name +"(f"+ to_string(particleLife.getFrameCount()) + ").png";
+        TakeScreenshot(ssName.c_str());
+        cout << "Screenshot: " << ssName << endl;
+    }
+    if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_S)) {
         particleLife.save();
-
-    if (IsKeyPressed(KEY_C))
+        cout << "Simulation Saved: " << endl << particleLife.settings << endl;
+    }
+    if (IsKeyPressed(KEY_C)) {
         ghostsOn = !ghostsOn;
-
-    if (IsKeyPressed(KEY_F))
+        cout << "Toggled Ghosts: " << (ghostsOn?"ON":"OFF") << endl;
+    }
+    if (IsKeyPressed(KEY_F)) {
         ToggleFullscreen();
+        cout << "Toggled Fullscreen: " << (IsWindowFullscreen()?"ON":"OFF") << endl;
+    }
 }
+
+
+
+

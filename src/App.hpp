@@ -11,14 +11,14 @@
 
 class App
 {
- public:
+  public:
 
     App(int width, int height, int fpsTarget, const Settings& settings, long long unsigned int finalFrame);
     ~App();
 
     bool update();
 
- private: 
+  private: 
 
     unsigned int width;
     unsigned int height;
@@ -32,7 +32,7 @@ class App
     bool paused;
     bool gridOn;
     bool ghostsOn;
-    
+
     Camera2D camera;
     Texture2D particleTexture;
 
