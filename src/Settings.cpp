@@ -371,24 +371,66 @@ void Settings::JsonParser::parseIntoSettings()
         throw invalid_argument(posString() + "Expected '{' to begin settings");
     step();
 
-    const long long unsigned int totalAttributes = 11LLU;
+    // const long long unsigned int totalAttributes = 11LLU;
     // for (long long unsigned int attributesRead = 0LLU; attributesRead < totalAttributes; attributesRead++) 
 
+    // NAME
     attributeName = parseGetDeclaration();
     settings.name = parseGetString();
     if (curr != ',')
         throw invalid_argument(posString() + "Expected ',' after declaration");
+    cout << "name: " << settings.name << endl;
     step();
 
+    // TYPES
     attributeName = parseGetDeclaration();
-    cout << *this << endl;
     settings.types = parseGetInt();
-    cout << *this << endl;
     if (curr != ',')
         throw invalid_argument(posString() + "Expected ',' after declaration");
+    cout << "types: " << settings.types << endl;
     step();
 
-    // cout << endl << endl << settings << endl;
+    // SIZE
+    attributeName = parseGetDeclaration();
+    settings.size = parseGetInt();
+    if (curr != ',')
+        throw invalid_argument(posString() + "Expected ',' after declaration");
+    cout << "size: " << settings.size << endl;
+    step();
+
+    // COUNT
+    attributeName = parseGetDeclaration();
+    settings.count = parseGetInt();
+    if (curr != ',')
+        throw invalid_argument(posString() + "Expected ',' after declaration");
+    cout << "count: " << settings.count << endl;
+    step();
+
+    // INNER RADIUS
+    attributeName = parseGetDeclaration();
+    settings.innerRadius = parseGetFloat();
+    if (curr != ',')
+        throw invalid_argument(posString() + "Expected ',' after declaration");
+    cout << "innerRadius: " << settings.innerRadius << endl;
+    step();
+
+    // RESISTANCE
+    attributeName = parseGetDeclaration();
+    settings.resistance = parseGetFloat();
+    if (curr != ',')
+        throw invalid_argument(posString() + "Expected ',' after declaration");
+    cout << "resistance: " << settings.resistance << endl;
+    step();
+
+    // STEP
+    attributeName = parseGetDeclaration();
+    settings.step = parseGetFloat();
+    if (curr != ',')
+        throw invalid_argument(posString() + "Expected ',' after declaration");
+    cout << "step: " << settings.step << endl;
+    step();
+
+    cout << endl << endl << settings << endl;
 
     // if (curr != '}')
         // throw invalid_argument(posString() + "Expected '}' to end file");
@@ -410,11 +452,11 @@ string Settings::JsonParser::parseGetDeclaration()
     step();
     long long unsigned int startCol = col;
 
-    if (row != startRow) {
+    if (row != startRow)
         throw invalid_argument(posString(row, col) + "Expected declaration to be on same line");
-    } if (!isalpha(curr) && curr != '_'){
+    if (!isalpha(curr) && curr != '_')
         throw invalid_argument(posString(row, col) + "Expected alpha character or \'_\' after '\"'");
-    }
+
 
     while (step() && row == startRow)
     {
@@ -431,16 +473,15 @@ string Settings::JsonParser::parseGetDeclaration()
             throw invalid_argument(posString() + "Expected alphanumeric character or \'_\' in declaration");
         }
     }
-    throw invalid_argument(posString() + "End of line reached before declaration end");
+    throw invalid_argument(posString() + "End of line reached before attribute name end");
 }
 
 string Settings::JsonParser::parseGetString()
 {
     long long unsigned int startRow = row;
 
-    if (curr != '"') {
+    if (curr != '"')
         throw invalid_argument(posString(row, col) + "Expected '\"' to begin string");
-    }
 
     step();
     long long unsigned int startCol = col;
@@ -459,24 +500,102 @@ int Settings::JsonParser::parseGetInt()
 {
     long long unsigned int startRow = row;
     long long unsigned int startCol = col;
-    if (!(isdigit(curr) && curr != '-')) {
-        throw invalid_argument(posString() + "Expected digit or '-' to begin integer");
-    }
-    step();
+    bool hasSign = false;
 
-    while (true) {
+    if (curr == '-') {
+        hasSign = true;
+        step();
+    }
+
+    while (true)
+    {
         if (row != startRow)
             throw invalid_argument(posString() + "Expected integer to be on same line");
-        if (isdigit(curr)) continue;
 
         if (curr == ',' || curr == '}' || curr == ']') {
-            string result = lines[startRow].substr(startCol, col-startCol);
-            cout << "int: \"" << result << "\"" << endl;
-            return stoi(result);
-        }
-        step();
-    } 
+            if (col-startCol-hasSign < 1)
+                throw invalid_argument(posString() + "No numeric value given for integer");
+            return stoi(lines[startRow].substr(startCol, col-startCol));
+        } else if (!isdigit(curr))
+            throw invalid_argument(posString() + "Invalid char '" + curr + "' in integer value");
 
+        if (!step())
+            throw invalid_argument(posString() + "File cannot end with integer value");
+    }
+    throw logic_error("Settings::JsonParser::parseGetInt() exited loop without returning");
+}
+
+float Settings::JsonParser::parseGetFloat()
+{
+    long long unsigned int startRow = row;
+    long long unsigned int startCol = col;
+    bool hasPoint = false;
+    bool hasSign = false;
+
+    if (!isdigit(curr) && curr != '-' && curr == '+')
+        throw invalid_argument(posString() + "Expected digit, '-', '+' or '.' to begin float");
+
+    if (curr == '-') {
+        hasSign = true;
+        step();
+    }
+
+    while(true)
+    {
+        if (row != startRow)
+            throw invalid_argument(posString() + "Expected float to be on same line");
+
+        if (curr == ',' || curr == '}' || curr == ']') {
+            if (hasPoint) {
+                if (col-startCol-hasSign < 3)
+                    throw invalid_argument(posString() + "Float with decimal point needs at least one digit before and after the point");
+                return stof(lines[startRow].substr(startCol, col-startCol));
+            } else if (col-startCol-hasSign < 1)
+                throw invalid_argument(posString() + "No numeric value given for float");
+         } else if (curr == '.' && !hasPoint) {
+            hasPoint = true;
+         } else if (!isdigit(curr)) 
+            throw invalid_argument(posString() + "Invalid char '" + curr + "' in float value");
+
+        if (!step())
+            throw invalid_argument(posString() + "File cannot end with float value");
+    }
+    throw logic_error("Settings::JsonParser::parseGetFloat() exited loop without returning");
+
+//     bool hasPoint = false;
+//     while (!hasPoint)
+//     {
+//         if (row != startRow)
+//             throw invalid_argument(posString() + "Expected float to be on same line");
+// 
+//         if (!hasPoint && curr == '.') {
+//             hasPoint = true;
+//         } else if (curr == ',' || curr == '}' || curr == ']') {
+//             if (col == startCol)
+//                 throw invalid_argument(posString() + "No value given for float");
+//             return static_cast<float>(stoi(lines[startRow].substr(startCol, col-startCol)));
+//         } else if (!isdigit(curr))
+//             throw invalid_argument(posString() + "Invalid char '" + curr + "' in float value");
+// 
+//         if (!step())
+//             throw invalid_argument(posString() + "File cannot end with float value");
+//     }
+//     while (true)
+//     {
+//         if (row != startRow)
+//             throw invalid_argument(posString() + "Expected float to be on same line");
+// 
+//         if (curr == ',' || curr == '}' || curr == ']') {
+//             if (col == startCol)
+//                 throw invalid_argument(posString() + "No value given for float");
+//             return stof(lines[startRow].substr(startCol, col-startCol));
+//         } else if (!isdigit(curr))
+//             throw invalid_argument(posString() + "Invalid char '" + curr + "' in float value");
+// 
+//         if (!step())
+//             throw invalid_argument(posString() + "File cannot end with float value");
+//     }
+//     throw logic_error("Settings::JsonParser::parseGetFloat() exited loop without returning");
 }
 
 ostream &operator<<(ostream &os, const Settings::JsonParser &parser)

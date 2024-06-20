@@ -116,7 +116,7 @@ struct Settings
         string parseGetDeclaration();
         string parseGetString();
         int parseGetInt();
-        // float parseGetFloat();
+        float parseGetFloat();
 // 
 //         void parseIntoName();
 //         void parseIntoTypes();
