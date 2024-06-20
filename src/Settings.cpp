@@ -271,12 +271,6 @@ void Settings::generateParticleData()
     }
 }
 
-
-
-
-
-
-
 /* 
 Settings::Settings(string filePath)
 {
@@ -452,107 +446,88 @@ string Settings::JsonParser::parseGetString()
 string Settings::JsonParser::parseGetString(bool isKey)
 {
     const long long unsigned int startRow = row;
-    string str = "";
 
     if (curr != '"')
-        throw invalid_argument(posString() + "Expected '\"' to begin string, got '"+curr+"' instead");
-    if (!step())
-        throw invalid_argument(posString() + "End of file reached before end of "+(isKey?"key":"string"));
+        throw invalid_argument(posString()+"Expected '\"' to begin string, got '"+curr+"' instead");
 
+    string str = "";
     while (true)
     {
-        if (row != startRow)
-            throw invalid_argument(posString() +(isKey?"key":"string")+" can only span one line");
+        if (!step()) throw invalid_argument(posString() + "File cannot end with string");
+        if (startRow != row) throw invalid_argument(posString() + "String can only span one line");
+        if (curr != '"' && (str += curr, true)) continue;
 
-        if (curr == '"') {
-            if (!step())
-                throw invalid_argument(posString() + "End of file reached before end of "+(isKey?"key":"string"));
-            if (isKey) {
-                if (curr != ':')
-                    throw invalid_argument(posString() + "Expected ':' after key");
-                if (!step())
-                    throw invalid_argument(posString() + "File cannot end with key");
-            } else if (curr != ',' && curr != '}' && curr != ']')
-                throw invalid_argument(posString() + "Expected ',' or '}' or ']' after string, got '"+curr+"' instead");
-            return str;
-        }
-        if (!step())
-            throw invalid_argument(posString() + "File cannot end with "+(isKey?"key":"string"));
-
-        str += prev;
+        if (!step()) throw invalid_argument(posString() + "File cannot end with string");
+        if (isKey) {
+            if (curr != ':') throw invalid_argument(posString() + "Expected ':' after key");
+            if (!step()) throw invalid_argument(posString() + "File cannot end with key");
+        } else if (curr != ',' && curr != '}' && curr != ']')
+            throw invalid_argument(posString() + "Expected ',' or '}' or ']' after string, got '"+curr+"' instead");
+        return str;
     }
-    throw logic_error(posString() + "Settings::JsonParser::parseGet"+(isKey?"Key":"String")+"() exited loop without returning");
 }
 
 int Settings::JsonParser::parseGetInt()
 {
     // NOTE: remember true is 1, false is 0, and 0 is falsey, 1 and above is truthy
-    long long unsigned int startRow = row, startCol = col;
+    const long long unsigned int startRow = row;
+    const long long unsigned int startCol = col;
+    const bool sign = curr == '-';
+
+    if (sign && !step())
+        throw invalid_argument(posString()+"File cannot end with integer value");
+
     unsigned int digitCount = 0U;
-    bool sign = 0U;
-
-    if (curr == '-') {
-        if (!step())
-            throw invalid_argument(posString() + "File cannot end with integer value");
-        sign = 1U;
-    }
-
     while (true)
     {
         if (curr == ',' || curr == '}' || curr == ']') {
-            if (!digitCount)
-                throw invalid_argument(posString() + "No numeric value given for integer");  
+            if (!digitCount) throw invalid_argument(posString()+"No numeric value given for integer");  
             return stoi(lines[startRow].substr(startCol, startCol+sign+digitCount));
         }
         if (row != startRow)
-            throw invalid_argument(posString() + "Integer can only span one line");
+            throw invalid_argument(posString()+"Integer can only span one line");
+        if (!isdigit(curr))
+            throw invalid_argument(posString()+"Invalid char '"+curr+"' in integer");
         if (!step())
-            throw invalid_argument(posString() + "File cannot end with integer value");
-        if (!isdigit(prev))
-            throw invalid_argument(posString() + "Invalid char '"+prev+"' in integer");
+            throw invalid_argument(posString()+"File cannot end with integer value");
 
         digitCount++;
     }
-    throw logic_error(posString() + "Settings::JsonParser::parseGetInt() exited loop without returning");
+    throw logic_error(posString()+"Settings::JsonParser::parseGetInt() exited loop without returning");
 }
 
 float Settings::JsonParser::parseGetFloat()
 {
     // NOTE: remember true is 1, false is 0, and 0 is falsey, 1 and above is truthy
-    long long unsigned int startRow = row, startCol = col;
+    const long long unsigned int startRow = row;
+    const long long unsigned int startCol = col;
+    const bool sign = curr == '-';
+
+    if (sign && !step())
+        throw invalid_argument(posString()+"File cannot end with float value, also no digit after '-'");
+
     unsigned int digitCounts[2] = { 0U, 0U };
-    bool point = 0U, sign = 0U;
-
-    if (!isdigit(curr)) {
-        if (curr != '-')
-            throw invalid_argument(posString() + "Expected digit, '-', '+' or '.' to begin float");
-        if (!step())
-            throw invalid_argument(posString() + "File cannot end with float value, also no digit after '-'");
-        sign = 1U;
-    }
-
+    bool point = false;
     while(true)
     {
         if (curr == ',' || curr == '}' || curr == ']') {
             if (!digitCounts[0])
-                throw invalid_argument(posString() + "No integer value given for float");
+                throw invalid_argument(posString()+"No integer value given for float");
             if (point && !digitCounts[1])
-                throw invalid_argument(posString() + "Float with decimal point needs at least one digit after the point");
+                throw invalid_argument(posString()+"Float with decimal point needs at least one digit after the point");
             return stof(lines[startRow].substr(startCol, startCol+sign+digitCounts[0]+point+digitCounts[1]));
         }
-        if (row != startRow)
-            throw invalid_argument(posString() + "Float can only span one line");
-        if (!step())
-            throw invalid_argument(posString() + "File cannot end with float value");
-        if (!point && digitCounts[0] && prev == '.') {
-            point = 1U;
+
+        if (row != startRow || !step())
+            throw invalid_argument(posString()+"Float can only span one line");
+        if (!point && digitCounts[0] && prev == '.' && (point = true))
             continue;
-        } if (!isdigit(prev))
-            throw invalid_argument(posString() + "Invalid char '"+prev+"' in float value");
+        if (!isdigit(prev))
+            throw invalid_argument(posString(row, col-1)+"Invalid char '"+prev+"' in float value");
 
         digitCounts[point]++;
     }
-    throw logic_error(posString() + "Settings::JsonParser::parseGetFloat() exited loop without returning");
+    throw logic_error(posString()+"Settings::JsonParser::parseGetFloat() exited loop without returning");
 }
 
 ostream &operator<<(ostream &os, const Settings::JsonParser &parser)
